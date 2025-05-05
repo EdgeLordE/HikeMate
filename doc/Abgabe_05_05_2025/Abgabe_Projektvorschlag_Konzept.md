@@ -17,6 +17,37 @@ https://github.com/EdgeLordE/HikeMate
 
 ## Alles was ihr bisher in diese Richtung erledigt habt
 
-ER-Diagramm:
+**ER-Diagramm**:
 
-![alt text](../ER.png)
+![alt text](ER-1.png)
+
+**Klassendiagramm**:
+
+![alt text](Klassendiagramm.png)
+
+### UI-SKizzen
+
+- LandingPage, wo man sieht wo man ist und das Tracking starten kann
+
+![alt text](image.png)
+- Tracking gestartet
+
+![alt text](image-1.png)
+- Berg suchen Page
+
+![alt text](image-3.png)
+- ProfilPage
+  
+![alt text](image-4.png)
+- EinstellungenPage
+  
+![alt text](image-5.png)
+- WetterPage
+  
+![alt text](image-6.png)
+- LoginPage
+  
+![alt text](image-7.png)
+- RegristrierenPage
+  
+![alt text](image-9.png)

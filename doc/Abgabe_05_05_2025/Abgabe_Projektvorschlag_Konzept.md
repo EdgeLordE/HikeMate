@@ -11,11 +11,9 @@ HikeMate ist eine Wander-App, die Touren mit GPS trackt, Berge aus Österreich a
 https://github.com/EdgeLordE/HikeMate
 
 ## Arbeitsaufteilung (sofern vorhanden)
+noch nicht vorhanden
 
-
-## Softwarekonzept (sofern vorhanden)
-
-## Alles was ihr bisher in diese Richtung erledigt habt
+## Alles was ihr bisher in diese Richtung erledigt habt / Softwarekonzept
 
 **ER-Diagramm**:
 
@@ -51,3 +49,7 @@ https://github.com/EdgeLordE/HikeMate
 - RegristrierenPage
   
 ![alt text](image-9.png)
+
+### Installationen
+
+Wir haben alles installiert und könen mit dem Programmieren anfangen(Android Studio)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'Pages/NavigationPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,8 +12,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HikeMate',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.grey[900],
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.black,
+          selectedItemColor: Colors.lightBlueAccent,
+          unselectedItemColor: Colors.grey[600],
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+        ),
       ),
       home: const MyHomePage(),
     );
@@ -29,11 +38,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  // Liste der Seiten für die Navigation
-  static const List<Widget> _pages = <Widget>[
-    Center(child: Text('Home Page')),
-    Center(child: Text('Search Page')),
-    Center(child: Text('Profile Page')),
+  static const List<Widget> _pages = [
+    Center(child: Text('Search', style: TextStyle(color: Colors.white))),
+    Center(child: Text('Touren', style: TextStyle(color: Colors.white))),
+    NavigationPage(),
+    Center(child: Text('Profil', style: TextStyle(color: Colors.white))),
+    Center(child: Text('Erfolge', style: TextStyle(color: Colors.white))),
   ];
 
   void _onItemTapped(int index) {
@@ -44,30 +54,46 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter Navbar Demo'),
-      ),
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+    double screenWidth = MediaQuery.of(context).size.width;
+    double tabWidth = screenWidth / 5;
 
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.lightBlue,
-        onTap: _onItemTapped,
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: SizedBox(
+
+        height: 60, // genug Platz für Balken + Icons
+        child: Stack(
+          children: [
+            // eigentliche Navigation
+            Positioned.fill(
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                items: const [
+                  BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
+                  BottomNavigationBarItem(icon: Icon(Icons.cloud), label: ''),
+                  BottomNavigationBarItem(icon: Icon(Icons.navigation), label: ''),
+                  BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+                  BottomNavigationBarItem(icon: Icon(Icons.checklist), label: ''),
+                ],
+                currentIndex: _selectedIndex,
+                onTap: _onItemTapped,
+              ),
+            ),
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 200),
+              top: 0, // Position direkt innerhalb der Navigation Bar
+              left: _selectedIndex * tabWidth + tabWidth * 0.1, // Zentrierung
+              child: Container(
+                width: tabWidth * 0.8, // Breite des Rechtecks
+                height: 4, // Höhe des Rechtecks
+                decoration: BoxDecoration(
+                  color: Colors.lightBlueAccent,
+                  borderRadius: BorderRadius.circular(5), // Abgerundete Ecken
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

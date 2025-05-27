@@ -1,6 +1,9 @@
+// Erweiterte Wetter-App: Modernes, aufgeräumtes Design mit Standort und Vorhersage
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -10,10 +13,50 @@ class WeatherPage extends StatefulWidget {
 }
 
 class _WeatherPageState extends State<WeatherPage> {
-  final TextEditingController _controller = TextEditingController(text: 'Rankweil');
+  final TextEditingController _controller = TextEditingController();
   final String apiKey = 'b8fe09709a738c0e8f4412b7a7376bb9';
+
   Map<String, dynamic>? currentWeather;
-  List<Map<String, dynamic>> dailyForecast = [];
+  Map<String, List<Map<String, dynamic>>> groupedForecast = {};
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWeatherByLocation();
+  }
+
+  Future<void> fetchWeatherByLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) throw Exception('Standortdienste sind deaktiviert');
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Standortberechtigung verweigert');
+        }
+      }
+
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
+      final coordUrl = Uri.parse(
+          'https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey&units=metric&lang=de');
+
+      final response = await http.get(coordUrl);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final city = data['name'];
+        _controller.text = city;
+        await fetchWeather(city);
+      } else {
+        throw Exception('Fehler beim Ermitteln des Standorts');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Standortfehler: ${e.toString()}')),
+      );
+    }
+  }
 
   Future<void> fetchWeather(String city) async {
     try {
@@ -29,35 +72,24 @@ class _WeatherPageState extends State<WeatherPage> {
         final currentData = json.decode(currentResponse.body);
         final forecastData = json.decode(forecastResponse.body);
 
-        Map<String, List> days = {};
+        Map<String, List<Map<String, dynamic>>> forecastByDay = {};
         for (var entry in forecastData['list']) {
           final date = DateTime.parse(entry['dt_txt']);
-          final day = "${date.year}-${date.month}-${date.day}";
-          days.putIfAbsent(day, () => []).add(entry);
+          final dayKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+          forecastByDay.putIfAbsent(dayKey, () => []).add({
+            'time': "${date.hour.toString().padLeft(2, '0')}:00",
+            'temp': entry['main']['temp'].round(),
+            'icon': entry['weather'][0]['icon'],
+            'desc': entry['weather'][0]['description'],
+          });
         }
-
-        List<Map<String, dynamic>> daily = [];
-        final now = DateTime.now();
-        days.forEach((key, value) {
-          final day = DateTime.parse(value[0]['dt_txt']);
-          if (day.day != now.day && daily.length < 4) {
-            final temps = value.map((e) => e['main']['temp'] as double).toList();
-            final avgTemp = temps.reduce((a, b) => a + b) / temps.length;
-            final icon = value[0]['weather'][0]['icon'];
-            daily.add({
-              'date': day,
-              'temp': avgTemp.round(),
-              'icon': icon,
-            });
-          }
-        });
 
         setState(() {
           currentWeather = currentData;
-          dailyForecast = daily;
+          groupedForecast = forecastByDay;
         });
       } else {
-        throw Exception('Wetterdaten konnten nicht geladen werden');
+        throw Exception('Fehler beim Laden der Wetterdaten');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -66,10 +98,73 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    fetchWeather(_controller.text);
+  Widget buildForecast() {
+    if (groupedForecast.isEmpty) {
+      return const Center(child: Text("Keine Vorhersage verfügbar", style: TextStyle(color: Colors.white)));
+    }
+
+    final todayKey = groupedForecast.keys.first;
+    final today = groupedForecast[todayKey]!;
+    final others = groupedForecast.entries.skip(1);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 8.0),
+          child: Text("Heute", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A2A2A),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: today.map((e) => ListTile(
+              leading: Image.network('https://openweathermap.org/img/wn/${e['icon']}@2x.png'),
+              title: Text("${e['time']} - ${e['desc']}", style: const TextStyle(color: Colors.white)),
+              trailing: Text("${e['temp']}°", style: const TextStyle(color: Colors.white, fontSize: 18)),
+            )).toList(),
+          ),
+        ),
+        const SizedBox(height: 24),
+        const Text("Nächste Tage", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        ...others.map((day) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2C2C2C),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(day.key, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: day.value.map((e) => Container(
+                      width: 80,
+                      margin: const EdgeInsets.only(right: 12),
+                      child: Column(
+                        children: [
+                          Text(e['time'], style: const TextStyle(color: Colors.white70)),
+                          Image.network('https://openweathermap.org/img/wn/${e['icon']}@2x.png', width: 50),
+                          Text("${e['temp']}°", style: const TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    )).toList(),
+                  ),
+                )
+              ],
+            ),
+          ),
+        )),
+      ],
+    );
   }
 
   @override
@@ -79,89 +174,66 @@ class _WeatherPageState extends State<WeatherPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1F1F1F),
         elevation: 0,
-        title: TextField(
-          controller: _controller,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFF3A3A3A),
-            hintText: 'Ort eingeben...',
-            hintStyle: const TextStyle(color: Colors.grey),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+        title: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFF3A3A3A),
+                  hintText: 'Ort eingeben...',
+                  hintStyle: const TextStyle(color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
             ),
-            suffixIcon: IconButton(
+            IconButton(
               icon: const Icon(Icons.search, color: Colors.white),
-              onPressed: () => fetchWeather(_controller.text),
-            ),
-          ),
+              onPressed: () => fetchWeather(_controller.text.trim()),
+            )
+          ],
         ),
       ),
       body: currentWeather == null
-          ? const Center(child: CircularProgressIndicator(color: Colors.white))
-          : Padding(
+          ? const Center(child: Text("Standort wird verwendet...", style: TextStyle(color: Colors.white)))
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2C),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    currentWeather!['name'],
-                    style: const TextStyle(color: Colors.white, fontSize: 24),
-                  ),
-                  const SizedBox(height: 16),
-                  Image.network(
-                    'https://openweathermap.org/img/wn/${currentWeather!['weather'][0]['icon']}@2x.png',
-                    width: 80,
-                    height: 80,
-                  ),
-                  Text(
-                    "${currentWeather!['main']['temp'].round()}°",
-                    style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    currentWeather!['weather'][0]['description'],
-                    style: const TextStyle(color: Colors.white70, fontSize: 18),
-                  ),
-                  Text(
-                    "H: ${currentWeather!['main']['temp_max'].round()}°  T: ${currentWeather!['main']['temp_min'].round()}°",
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: dailyForecast.map((day) {
-                final date = day['date'] as DateTime;
-                final icon = day['icon'];
-                return Column(
+              children: [
+                Image.network(
+                  'https://openweathermap.org/img/wn/${currentWeather!["weather"][0]["icon"]}@2x.png',
+                  width: 80,
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][date.weekday % 7]}",
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    Image.network(
-                      'https://openweathermap.org/img/wn/$icon.png',
-                      width: 32,
-                      height: 32,
+                      currentWeather!["name"],
+                      style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "${day['temp']}°",
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      "${currentWeather!["main"]["temp"].round()}°",
+                      style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      currentWeather!["weather"][0]["description"],
+                      style: const TextStyle(color: Colors.white70, fontSize: 18),
                     ),
                   ],
-                );
-              }).toList(),
-            )
+                )
+              ],
+            ),
+            const SizedBox(height: 24),
+            buildForecast(),
           ],
         ),
       ),

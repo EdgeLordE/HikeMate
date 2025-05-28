@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'NavigationPage.dart';
 import 'WeatherPage.dart';
+import 'ProfilePage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +17,7 @@ class _HomePageState extends State<HomePage> {
     Center(child: Text('Suche', style: TextStyle(color: Colors.white))),
     WeatherPage(),
     NavigationPage(),
-    Center(child: Text('Profil', style: TextStyle(color: Colors.white))),
+    ProfilePage(),
     Center(child: Text('DoneList', style: TextStyle(color: Colors.white))),
   ];
 

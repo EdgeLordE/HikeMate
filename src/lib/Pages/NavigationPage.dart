@@ -37,15 +37,19 @@ Future<Position?> _checkAndRequestPermissions() async {
   );
 }
 
-
 class _NavigationPageState extends State<NavigationPage> {
   final MapController _mapController = MapController();
   double _altitude = 0.0;
+  double _totaldistance = 0.0;
+  double _totalAscent = 0.0;
+  LatLng? _previousPosition;
+  double? _previousAltitude;
   bool _isTracking = false;
   Duration _duration = Duration.zero;
   Timer? _timer;
   Timer? _altitudeTimer;
-  int _currentCountAltitudeTimer = 0;
+  List<LatLng> _path = [];
+  StreamSubscription<Position>? _positionStream;
 
   @override
   void initState() {
@@ -53,39 +57,76 @@ class _NavigationPageState extends State<NavigationPage> {
     _moveToCurrentLocation();
   }
 
-
   void _toggleTracking() {
     setState(() {
       if (_isTracking) {
         _isTracking = false;
         _timer?.cancel();
         _timer = null;
-        
+
         _altitudeTimer?.cancel();
         _altitudeTimer = null;
+
+        _positionStream?.cancel();
+        _positionStream = null;
       } else {
-        // Tracking starten
         _isTracking = true;
         _duration = Duration.zero;
+
+        _totalAscent = 0.0;
+        _totaldistance = 0.0;
+        _previousAltitude = null;
+        _previousPosition = null;
+
+
+
         _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
           setState(() {
             _duration += const Duration(seconds: 1);
           });
         });
+
+        // Start tracking positions
+        _positionStream = Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 10, // Update every 5 meters
+          ),
+        ).listen((Position position) {
+          setState(() {
+            final currentPosition = LatLng(position.latitude, position.longitude);
+            _path.add(currentPosition);
+
+            if (_previousPosition != null){
+              final distance = Distance().as(
+                LengthUnit.Meter,
+                _previousPosition!,
+                currentPosition,
+              );
+              _totaldistance += distance;
+            }
+            _previousPosition = currentPosition;
+
+            if (_previousAltitude != null && position.altitude > _previousAltitude!) {
+              _totalAscent += (position.altitude - _previousAltitude!);
+            }
+            _previousAltitude = position.altitude;
+          });
+        });
       }
     });
-    _altitudeTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
 
-      Position? postion = await _checkAndRequestPermissions();
+    _altitudeTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      Position? position = await _checkAndRequestPermissions();
       setState(() {
-        if (postion == null) {
+        if (position == null) {
           return;
         }
-        _altitude = postion.altitude;
+        _altitude = position.altitude;
       });
     });
-
   }
+
   Future<void> _moveToCurrentLocation() async {
     Position? position = await _checkAndRequestPermissions();
     if (position != null) {
@@ -97,9 +138,13 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   String _formatAltitude(double altitude) {
-    return "${altitude.toStringAsFixed(1)} m";
+    return "${altitude.toStringAsFixed(0)} m";
   }
-  
+
+  String _formatDistance(double distance) {
+    return "${distance.toInt()} m";
+  }
+
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(duration.inHours);
@@ -112,10 +157,9 @@ class _NavigationPageState extends State<NavigationPage> {
   void dispose() {
     _timer?.cancel();
     _altitudeTimer?.cancel();
+    _positionStream?.cancel();
     super.dispose();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -137,10 +181,17 @@ class _NavigationPageState extends State<NavigationPage> {
                 maxZoom: 19,
               ),
               CurrentLocationLayer(),
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: _path,
+                    strokeWidth: 4.0,
+                    color: Colors.blue,
+                  ),
+                ],
+              ),
             ],
           ),
-
-
           if (!_isTracking)
             Positioned(
               bottom: 5,
@@ -150,8 +201,8 @@ class _NavigationPageState extends State<NavigationPage> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 60, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 60, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -167,34 +218,32 @@ class _NavigationPageState extends State<NavigationPage> {
                 ),
               ),
             ),
-            Positioned(
-              bottom: 7,
-              right: 10,
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: SizedBox(
-                  width: 45,
-                  height: 45,
-                  child: ElevatedButton(
-                    onPressed: _moveToCurrentLocation,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[900],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.all(10),
+          Positioned(
+            bottom: 7,
+            right: 10,
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: SizedBox(
+                width: 45,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: _moveToCurrentLocation,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[900],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(
-                      Icons.my_location,
-                      color: Colors.white,
-                      size: 20,
-                    )
+                    padding: const EdgeInsets.all(10),
+                  ),
+                  child: const Icon(
+                    Icons.my_location,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
-              )
+              ),
             ),
-
-
+          ),
           if (_isTracking)
             Align(
               alignment: Alignment.bottomCenter,
@@ -202,7 +251,8 @@ class _NavigationPageState extends State<NavigationPage> {
                 height: 190,
                 width: double.infinity,
                 color: const Color(0xFF1E1E1E),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -213,14 +263,15 @@ class _NavigationPageState extends State<NavigationPage> {
                           children: [
                             _buildInfoBox('Dauer', _formatDuration(_duration)),
                             const SizedBox(height: 5),
-                            _buildInfoBox('Anstieg', '0 m'),
+                            _buildInfoBox('Anstieg', _formatAltitude(_totalAscent)),
                           ],
                         ),
                         Column(
                           children: [
-                            _buildInfoBox('Distanz', '0.0 km'),
+                            _buildInfoBox('Distanz', _formatDistance(_totaldistance)),
                             const SizedBox(height: 5),
-                            _buildInfoBox('Seehöhe', _formatAltitude(_altitude)),
+                            _buildInfoBox(
+                                'Seehöhe', _formatAltitude(_altitude)),
                           ],
                         ),
                       ],
@@ -253,34 +304,6 @@ class _NavigationPageState extends State<NavigationPage> {
                 ),
               ),
             ),
-          if (_isTracking)
-            Positioned(
-                top: 50,
-                right: 10,
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: SizedBox(
-                    width: 45,
-                    height: 45,
-                    child: ElevatedButton(
-                        onPressed: _moveToCurrentLocation,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[900],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.all(10),
-                        ),
-                        child: const Icon(
-                          Icons.my_location,
-                          color: Colors.white,
-                          size: 20,
-                        )
-                    ),
-                  ),
-                )
-            ),
-
         ],
       ),
     );
@@ -296,9 +319,9 @@ class _NavigationPageState extends State<NavigationPage> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
-        padding: const EdgeInsets.only(left: 5), // Gemeinsamer Margin
+        padding: const EdgeInsets.only(left: 5),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Links ausrichten
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
@@ -321,3 +344,4 @@ class _NavigationPageState extends State<NavigationPage> {
     );
   }
 }
+

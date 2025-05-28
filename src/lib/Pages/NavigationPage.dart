@@ -7,10 +7,36 @@ import 'package:latlong2/latlong.dart';
 
 class NavigationPage extends StatefulWidget {
   const NavigationPage({super.key});
-
   @override
   State<NavigationPage> createState() => _NavigationPageState();
 }
+
+Future<Position?> _checkAndRequestPermissions() async {
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    print('Standortdienste sind deaktiviert.');
+    return null;
+  }
+
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      print('Standortberechtigung verweigert.');
+      return null;
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    print('Standortberechtigung dauerhaft verweigert.');
+    return null;
+  }
+
+  return await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high,
+  );
+}
+
 
 class _NavigationPageState extends State<NavigationPage> {
   final MapController _mapController = MapController();
@@ -19,6 +45,13 @@ class _NavigationPageState extends State<NavigationPage> {
   Duration _duration = Duration.zero;
   Timer? _timer;
   Timer? _altitudeTimer;
+  int _currentCountAltitudeTimer = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _moveToCurrentLocation();
+  }
 
 
   void _toggleTracking() {
@@ -42,35 +75,25 @@ class _NavigationPageState extends State<NavigationPage> {
       }
     });
     _altitudeTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      bool serviceEnabled;
-      LocationPermission permission;
 
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        return;
-      }
-
-      permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
+      Position? postion = await _checkAndRequestPermissions();
+      setState(() {
+        if (postion == null) {
           return;
         }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        return;
-      }
-
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      setState(() {
-        _altitude = position.altitude; // echte Seehöhe in Metern
+        _altitude = postion.altitude;
       });
     });
 
+  }
+  Future<void> _moveToCurrentLocation() async {
+    Position? position = await _checkAndRequestPermissions();
+    if (position != null) {
+      _mapController.move(
+        LatLng(position.latitude, position.longitude),
+        14.0,
+      );
+    }
   }
 
   String _formatAltitude(double altitude) {
@@ -102,7 +125,7 @@ class _NavigationPageState extends State<NavigationPage> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              center: LatLng(47.3769, 8.5417),
+              center: LatLng(0, 0),
               zoom: 14.0,
             ),
             children: [
@@ -117,7 +140,7 @@ class _NavigationPageState extends State<NavigationPage> {
             ],
           ),
 
-          // Tracking starten Button
+
           if (!_isTracking)
             Positioned(
               bottom: 5,
@@ -144,20 +167,45 @@ class _NavigationPageState extends State<NavigationPage> {
                 ),
               ),
             ),
+            Positioned(
+              bottom: 7,
+              right: 10,
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: SizedBox(
+                  width: 45,
+                  height: 45,
+                  child: ElevatedButton(
+                    onPressed: _moveToCurrentLocation,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[900],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.all(10),
+                    ),
+                    child: const Icon(
+                      Icons.my_location,
+                      color: Colors.white,
+                      size: 20,
+                    )
+                  ),
+                ),
+              )
+            ),
 
-          // Tracking-Bereich aktiv
+
           if (_isTracking)
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
                 height: 190,
                 width: double.infinity,
-                color: const Color(0xFF1E1E1E), // etwas satteres Dunkelgrau
+                color: const Color(0xFF1E1E1E),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Grid mit 2x2 InfoBoxen
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -205,6 +253,34 @@ class _NavigationPageState extends State<NavigationPage> {
                 ),
               ),
             ),
+          if (_isTracking)
+            Positioned(
+                top: 50,
+                right: 10,
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: SizedBox(
+                    width: 45,
+                    height: 45,
+                    child: ElevatedButton(
+                        onPressed: _moveToCurrentLocation,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[900],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.all(10),
+                        ),
+                        child: const Icon(
+                          Icons.my_location,
+                          color: Colors.white,
+                          size: 20,
+                        )
+                    ),
+                  ),
+                )
+            ),
+
         ],
       ),
     );

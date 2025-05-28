@@ -1,5 +1,3 @@
-// Erweiterte Wetter-App: Modernes, aufgeräumtes Design mit Standort und Vorhersage
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -76,6 +74,7 @@ class _WeatherPageState extends State<WeatherPage> {
         for (var entry in forecastData['list']) {
           final date = DateTime.parse(entry['dt_txt']);
           final dayKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
           forecastByDay.putIfAbsent(dayKey, () => []).add({
             'time': "${date.hour.toString().padLeft(2, '0')}:00",
             'temp': entry['main']['temp'].round(),
@@ -103,9 +102,18 @@ class _WeatherPageState extends State<WeatherPage> {
       return const Center(child: Text("Keine Vorhersage verfügbar", style: TextStyle(color: Colors.white)));
     }
 
+    // Today's forecast
     final todayKey = groupedForecast.keys.first;
     final today = groupedForecast[todayKey]!;
-    final others = groupedForecast.entries.skip(1);
+
+    // Next days: skip today, convert to list, remove last entry
+    final allOthers = groupedForecast.entries.skip(1).toList();
+    if (allOthers.length > 1) {
+      allOthers.removeLast();
+    }
+    final others = allOthers;
+
+    const weekdays = ['Mo -', 'Di -', 'Mi -', 'Do -', 'Fr -', 'Sa -', 'So -'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,39 +138,43 @@ class _WeatherPageState extends State<WeatherPage> {
         const SizedBox(height: 24),
         const Text("Nächste Tage", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        ...others.map((day) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2C),
-              borderRadius: BorderRadius.circular(12),
+        ...others.map((day) {
+          final date = DateTime.parse(day.key);
+          final weekday = weekdays[date.weekday - 1];
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6.0),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2C),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('$weekday ${day.key}', style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: day.value.map((e) => Container(
+                        width: 80,
+                        margin: const EdgeInsets.only(right: 12),
+                        child: Column(
+                          children: [
+                            Text(e['time'], style: const TextStyle(color: Colors.white70)),
+                            Image.network('https://openweathermap.org/img/wn/${e['icon']}@2x.png', width: 50),
+                            Text("${e['temp']}°", style: const TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      )).toList(),
+                    ),
+                  )
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(day.key, style: const TextStyle(color: Colors.white70, fontSize: 16)),
-                const SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: day.value.map((e) => Container(
-                      width: 80,
-                      margin: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        children: [
-                          Text(e['time'], style: const TextStyle(color: Colors.white70)),
-                          Image.network('https://openweathermap.org/img/wn/${e['icon']}@2x.png', width: 50),
-                          Text("${e['temp']}°", style: const TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                    )).toList(),
-                  ),
-                )
-              ],
-            ),
-          ),
-        )),
+          );
+        }),
       ],
     );
   }

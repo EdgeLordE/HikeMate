@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  title: HikeMate
+  description: Eine API um eine Kaffeemaschine zu verwalten
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- name: Login/Registrierung
+  description: Login und Registrierung für die API
+paths:
+  /Registrieren:
+    post:
+      tags:
+      - Login/Registrierung
+      summary: Registriert einen neuen Benutzer
+      operationId: post_regristration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                FirstName:
+                  type: string
+                LastName:
+                  type: string
+                Username:
+                  type: string
+                Password:
+                  type: string
+      responses:
+        "201":
+          description: Benutzer erfolgreich registriert
+        "400":
+          description: Ungültige Eingabedaten
+      x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+      
+ 

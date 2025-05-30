@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'Pages/LoginPage.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: Colors.grey[900],
       ),
-      home: const LoginPage(), // LoginPage wird hier aufgerufen
+      home: const LoginPage(),
     );
   }
 }

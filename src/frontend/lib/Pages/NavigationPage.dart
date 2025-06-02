@@ -1,3 +1,4 @@
+import 'package:HikeMate/Class/User.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -5,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../Class/LocationTracker.dart';
 import '../Class/TrackingStorage.dart';
+import '../Class/supabase_client.dart';
 
 class NavigationPage extends StatefulWidget {
   const NavigationPage({super.key});
@@ -62,6 +64,7 @@ class _NavigationPageState extends State<NavigationPage> {
       LatLng(pos.latitude, pos.longitude),
       14.0,
     );
+
   }
 
   void _toggleTracking() {
@@ -73,6 +76,7 @@ class _NavigationPageState extends State<NavigationPage> {
       );
       TrackingStorage().saveTrackingDuration(_trackingService.duration);
       TrackingStorage().saveTrackingState(false);
+      _showSaveOrDiscardDialog();
       _trackingService.stop();
     } else {
       _trackingService.totalDistance = 0;
@@ -96,6 +100,74 @@ class _NavigationPageState extends State<NavigationPage> {
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return hours != "00" ? "$hours:$minutes:$seconds" : "$minutes:$seconds";
+  }
+
+  void _showSaveOrDiscardDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E1E1E),
+          title: const Text(
+            'Aktivität beenden',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'Möchten Sie die Aktivität speichern oder verwerfen?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _discardActivity();
+              },
+              child: const Text(
+                'Verwerfen',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _saveActivity();
+              },
+              child: const Text(
+                'Speichern',
+                style: TextStyle(color: Colors.green),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _discardActivity() {
+    _trackingService.isTracking = false;
+    setState(() {});
+  }
+
+  void _saveActivity() async {
+    try {
+      await supabase.from('Activity').insert({
+        'UserID': User.id,
+        'Distance': _trackingService.totalDistance,
+        'Increase': _trackingService.totalAscent,
+        'Duration': _trackingService.duration.inSeconds,
+        'Date': DateTime.now().toIso8601String(),
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aktivität erfolgreich gespeichert')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fehler beim Speichern der Aktivität: $e')),
+      );
+    }
+
+    _trackingService.isTracking = false;
+    setState(() {});
   }
 
   @override

@@ -4,6 +4,7 @@ import 'HomePage.dart';
 import 'RegistrationPage.dart';
 import '../Class/supabase_client.dart';
 import 'package:bcrypt/bcrypt.dart';
+import '../Class/User.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -17,20 +18,21 @@ class LoginPage extends StatelessWidget {
       try {
         final response = await supabase
             .from('User')
-            .select('Password')
+            .select('Password, Username, UserID, FirstName, LastName')
             .eq('Username', usernameController.text)
             .maybeSingle();
 
 
 
         if (response != null && BCrypt.checkpw(passwordController.text, response['Password']) ) {
+          User.setUser(response['UserID'], response['FirstName'], response['LastName'], response['Username']);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const HomePage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login fehlgeschlagen')),
+            const SnackBar(content: Text('Benutzername oder Passwort falsch')),
           );
         }
       } catch (e) {

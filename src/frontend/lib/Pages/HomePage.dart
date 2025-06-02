@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'NavigationPage.dart';
 import 'WeatherPage.dart';
 import 'ProfilePage.dart';
+import 'SearchMountainPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = [
-    Center(child: Text('Suche', style: TextStyle(color: Colors.white))),
+    SearchMountainPage(),
     WeatherPage(),
     NavigationPage(),
     ProfilePage(),

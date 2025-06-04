@@ -37,7 +37,6 @@ class TrackingService {
     await trackingStorage.requestNotificationPermission();
     await trackingStorage.enableBackgroundTracking();
 
-
     _stopwatch.start();
 
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -67,12 +66,15 @@ class TrackingService {
         path.add(currentPosition);
       }
 
-      if (_previousAltitude != null && position.altitude > _previousAltitude!) {
-        totalAscent += (position.altitude - _previousAltitude!);
+      if (_previousAltitude != null) {
+        final altitudeDifference = position.altitude.round() - _previousAltitude!.round();
+        if (altitudeDifference > 0) {
+          totalAscent += altitudeDifference;
+        }
       }
 
-      _previousAltitude = position.altitude;
-      altitude = position.altitude;
+      _previousAltitude = position.altitude.roundToDouble();
+      altitude = position.altitude.roundToDouble();
       _onUpdate.add(null);
     });
   }
@@ -88,6 +90,11 @@ class TrackingService {
 
     _stopwatch.stop();
     _stopwatch.reset();
+
+    path.clear();
+    _previousPosition = null;
+    _previousAltitude = null;
+
 
     _onUpdate.add(null);
   }

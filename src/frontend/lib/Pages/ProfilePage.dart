@@ -80,9 +80,9 @@ class _ProfilePageState extends State<ProfilePage> {
       final double avgSpeed = (sumDuration > 0) ? (sumDist / sumDuration) : 0.0;
 
       setState(() {
-        _totalDistance = sumDist;
+        _totalDistance = sumDist / 1000;
         _totalAscent = sumAscent;
-        _totalDuration = sumDuration;
+        _totalDuration = sumDuration / 3600;
         _totalActivities = activityCount;
         _totalCalories = sumCalories;
         _averageSpeed = avgSpeed;
@@ -124,9 +124,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildActivityItem(Map<String, dynamic> activity) {
-    final dist = (activity['Distance'] as num?)?.toDouble() ?? 0.0;
+    final dist = ((activity['Distance'] as num?)?.toDouble() ?? 0.0) / 1000;
     final ascent = (activity['Increase'] as num?)?.toInt() ?? 0;
-    final dur = (activity['Duration'] as num?)?.toDouble() ?? 0.0;
+    final dur = ((activity['Duration'] as num?)?.toDouble() ?? 0.0) / 3600;
     final cal = (activity['Calories'] as num?)?.toInt() ?? 0;
     final alt = (activity['MaxAltitude'] as num?)?.toInt() ?? 0;
     final dateString = activity['Date'] as String? ?? '';

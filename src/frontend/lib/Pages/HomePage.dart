@@ -3,6 +3,7 @@ import 'NavigationPage.dart';
 import 'WeatherPage.dart';
 import 'ProfilePage.dart';
 import 'SearchMountainPage.dart';
+import 'DonePage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,7 +20,7 @@ class _HomePageState extends State<HomePage> {
     WeatherPage(),
     NavigationPage(),
     ProfilePage(),
-    Center(child: Text('DoneList', style: TextStyle(color: Colors.white))),
+    DonePage(),
   ];
 
   void _onItemTapped(int index) {

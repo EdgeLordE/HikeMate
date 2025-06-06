@@ -41,6 +41,7 @@ class _DonePageState extends State<DonePage> {
           .eq('UserID', User.id);
 
       if (!mounted) return;
+
       if (response is List) {
         setState(() {
           _doneList = List<Map<String, dynamic>>.from(response);
@@ -53,7 +54,7 @@ class _DonePageState extends State<DonePage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fehler beim Laden: $e')),
+        SnackBar(content: Text('Fehler beim Laden der Done‐Einträge: $e')),
       );
       setState(() {
         _doneList = [];
@@ -67,17 +68,30 @@ class _DonePageState extends State<DonePage> {
   }
 
   Future<void> _deleteDoneEntry(int doneID) async {
+    print('[_deleteDoneEntry] Versuche zu löschen: DoneID = $doneID');
+
     try {
       final deleteResponse = await supabase
           .from('Done')
           .delete()
-          .eq('DoneID', doneID);
+          .eq('DoneID', doneID)
+          .eq('UserID', User.id);
+
+      print('[_deleteDoneEntry] Supabase.delete() Response = $deleteResponse');
+
+
+      if (!mounted) return;
 
       if (deleteResponse == null ||
           (deleteResponse is List && deleteResponse.isEmpty)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Eintrag nicht gefunden')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Eintrag nicht gefunden oder konnte nicht gelöscht werden'),
+            ),
+          );
+        }
         return;
       }
 
@@ -86,9 +100,11 @@ class _DonePageState extends State<DonePage> {
         _doneList.removeWhere((entry) => entry['DoneID'] == doneID);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Eintrag erfolgreich gelöscht')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Eintrag erfolgreich gelöscht')),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -121,34 +137,38 @@ class _DonePageState extends State<DonePage> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(Colors.lightBlueAccent),
+        ),
+      )
           : _doneList.isEmpty
           ? const Center(
         child: Text(
           'Noch keine Berge hinzugefügt.',
-          style: TextStyle(color: Colors.white54),
+          style: TextStyle(color: Colors.white54, fontSize: 16),
         ),
       )
           : ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 10),
         itemCount: _doneList.length,
-        itemBuilder: (ctx, index) {
+        itemBuilder: (context, index) {
           final doneEntry = _doneList[index];
           final doneId = doneEntry['DoneID'] as int;
           final dateRaw = doneEntry['Date'] as String;
           final mountain =
           doneEntry['Mountain'] as Map<String, dynamic>;
-          final name = mountain['Name'] as String? ?? '–';
+          final name = mountain['Name'] as String? ?? 'Unbekannt';
           final height = mountain['Height']?.toString() ?? '–';
-          final federalState =
-              (mountain['FederalState'] as Map<String, dynamic>?)?['Name']
-              as String? ??
-                  '–';
+          final federalState = (mountain['FederalState']
+          as Map<String, dynamic>?)?['Name']
+          as String? ??
+              '–';
 
           return Card(
             color: const Color(0xFF1E1E1E),
-            margin:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            margin: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 6),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16, vertical: 8),
@@ -172,7 +192,7 @@ class _DonePageState extends State<DonePage> {
                         fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Text(
                       'Höhe: $height m, Bundesland: $federalState',
                       style: const TextStyle(
@@ -195,7 +215,7 @@ class _DonePageState extends State<DonePage> {
                         style: TextStyle(color: Colors.white),
                       ),
                       content: Text(
-                        'Möchtest du „$name“ wirklich löschen?',
+                        'Möchtest du „$name“ wirklich aus deinen Done‐Einträgen entfernen?',
                         style: const TextStyle(color: Colors.white70),
                       ),
                       actions: [

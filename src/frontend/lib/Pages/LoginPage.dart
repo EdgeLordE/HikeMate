@@ -16,28 +16,21 @@ class LoginPage extends StatelessWidget {
 
     Future<void> login(BuildContext context) async {
       try {
-        final response = await supabase
-            .from('User')
-            .select('Password, Username, UserID, FirstName, LastName')
-            .eq('Username', usernameController.text)
-            .maybeSingle();
+        final result = await User.login_User(usernameController.text, passwordController.text);
 
-
-
-        if (response != null && BCrypt.checkpw(passwordController.text, response['Password']) ) {
-          User.setUser(response['UserID'], response['FirstName'], response['LastName'], response['Username']);
+        if (result["success"]) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const HomePage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Benutzername oder Passwort falsch')),
+            SnackBar(content: Text(result["message"])),
           );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e')),
+          const SnackBar(content: Text('Login fehlgeschlagen')),
         );
       }
     }

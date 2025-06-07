@@ -8,6 +8,14 @@ servers:
 tags:
 - name: Login/Registrierung
   description: Login und Registrierung für die API
+- name: Aktivitäten
+  description: Aktivitäten verwalten
+- name: Berge erledigt
+  description: Berge als erledigt markieren
+- name: Berge
+  description: Berge verwalten
+- name: Bundesländer
+  description: Bundesländer verwalten
 paths:
   /Registrieren:
     post:
@@ -31,10 +39,142 @@ paths:
                 Password:
                   type: string
       responses:
-        "201":
+        "200":
           description: Benutzer erfolgreich registriert
         "400":
           description: Ungültige Eingabedaten
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+  /Login:
+    post:
+      tags:
+      - Login/Registrierung
+      summary: Login 
+      operationId: post_login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Username:
+                  type: string
+                Password:
+                  type: string
+      responses:
+        "200":
+          description: Benutzer erfolgreich eingeloggt
+        "400":
+          description: Username oder Passwort ungültig
+      x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+  /Aktivitaeten:
+    get:
+      tags:
+      - Aktivitäten
+      summary: Gibt eine Liste aller Aktivitäten zurück
+      operationId: get_activities
+      responses:
+        "200":
+          description: Erfolgreich
+        "400":
+          description: Ungültige Anfrage
+      x-openapi-router-controller: swagger_server.controllers.activity_controller
+  /Aktivitaet:
+    get:
+      tags:
+      - Aktivitäten
+      summary: Gibt eine Aktivität aufgrund der userid zurück
+      operationId: get_activities_by_user_id
+      parameters:
+      - name: user_id
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Erfolgreich
+        "400":
+          description: Ungültige Anfrage
+      x-openapi-router-controller: swagger_server.controllers.activity_controller
+  /DoneBerge:
+    get:
+      tags:
+      - Berge erledigt
+      summary: Gibt eine Liste aller erledigten Berge von einem Benutzer zurück
+      operationId: get_done_mountains_by_user_id
+      parameters:
+      - name: user_id
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Erfolgreich
+        "400":
+          description: Ungültige Anfrage
+      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+  /DoneBerghinzufuegen:
+    post:
+      tags:
+      - Berge erledigt
+      summary: Fügt einen erledigten Berg hinzu
+      operationId: post_done_mountain_with_user_id
+      parameters:
+      - name: user_id
+        in: query
+        required: true
+        schema:
+          type: integer
+      - name: mountain_id
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Erfolgreich hinzugefügt
+        "400":
+          description: Ungültige Eingabedaten
+      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+  /Berg:
+    get:
+      tags:
+      - Berge
+      summary: Gibt einen Berg anhand des Namens zurück
+      operationId: get_mountain_by_name
+      parameters:
+      - name: mountain_name
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Erfolgreich
+        "400":
+          description: Ungültige Anfrage
+      x-openapi-router-controller: swagger_server.controllers.mountain_controller
+  /Bundesland:
+    get:
+      tags:
+      - Bundesländer
+      summary: Gibt der Name des Bundeslandes anhand der ID zurück
+      operationId: get_federal_state_by_id
+      parameters:
+      - name: federal_state_id
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Erfolgreich
+        "400":
+          description: Ungültige Anfrage
+      x-openapi-router-controller: swagger_server.controllers.federal_state_controller
+
+  
       
  

@@ -1,11 +1,11 @@
 import csv
 
-# Mapping von CSV-Region-Code zu Datenbank-Bundesland-ID
+
 csv_to_db_mapping = {
-    "1": 9,  # Burgenland
-    "2": 6,  # Kärnten
-    "3": 5,  # Niederösterreich
-    "4": 4,  # Oberösterreich
+    "1": 9,  
+    "2": 6,  
+    "3": 5,  
+    "4": 4,  
     "5": 3,  # Salzburg
     "6": 8,  # Steiermark
     "7": 2,  # Tirol

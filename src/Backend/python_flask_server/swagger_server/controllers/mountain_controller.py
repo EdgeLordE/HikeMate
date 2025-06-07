@@ -14,7 +14,7 @@ def get_mountain_by_name(mountain_name):
     Get mountain by name
     """
     try:
-        response = supabase.table('Mountain').select("*").ilike("Name", f"%{mountain_name}%").execute()
+        response = supabase.table('Mountain').select("Mountainid, Name, Height, FederalStateid (Name)").ilike("Name", f"%{mountain_name}%").execute()
         if response.data:
             return {"response": response.data}, 200
         else:

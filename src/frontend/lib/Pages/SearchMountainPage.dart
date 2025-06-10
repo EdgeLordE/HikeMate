@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../Class/supabase_client.dart';
 import '../Class/User.dart';
 import '../Class/Mountain.dart';
+import '../Class/Watchlist.dart'; // Import für Watchlist hinzugefügt
 
 class SearchMountainPage extends StatefulWidget {
   const SearchMountainPage({super.key});
@@ -77,7 +78,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
     }
   }
 
-  Future<void> addMountain() async {
+  Future<void> addMountainToDone() async {
     if (mountainData == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -109,7 +110,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
       if (mounted) {
         if (response != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Berg bereits hinzugefügt')),
+            const SnackBar(content: Text('Berg bereits abgehakt')),
           );
         } else {
           await supabase.from('Done').insert({
@@ -118,18 +119,90 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
             'Date': DateTime.now().toIso8601String(),
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Berg erfolgreich hinzugefügt')),
+            const SnackBar(content: Text('Berg erfolgreich abgehakt')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Hinzufügen des Berges: $e')),
+          SnackBar(content: Text('Fehler beim Abhaken des Berges: $e')),
         );
       }
     }
   }
+
+  Future<void> addMountainToWatchlist() async {
+    if (mountainData == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Keine Bergdaten verfügbar, um zur Watchlist hinzuzufügen.')),
+        );
+      }
+      return;
+    }
+
+    final mountainIdValue = mountainData!['Mountainid'];
+    if (mountainIdValue == null || mountainIdValue is! int) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gültige Berg-ID nicht in den Daten gefunden.')),
+        );
+      }
+      return;
+    }
+
+    if (User.id == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Benutzer nicht angemeldet.')),
+        );
+      }
+      return;
+    }
+
+    try {
+      // Zuerst prüfen, ob der Berg bereits auf der Watchlist ist
+      final existingWatchlistItem = await supabase
+          .from('Watchlist')
+          .select('MountainID')
+          .eq('UserID', User.id!)
+          .eq('MountainID', mountainIdValue)
+          .limit(1)
+          .maybeSingle();
+
+      if (mounted) {
+        if (existingWatchlistItem != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Berg ist bereits auf der Watchlist')),
+          );
+          return;
+        }
+      }
+
+
+      final result = await Watchlist.AddToWatchlist(User.id!, mountainIdValue as int);
+
+      if (mounted) {
+        if (result["success"] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Berg erfolgreich zur Watchlist hinzugefügt')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"] ?? 'Fehler beim Hinzufügen zur Watchlist')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler beim Hinzufügen zur Watchlist: $e')),
+        );
+      }
+    }
+  }
+
 
   Widget _buildInfoBox(String title, String value) {
     return Expanded( // Wrap with Expanded for proper layout in Row
@@ -314,7 +387,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                           ],
                         ),
                       ),
-                    const SizedBox(height: 80), // Space for the button
+                    const SizedBox(height: 100), // Space for the buttons
                   ],
                 ),
               ),
@@ -324,19 +397,37 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
               bottom: 20,
               left: 20,
               right: 20,
-              child: ElevatedButton(
-                onPressed: addMountain,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlueAccent,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              child: Row( // Row für beide Buttons
+                children: [
+                  Expanded( // "Abhacken"-Button nimmt verfügbaren Platz ein
+                    child: ElevatedButton(
+                      onPressed: addMountainToDone, // Umbenannt zur Klarheit
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlueAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Abhaken',
+                        style: TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.w600),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Abhacken',
-                  style: TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.w600),
-                ),
+                  const SizedBox(width: 10), // Abstand zwischen den Buttons
+                  Container( // Container für den IconButton, um Hintergrund und Form zu geben
+                    decoration: BoxDecoration(
+                      color: Colors.lightBlueAccent, // Gleiche Farbe wie der andere Button
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.favorite_border, color: Colors.white),
+                      tooltip: 'Zur Watchlist hinzufügen',
+                      onPressed: addMountainToWatchlist, // Neue Funktion
+                    ),
+                  ),
+                ],
               ),
             ),
         ],

@@ -13,6 +13,8 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextEditingController usernameController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final formWidth = screenWidth * 0.85;
 
     Future<void> login(BuildContext context) async {
       try {
@@ -38,13 +40,13 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF141212),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: const Text(
+        child: SingleChildScrollView( // Added SingleChildScrollView for smaller screens
+          padding: const EdgeInsets.symmetric(horizontal: 20.0), // Added horizontal padding
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center, // Center items horizontally
+            children: [
+              const Text(
                 'Login',
                 style: TextStyle(
                   fontSize: 45,
@@ -52,11 +54,9 @@ class LoginPage extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
-            const SizedBox(height: 50),
-            Align(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 300, minWidth: 300),
+              const SizedBox(height: 50),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: formWidth),
                 child: TextField(
                   controller: usernameController,
                   decoration: InputDecoration(
@@ -77,11 +77,9 @@ class LoginPage extends StatelessWidget {
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
-            ),
-            const SizedBox(height: 25),
-            Align(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 300, minWidth: 300),
+              const SizedBox(height: 25),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: formWidth),
                 child: TextField(
                   controller: passwordController,
                   obscureText: true,
@@ -103,64 +101,67 @@ class LoginPage extends StatelessWidget {
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(left: 30),
-              child: Row(
-                children: [
-                  const Text(
-                    'Noch kein Konto?',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RegistrationPage()),
-                      );
-                    },
-                    child: const Text(
-                      'Registrieren',
+              const SizedBox(height: 20),
+              ConstrainedBox( // Added ConstrainedBox for responsive width
+                constraints: BoxConstraints(maxWidth: formWidth),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start, // Align to start within the constrained width
+                  children: [
+                    const Text(
+                      'Noch kein Konto?',
                       style: TextStyle(
                         fontSize: 15,
-                        color: Colors.lightBlueAccent,
+                        color: Colors.white,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 55),
-            Align(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                    maxWidth: 300, minWidth: 300, maxHeight: 48, minHeight: 48),
-                child: ElevatedButton(
-                  onPressed: () => login(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(60),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                        );
+                      },
+                      child: const Text(
+                        'Registrieren',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.lightBlueAccent,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxWidth: formWidth, minHeight: 48), // minHeight to maintain button size
+                child: SizedBox( // Use SizedBox to enforce width for ElevatedButton
+                  width: double.infinity, // Make button take full width of ConstrainedBox
+                  child: ElevatedButton(
+                    onPressed: () => login(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(40), // Adjusted border radius
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 11), // Ensure consistent padding
+                    ),
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

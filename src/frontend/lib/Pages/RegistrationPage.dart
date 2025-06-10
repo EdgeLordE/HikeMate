@@ -1,8 +1,7 @@
 import 'package:HikeMate/Class/User.dart';
 import 'package:HikeMate/Pages/LoginPage.dart';
 import 'package:flutter/material.dart';
-import '../Class/supabase_client.dart';
-import 'package:bcrypt/bcrypt.dart';
+
 
 class RegistrationPage extends StatelessWidget {
   const RegistrationPage({super.key});
@@ -13,20 +12,35 @@ class RegistrationPage extends StatelessWidget {
     final TextEditingController lastNameController = TextEditingController();
     final TextEditingController usernameController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final formWidth = screenWidth * 0.85; // Verwende 85% der Bildschirmbreite
 
     Future<void> register(BuildContext context) async {
       try {
-        final result = await User.register_User(firstNameController.text, lastNameController.text, usernameController.text, passwordController.text,);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registrierung erfolgreich!')),
+        final result = await User.register_User(
+          firstNameController.text,
+          lastNameController.text,
+          usernameController.text,
+          passwordController.text,
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
+        // Annahme: register_User gibt ein Map mit "success" und "message" zurück oder wirft einen Fehler
+        // Diese Logik basiert auf der LoginPage, passe sie ggf. an das tatsächliche Verhalten von User.register_User an.
+        if (result["success"]) { // Überprüfe, ob ein "success"-Flag zurückgegeben wird
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registrierung erfolgreich!')),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"] ?? 'Registrierung fehlgeschlagen')),
+          );
+        }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Username bereits vergeben')),
+          SnackBar(content: Text('Registrierung fehlgeschlagen: ${e.toString()}')),
         );
       }
     }
@@ -44,23 +58,21 @@ class RegistrationPage extends StatelessWidget {
       ),
       backgroundColor: const Color(0xFF141212),
       resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
+      body: Center( // Zentriert den Inhalt, wenn nicht gescrollt werden muss
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0), // Horizontaler Abstand
+          child: Padding( // Behält den ursprünglichen Padding bei, falls gewünscht
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center, // Zentriert Elemente horizontal
               children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Registrieren',
-                    style: TextStyle(
-                      fontSize: 45,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                const Text( // Zentriert durch CrossAxisAlignment.center der Column
+                  'Registrieren',
+                  style: TextStyle(
+                    fontSize: 45,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 50),
@@ -68,18 +80,21 @@ class RegistrationPage extends StatelessWidget {
                   controller: firstNameController,
                   hintText: 'Vorname',
                   icon: Icons.person_2,
+                  maxWidth: formWidth,
                 ),
                 const SizedBox(height: 25),
                 _buildTextField(
                   controller: lastNameController,
                   hintText: 'Nachname',
                   icon: Icons.person_2,
+                  maxWidth: formWidth,
                 ),
                 const SizedBox(height: 25),
                 _buildTextField(
                   controller: usernameController,
                   hintText: 'Benutzername',
                   icon: Icons.person,
+                  maxWidth: formWidth,
                 ),
                 const SizedBox(height: 25),
                 _buildTextField(
@@ -87,19 +102,22 @@ class RegistrationPage extends StatelessWidget {
                   hintText: 'Passwort',
                   icon: Icons.lock,
                   obscureText: true,
+                  maxWidth: formWidth,
                 ),
                 const SizedBox(height: 55),
-                Align(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                        maxWidth: 300, minWidth: 300, maxHeight: 48, minHeight: 48),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxWidth: formWidth, minHeight: 48),
+                  child: SizedBox(
+                    width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => register(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(60),
+                          borderRadius: BorderRadius.circular(40), // Angepasster Radius
                         ),
+                        padding: const EdgeInsets.symmetric(vertical: 11), // Konsistentes Padding
                       ),
                       child: const Text(
                         'Registrieren',
@@ -125,30 +143,29 @@ class RegistrationPage extends StatelessWidget {
     required String hintText,
     required IconData icon,
     bool obscureText = false,
+    required double maxWidth, // Parameter für maximale Breite hinzugefügt
   }) {
-    return Align(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 300, minWidth: 300),
-        child: TextField(
-          controller: controller,
-          obscureText: obscureText,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFF505050),
-            border: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-              borderSide: BorderSide.none,
-            ),
-            prefixIcon: Icon(
-              icon,
-              color: Colors.lightBlueAccent,
-              size: 25,
-            ),
-            hintText: hintText,
-            hintStyle: const TextStyle(color: Colors.white54),
+    return ConstrainedBox( // Nicht mehr `Align`, da die Column bereits zentriert
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF505050),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            borderSide: BorderSide.none,
           ),
-          style: const TextStyle(color: Colors.white),
+          prefixIcon: Icon(
+            icon,
+            color: Colors.lightBlueAccent,
+            size: 25,
+          ),
+          hintText: hintText,
+          hintStyle: const TextStyle(color: Colors.white54),
         ),
+        style: const TextStyle(color: Colors.white),
       ),
     );
   }

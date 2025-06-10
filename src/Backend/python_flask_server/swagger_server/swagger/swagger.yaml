@@ -16,6 +16,8 @@ tags:
   description: Berge verwalten
 - name: Bundesländer
   description: Bundesländer verwalten
+- name: Watchlist
+  description: Watchlist verwalten
 paths:
   /Registrieren:
     post:
@@ -174,7 +176,31 @@ paths:
         "400":
           description: Ungültige Anfrage
       x-openapi-router-controller: swagger_server.controllers.federal_state_controller
+  /Watchlist:
+    post:
+      tags:
+      - Watchlist
+      summary: Fügt einen Berg zur Watchlist hinzu
+      operationId: post_watchlist
+      parameters:
+      - name: user_id
+        in: query
+        required: true
+        schema:
+          type: integer
+      - name: mountain_id
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Erfolgreich hinzugefügt
+        "404":
+          description: Ungültige Eingabedaten
+      x-openapi-router-controller: swagger_server.controllers.watchlist_controller
 
-  
-      
- 
+
+
+
+    

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../Class/supabase_client.dart';
 import '../Class/User.dart';
 import '../Class/Mountain.dart';
-import '../Class/Watchlist.dart'; // Import für Watchlist hinzugefügt
+import '../Class/Watchlist.dart';
 
 class SearchMountainPage extends StatefulWidget {
   const SearchMountainPage({super.key});
@@ -176,11 +176,11 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Berg ist bereits auf der Watchlist')),
           );
-          return;
+          return; // Verhindert das erneute Hinzufügen
         }
       }
 
-
+      // Wenn nicht bereits vorhanden, dann zur Watchlist hinzufügen
       final result = await Watchlist.AddToWatchlist(User.id!, mountainIdValue as int);
 
       if (mounted) {
@@ -205,7 +205,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
 
 
   Widget _buildInfoBox(String title, String value) {
-    return Expanded( // Wrap with Expanded for proper layout in Row
+    return Expanded(
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -214,7 +214,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, // Ensure column takes minimum space
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               title,
@@ -231,7 +231,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
-              overflow: TextOverflow.ellipsis, // Handle long text
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -387,7 +387,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                           ],
                         ),
                       ),
-                    const SizedBox(height: 100), // Space for the buttons
+                    const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -397,11 +397,11 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
               bottom: 20,
               left: 20,
               right: 20,
-              child: Row( // Row für beide Buttons
+              child: Row(
                 children: [
-                  Expanded( // "Abhacken"-Button nimmt verfügbaren Platz ein
+                  Expanded(
                     child: ElevatedButton(
-                      onPressed: addMountainToDone, // Umbenannt zur Klarheit
+                      onPressed: addMountainToDone,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.lightBlueAccent,
                         padding: const EdgeInsets.symmetric(vertical: 15),
@@ -415,16 +415,16 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10), // Abstand zwischen den Buttons
-                  Container( // Container für den IconButton, um Hintergrund und Form zu geben
+                  const SizedBox(width: 10),
+                  Container(
                     decoration: BoxDecoration(
-                      color: Colors.lightBlueAccent, // Gleiche Farbe wie der andere Button
+                      color: Colors.lightBlueAccent,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.favorite_border, color: Colors.white),
                       tooltip: 'Zur Watchlist hinzufügen',
-                      onPressed: addMountainToWatchlist, // Neue Funktion
+                      onPressed: addMountainToWatchlist,
                     ),
                   ),
                 ],

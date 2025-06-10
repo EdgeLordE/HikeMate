@@ -189,13 +189,13 @@ paths:
             schema:
               type: object
               properties:
-                user_id:
+                UserID:
                   type: integer
-                mountain_id:
+                MountainID:
                   type: integer
               required:
-                - user_id
-                - mountain_id
+                - UserID
+                - MountainID
       responses:
         "200":
           description: Erfolgreich hinzugefügt

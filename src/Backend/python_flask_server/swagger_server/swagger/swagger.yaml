@@ -198,7 +198,7 @@ paths:
           description: Erfolgreich hinzugefügt
         "404":
           description: Ungültige Eingabedaten
-      x-openapi-router-controller: swagger_server.controllers.watchlist_controller
+      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
 
 
 

@@ -8,10 +8,20 @@ SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def post_watchlist(user_id, mountain_id):
+def post_watchlist():
     """
-    Add a new item to the watchlist
+    Add a new item to the watchlist (expects JSON body)
     """
+    if not connexion.request.is_json:
+        return {"error": "Request must be JSON"}, 400
+
+    data = connexion.request.get_json()
+    user_id = data.get("UserID")
+    mountain_id = data.get("MountainID")
+
+    if not user_id or not mountain_id:
+        return {"error": "UserID and MountainID are required"}, 400
+
     try:
         watchlist_item = {
             "UserID": user_id,
@@ -19,8 +29,8 @@ def post_watchlist(user_id, mountain_id):
         }
         response = supabase.table('Watchlist').insert(watchlist_item).execute()
         if response.data:
-            return {"response": response.data}, 200
+            return {"response": response.data}, 201
         else:
-            return {"message": "Failed to add item to watchlist"}, 404
+            return {"message": "Failed to add item to watchlist"}, 400
     except Exception as e:
         return {"error": str(e)}, 500

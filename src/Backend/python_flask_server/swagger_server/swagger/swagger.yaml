@@ -182,25 +182,23 @@ paths:
       - Watchlist
       summary: Fügt einen Berg zur Watchlist hinzu
       operationId: post_watchlist
-      parameters:
-      - name: user_id
-        in: query
+      requestBody:
         required: true
-        schema:
-          type: integer
-      - name: mountain_id
-        in: query
-        required: true
-        schema:
-          type: integer
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                mountain_id:
+                  type: integer
+              required:
+                - user_id
+                - mountain_id
       responses:
         "200":
           description: Erfolgreich hinzugefügt
         "404":
           description: Ungültige Eingabedaten
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
-
-
-
-
-    

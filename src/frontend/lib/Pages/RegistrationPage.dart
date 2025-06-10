@@ -1,3 +1,4 @@
+import 'package:HikeMate/Class/User.dart';
 import 'package:HikeMate/Pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 import '../Class/supabase_client.dart';
@@ -14,38 +15,18 @@ class RegistrationPage extends StatelessWidget {
     final TextEditingController passwordController = TextEditingController();
 
     Future<void> register(BuildContext context) async {
-
       try {
-
-        if (firstNameController.text.isEmpty || lastNameController.text.isEmpty || usernameController.text.isEmpty || passwordController.text.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Bitte füllen Sie alle Felder aus')),
-          );
-          return;
-        }
-
-        final response = await supabase.from('User').insert({
-          'FirstName': firstNameController.text,
-          'LastName': lastNameController.text,
-          'Username': usernameController.text,
-          'Password': BCrypt.hashpw(passwordController.text, BCrypt.gensalt()),
-        }).execute();
-
-        final responseGet = await supabase
-            .from('User')
-            .select()
-            .eq('Username', usernameController.text)
-            .maybeSingle();
-
-        if (responseGet != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-        }
+        final result = await User.register_User(firstNameController.text, lastNameController.text, usernameController.text, passwordController.text,);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registrierung erfolgreich!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Username bereits vergeben')),
+          const SnackBar(content: Text('Username bereits vergeben')),
         );
       }
     }

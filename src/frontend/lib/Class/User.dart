@@ -54,5 +54,27 @@ class User{
     }
   }
 
+  static Future<Map<String, dynamic>> register_User(String firstName, String lastName, String username, String password) async{
+    const String apiUrl = "http://193.141.60.63:8080/Registrieren";
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"Username": username, "Password": password, "FirstName": firstName, "LastName": lastName}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setUser(data["UserID"], data["FirstName"], data["LastName"], username);
+        return {"success": true, "message": "Login erfolgreich"};
+      } else {
+        final error = jsonDecode(response.body);
+        return {"success": false, "message": error["error"]};
+      }
+    } catch (e) {
+      return {"success": false, "message": "Fehler: $e"};
+    }
+  }
 
 }

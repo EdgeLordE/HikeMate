@@ -202,3 +202,81 @@ paths:
         "404":
           description: Ungültige Eingabedaten
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+  /GetWatchlist:
+    get:
+      tags:
+      - Watchlist
+      summary: Gibt die Watchlist eines Benutzers zurück
+      operationId: get_watchlist_by_user_id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserID:
+                  type: integer
+              required:
+                - UserID
+      responses:
+        "200":
+          description: Erfolgreich
+        "400":
+          description: Ungültige Anfrage
+      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+  /ChangePassword:
+    post:
+      tags:
+      - Login/Registrierung
+      summary: Ändert das Passwort eines Benutzers mit dem Username
+      operationId: post_change_password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Username:
+                  type: string
+                OldPassword:
+                  type: string
+                NewPassword:
+                  type: string
+              required:
+                - Username
+                - OldPassword
+                - NewPassword
+      responses:
+        "200":
+          description: Passwort erfolgreich geändert
+        "400":
+          description: Ungültige Eingabedaten
+      x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+  /ChnageUsername:
+    post:
+      tags:
+      - Login/Registrierung
+      summary: Ändert den Username eines Benutzers
+      operationId: post_change_username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Username:
+                  type: string
+                NewUsername:
+                  type: string
+              required:
+                - Username
+                - NewUsername
+      responses:
+        "200":
+          description: Username erfolgreich geändert
+        "400":
+          description: Ungültige Eingabedaten
+      x-openapi-router-controller: swagger_server.controllers.login_regristration_controller

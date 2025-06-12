@@ -162,7 +162,6 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
     }
 
     try {
-      // Zuerst prüfen, ob der Berg bereits auf der Watchlist ist
       final existingWatchlistItem = await supabase
           .from('Watchlist')
           .select('MountainID')
@@ -176,11 +175,10 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Berg ist bereits auf der Watchlist')),
           );
-          return; // Verhindert das erneute Hinzufügen
+          return;
         }
       }
 
-      // Wenn nicht bereits vorhanden, dann zur Watchlist hinzufügen
       final result = await Watchlist.AddToWatchlist(User.id!, mountainIdValue as int);
 
       if (mounted) {
@@ -249,6 +247,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Diese Einstellung ist entscheidend
       backgroundColor: const Color(0xFF141212),
       appBar: AppBar(
         backgroundColor: const Color(0xFF141212),
@@ -280,6 +279,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
         ),
       ),
       body: Stack(
+        fit: StackFit.expand, // Stellt sicher, dass der Stack den Body ausfüllt
         children: [
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
@@ -292,7 +292,8 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
             )
           else
             SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              primary: false, // Versuch, Interaktion mit globalen Insets zu minimieren
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0 + 100.0), // Padding angepasst, um Platz für Buttons unten zu lassen
               child: Center(
                 child: Column(
                   children: [
@@ -387,7 +388,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                           ],
                         ),
                       ),
-                    const SizedBox(height: 100),
+                    // SizedBox am Ende der Column ist nicht mehr nötig, da Padding im SingleChildScrollView
                   ],
                 ),
               ),
@@ -404,7 +405,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                       onPressed: addMountainToDone,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.lightBlueAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),

@@ -34,3 +34,20 @@ def post_watchlist():
             return {"message": "Failed to add item to watchlist"}, 400
     except Exception as e:
         return {"error": str(e)}, 500
+
+def get_watchlist_by_user_id():
+    """
+    Get watchlist by UserID
+    """
+    user_id = connexion.request.args.get('UserID')
+    if not user_id:
+        return {"error": "UserID is required"}, 400
+
+    try:
+        response = supabase.table('Watchlist').select("MountainID").eq("UserID", user_id).execute()
+        if response.data:
+            return {"response": response.data}, 200
+        else:
+            return {"message": "No items found in watchlist for this user"}, 404
+    except Exception as e:
+        return {"error": str(e)}, 500

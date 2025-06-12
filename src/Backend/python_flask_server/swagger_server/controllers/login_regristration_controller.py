@@ -55,6 +55,62 @@ def post_login():
             }, 200
         else:
             return {"error": "Invalid username or password"}, 401
+        
+
+        
+def post_change_password():
+    if connexion.request.is_json:
+        data = connexion.request.get_json()
+        username = data.get("Username")
+        old_password = data.get("OldPassword")
+        new_password = data.get("NewPassword")
+
+        if not username or not old_password or not new_password:
+            return {"error": "Username, OldPassword, and NewPassword are required"}, 400
+
+        user_data = supabase.table('User').select("Password").eq("Username", username).execute()
+        if not user_data.data or len(user_data.data) == 0:
+            return {"error": "User not found"}, 404
+
+        hashed_old_pw = user_data.data[0]["Password"]
+        if not bcrypt.checkpw(old_password.encode("utf-8"), hashed_old_pw.encode("utf-8")):
+            return {"error": "Old password is incorrect"}, 401
+
+        hashed_new_pw = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        response = supabase.table('User').update({"Password": hashed_new_pw}).eq("Username", username).execute()
+
+        if response.data:
+            return {"message": "Password changed successfully"}, 200
+        else:
+            return {"error": "Failed to change password"}, 500
+    return {"error": "Request must be JSON"}, 400
+
+
+
+def post_change_username():
+    if connexion.request.is_json:
+        data = connexion.request.get_json()
+        new_username = data.get("NewUsername")
+        username = data.get("Username")
+
+        if not username or not new_username:
+            return {"error": "UserID and NewUsername are required"}, 400
+        
+        exists = supabase.table('User').select("Username").eq("Username", username).eq("Username", username).execute()
+        if not exists.data or len(exists.data) == 0:
+            return {"error": "User not found"}, 404
+
+        exists = supabase.table('User').select("Username").eq("Username", new_username).execute()
+        if exists.data and len(exists.data) > 0:
+            return {"error": "Username already exists"}, 409
+
+        response = supabase.table('User').update({"Username": new_username}).eq("Username", username).execute()
+
+        if response.data:
+            return {"message": "Username changed successfully"}, 200
+        else:
+            return {"error": "Failed to change username"}, 500
+    return {"error": "Request must be JSON"}, 400
     
 
 

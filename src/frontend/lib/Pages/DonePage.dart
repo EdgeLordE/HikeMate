@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../Class/supabase_client.dart';
 import '../Class/User.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+// import 'package:flutter_map/flutter_map.dart'; // Nicht verwendet in diesem Snippet
+// import 'package:latlong2/latlong.dart'; // Nicht verwendet in diesem Snippet
 
 class DonePage extends StatefulWidget {
   const DonePage({Key? key}) : super(key: key);
@@ -21,12 +21,32 @@ class _DonePageState extends State<DonePage>
 
   String _searchQuery = '';
   String _filterState = 'Alle';
+  List<String> get _availableStates {
+    // Erstellt eine eindeutige, sortierte Liste von Bundesländern aus _doneList und _watchlist
+    final states = <String>{'Alle'}; // 'Alle' immer als erste Option
+    for (var item in _doneList) {
+      if (item['Mountain'] != null && item['Mountain']['FederalState'] != null && item['Mountain']['FederalState']['Name'] != null) {
+        states.add(item['Mountain']['FederalState']['Name']);
+      }
+    }
+    for (var item in _watchlist) {
+      if (item['Mountain'] != null && item['Mountain']['FederalState'] != null && item['Mountain']['FederalState']['Name'] != null) {
+        states.add(item['Mountain']['FederalState']['Name']);
+      }
+    }
+    final sortedStates = states.toList();
+    if (sortedStates.length > 1 && sortedStates[0] == 'Alle') {
+      final otherStates = sortedStates.sublist(1)..sort();
+      return ['Alle'] + otherStates;
+    }
+    return sortedStates..sort();
+  }
   String _sortMode = 'Neu → Alt';
 
   List<Map<String, dynamic>> get _filteredDone {
     var list = _doneList.where((e) {
-      final name = (e['Mountain']['Name'] as String).toLowerCase();
-      final state = (e['Mountain']['FederalState']['Name'] as String);
+      final name = (e['Mountain']?['Name'] as String?)?.toLowerCase() ?? '';
+      final state = (e['Mountain']?['FederalState']?['Name'] as String?) ?? '';
       return name.contains(_searchQuery.toLowerCase()) &&
           (_filterState == 'Alle' || state == _filterState);
     }).toList();
@@ -38,13 +58,13 @@ class _DonePageState extends State<DonePage>
         break;
       case 'A → Z':
         list.sort((a, b) =>
-            (a['Mountain']['Name'] as String)
-                .compareTo(b['Mountain']['Name'] as String));
+            (a['Mountain']?['Name'] as String? ?? '')
+                .compareTo(b['Mountain']?['Name'] as String? ?? ''));
         break;
       case 'Z → A':
         list.sort((a, b) =>
-            (b['Mountain']['Name'] as String)
-                .compareTo(a['Mountain']['Name'] as String));
+            (b['Mountain']?['Name'] as String? ?? '')
+                .compareTo(a['Mountain']?['Name'] as String? ?? ''));
         break;
       case 'Neu → Alt':
       default:
@@ -54,17 +74,44 @@ class _DonePageState extends State<DonePage>
     return list;
   }
 
+  List<Map<String, dynamic>> get _filteredWatchlist {
+    // Ähnliche Filterung und Sortierung für Watchlist, falls benötigt.
+    // Fürs Erste nur einfache Liste ohne Filter/Sortierung für Watchlist,
+    // da die UI-Elemente dafür nicht im Watchlist-Tab sind.
+    var list = _watchlist.where((e) {
+      final name = (e['Mountain']?['Name'] as String?)?.toLowerCase() ?? '';
+      // Watchlist hat keinen direkten Filter für Bundesland in der UI,
+      // aber wir könnten es hier berücksichtigen, wenn _searchQuery auch Bundesländer durchsuchen soll.
+      return name.contains(_searchQuery.toLowerCase());
+    }).toList();
+
+    // Sortierung für Watchlist (optional, hier A-Z als Beispiel)
+    list.sort((a, b) =>
+        (a['Mountain']?['Name'] as String? ?? '').compareTo(b['Mountain']?['Name'] as String? ?? ''));
+    return list;
+  }
+
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() { // Listener, um Filter zurückzusetzen oder anzupassen
+      if (mounted) {
+        setState(() {
+          _searchQuery = ''; // Suchfeld leeren beim Tab-Wechsel
+          // _filterState = 'Alle'; // Optional: Filter zurücksetzen
+          // _sortMode = 'Neu → Alt'; // Optional: Sortierung zurücksetzen
+        });
+      }
+    });
     _loadData();
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
     await Future.wait([_fetchDone(), _fetchWatchlist()]);
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   Future<void> _fetchDone() async {
@@ -74,9 +121,11 @@ class _DonePageState extends State<DonePage>
           .select(
           'DoneID, Date, Mountain(Mountainid,Name,Height,FederalState(Name))')
           .eq('UserID', User.id);
-      _doneList = res is List ? List<Map<String, dynamic>>.from(res) : [];
+      if (mounted) {
+        _doneList = res is List ? List<Map<String, dynamic>>.from(res) : [];
+      }
     } catch (_) {
-      _doneList = [];
+      if (mounted) _doneList = [];
     }
   }
 
@@ -87,9 +136,11 @@ class _DonePageState extends State<DonePage>
           .select(
           'WatchlistID, Mountain(Mountainid,Name,Height,FederalState(Name))')
           .eq('UserID', User.id);
-      _watchlist = res is List ? List<Map<String, dynamic>>.from(res) : [];
+      if (mounted) {
+        _watchlist = res is List ? List<Map<String, dynamic>>.from(res) : [];
+      }
     } catch (_) {
-      _watchlist = [];
+      if (mounted) _watchlist = [];
     }
   }
 
@@ -109,12 +160,16 @@ class _DonePageState extends State<DonePage>
           .delete()
           .eq('DoneID', id)
           .eq('UserID', User.id);
-      setState(() => _doneList.removeWhere((e) => e['DoneID'] == id));
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Eintrag gelöscht')));
+      if (mounted) {
+        setState(() => _doneList.removeWhere((e) => e['DoneID'] == id));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Eintrag gelöscht'), backgroundColor: Colors.redAccent));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler beim Löschen: $e'), backgroundColor: Colors.red));
+      }
     }
   }
 
@@ -125,29 +180,63 @@ class _DonePageState extends State<DonePage>
           .delete()
           .eq('WatchlistID', id)
           .eq('UserID', User.id);
-      setState(() => _watchlist.removeWhere((e) => e['WatchlistID'] == id));
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Von Watchlist entfernt')));
+      if (mounted) {
+        setState(() => _watchlist.removeWhere((e) => e['WatchlistID'] == id));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Von Watchlist entfernt'), backgroundColor: Colors.orangeAccent));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red));
+      }
     }
   }
 
   Future<void> _markDone(int mid, int wid) async {
     final now = DateTime.now().toIso8601String();
     try {
+      // Prüfen, ob der Berg bereits in "Done" ist
+      final existingDone = await supabase
+          .from('Done')
+          .select('DoneID')
+          .eq('UserID', User.id)
+          .eq('MountainID', mid)
+          .maybeSingle();
+
+      if (existingDone != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Dieser Berg wurde bereits abgehakt.'), backgroundColor: Colors.orangeAccent));
+          // Optional: Watchlist-Eintrag trotzdem löschen, wenn er noch existiert
+          await _deleteWatch(wid);
+          await _fetchWatchlist(); // Watchlist neu laden, da ein Element entfernt wurde
+          if (mounted) setState(() {});
+        }
+        return;
+      }
+
       await supabase.from('Done').insert(
           {'UserID': User.id, 'MountainID': mid, 'Date': now});
-      await _deleteWatch(wid);
-      await _fetchDone();
-      setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Als gemacht markiert')));
+      await _deleteWatch(wid); // Watchlist-Eintrag nach erfolgreichem Abhaken löschen
+      await _loadData(); // Beide Listen neu laden, um Konsistenz sicherzustellen
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Als gemacht markiert'), backgroundColor: Colors.green));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red));
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -156,12 +245,34 @@ class _DonePageState extends State<DonePage>
       backgroundColor: const Color(0xFF141212),
       appBar: AppBar(
         backgroundColor: const Color(0xFF141212),
-        title:
-        const Text('Meine Berge', style: TextStyle(color: Colors.white)),
+        elevation: 0,
+        // title: const Text('Meine Berge', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)), // Entfernt
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.lightBlueAccent,
-          tabs: const [Tab(text: 'Gemacht'), Tab(text: 'Watchlist')],
+          labelColor: Colors.lightBlueAccent,
+          unselectedLabelColor: Colors.white70,
+          indicatorWeight: 3.0, // Dicke des Indikators erhöht
+          tabs: const [
+            Tab(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.0), // Vertikaler Innenabstand für größere Tabs
+                child: Text(
+                  "GEMACHT",
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15), // Schriftgröße angepasst
+                ),
+              ),
+            ),
+            Tab(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.0), // Vertikaler Innenabstand für größere Tabs
+                child: Text(
+                  "WATCHLIST",
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15), // Schriftgröße angepasst
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: _isLoading
@@ -179,29 +290,92 @@ class _DonePageState extends State<DonePage>
     );
   }
 
+  Widget _searchAndFilterBar() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          TextField(
+            onChanged: (value) {
+              if (mounted) setState(() => _searchQuery = value);
+            },
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+            decoration: InputDecoration(
+              hintText: 'Suche Bergname...',
+              hintStyle: const TextStyle(color: Colors.white54),
+              prefixIcon: const Icon(Icons.search, color: Colors.white70, size: 22),
+              filled: true,
+              fillColor: const Color(0xFF505050),
+              contentPadding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 16.0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.lightBlueAccent, width: 1.5),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDropdown(
+                  _filterState,
+                  _availableStates, // Dynamische Liste der Bundesländer
+                      (v) {
+                    if (mounted && v != null) setState(() => _filterState = v);
+                  },
+                  hint: 'Bundesland',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildDropdown(
+                  _sortMode,
+                  ['Neu → Alt', 'Alt → Neu', 'A → Z', 'Z → A'],
+                      (v) {
+                    if (mounted && v != null) setState(() => _sortMode = v);
+                  },
+                  hint: 'Sortieren',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _doneView() {
+    final items = _filteredDone;
     return Column(
       children: [
-        _searchAndFilterBar(),
+        _searchAndFilterBar(), // Such- und Filterleiste nur für "Gemacht"-Tab
         Expanded(
-          child: _filteredDone.isEmpty
-              ? const Center(
-              child: Text('Noch keine Berge abgehakt.',
-                  style: TextStyle(color: Colors.white54)))
+          child: items.isEmpty
+              ? Center(
+              child: Text(
+                  _searchQuery.isEmpty && _filterState == 'Alle'
+                      ? 'Noch keine Berge abgehakt.'
+                      : 'Keine Berge entsprechen deiner Suche/Filter.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54, fontSize: 16)))
               : ListView.builder(
-            itemCount: _filteredDone.length,
+            padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
+            itemCount: items.length,
             itemBuilder: (_, i) {
-              final e = _filteredDone[i];
-              return Dismissible(
-                key: Key(e['DoneID'].toString()),
-                background: _slideBg(Colors.red, Icons.delete),
-                onDismissed: (_) => _deleteDone(e['DoneID']),
-                child: _entryCard(
-                  name: e['Mountain']['Name'],
-                  subtitle: 'Höhe: ${e['Mountain']['Height']} m',
-                  date: _formatDate(e['Date']),
-                  onDelete: () => _deleteDone(e['DoneID']),
-                ),
+              final e = items[i];
+              return _entryCard(
+                name: e['Mountain']?['Name'] ?? 'Unbekannter Berg',
+                subtitle: 'Höhe: ${e['Mountain']?['Height'] ?? 'N/A'} m • ${e['Mountain']?['FederalState']?['Name'] ?? 'N/A'}',
+                date: _formatDate(e['Date']),
+                onDelete: () => _deleteDone(e['DoneID']),
               );
             },
           ),
@@ -211,68 +385,71 @@ class _DonePageState extends State<DonePage>
   }
 
   Widget _watchView() {
-    return ListView.builder(
-      itemCount: _watchlist.length,
-      itemBuilder: (_, i) {
-        final e = _watchlist[i];
-        return _entryCard(
-          name: e['Mountain']['Name'],
-          subtitle: 'Höhe: ${e['Mountain']['Height']} m',
-          actionIcons: [
-            IconButton(
-                icon: const Icon(Icons.check, color: Colors.green),
-                onPressed: () =>
-                    _markDone(e['Mountain']['Mountainid'], e['WatchlistID'])),
-            IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _deleteWatch(e['WatchlistID'])),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _searchAndFilterBar() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          TextField(
+    final items = _filteredWatchlist; // Verwende die gefilterte Watchlist
+    return Column(
+      children: [
+        Padding( // Eigene, einfachere Suchleiste für Watchlist
+          padding: const EdgeInsets.all(16.0),
+          child: TextField(
+            onChanged: (value) {
+              if (mounted) setState(() => _searchQuery = value);
+            },
+            style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
-              hintText: 'Suche...',
-              prefixIcon: const Icon(Icons.search, color: Colors.white70),
+              hintText: 'Suche Bergname...',
+              hintStyle: const TextStyle(color: Colors.white54),
+              prefixIcon: const Icon(Icons.search, color: Colors.white70, size: 22),
               filled: true,
-              fillColor: const Color(0xFF2C2C2C),
+              fillColor: const Color(0xFF505050),
+              contentPadding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 16.0),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.lightBlueAccent, width: 1.5),
+              ),
             ),
-            style: const TextStyle(color: Colors.white),
-            onChanged: (v) => setState(() => _searchQuery = v),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDropdown(
-                  _filterState,
-                  ['Alle', 'Tirol', 'Salzburg', 'Kärnten', 'Vorarlberg', 'Wien'],
-                      (v) => setState(() => _filterState = v!),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildDropdown(
-                  _sortMode,
-                  ['Neu → Alt', 'Alt → Neu', 'A → Z', 'Z → A'],
-                      (v) => setState(() => _sortMode = v!),
-                ),
-              ),
-            ],
+        ),
+        Expanded(
+          child: items.isEmpty
+              ? Center(
+              child: Text(
+                  _searchQuery.isEmpty
+                      ? 'Deine Watchlist ist leer.'
+                      : 'Keine Berge auf der Watchlist entsprechen deiner Suche.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54, fontSize: 16)))
+              : ListView.builder(
+            padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final e = items[i];
+              return _entryCard(
+                name: e['Mountain']?['Name'] ?? 'Unbekannter Berg',
+                subtitle: 'Höhe: ${e['Mountain']?['Height'] ?? 'N/A'} m • ${e['Mountain']?['FederalState']?['Name'] ?? 'N/A'}',
+                actionIcons: [
+                  IconButton(
+                      icon: Icon(Icons.check_circle_outline, color: Colors.greenAccent[700], size: 26),
+                      tooltip: 'Als gemacht markieren',
+                      onPressed: () =>
+                          _markDone(e['Mountain']['Mountainid'], e['WatchlistID'])),
+                  IconButton(
+                      icon: Icon(Icons.delete_outline, color: Colors.redAccent[700], size: 26),
+                      tooltip: 'Von Watchlist entfernen',
+                      onPressed: () => _deleteWatch(e['WatchlistID'])),
+                ],
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -284,51 +461,66 @@ class _DonePageState extends State<DonePage>
     List<Widget>? actionIcons,
   }) {
     return Card(
-      margin: const EdgeInsets.all(8),
-      color: const Color(0xFF1E1E1E),
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+      color: const Color(0xFF2C2C2C), // Dunklere Kartenfarbe
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: ListTile(
-        title: Text(name, style: const TextStyle(color: Colors.white)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        title: Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 17)),
         subtitle: Text(date != null ? '$date • $subtitle' : subtitle,
-            style: const TextStyle(color: Colors.white70)),
-        trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-          if (actionIcons != null) ...actionIcons,
-          if (onDelete != null)
-            IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: onDelete),
-        ]),
+            style: const TextStyle(color: Colors.white70, fontSize: 14)),
+        trailing: actionIcons != null && actionIcons.isNotEmpty
+            ? Row(mainAxisSize: MainAxisSize.min, children: actionIcons)
+            : (onDelete != null
+            ? IconButton(
+            icon: Icon(Icons.delete_outline, color: Colors.redAccent[700], size: 26),
+            tooltip: 'Löschen',
+            onPressed: onDelete)
+            : null),
       ),
     );
   }
 
-  Widget _slideBg(Color c, IconData i) => Container(
-    color: c,
-    alignment: Alignment.centerLeft,
-    padding: const EdgeInsets.only(left: 16),
-    child: Icon(i, color: Colors.white),
-  );
+  // _slideBg ist nicht mehr notwendig, da Dismissible entfernt wurde.
+  // Widget _slideBg(Color c, IconData i, AlignmentGeometry alignment) => Container(
+  //   decoration: BoxDecoration(
+  //     color: c,
+  //     borderRadius: BorderRadius.circular(10),
+  //   ),
+  //   margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+  //   alignment: alignment,
+  //   padding: const EdgeInsets.symmetric(horizontal: 20),
+  //   child: Icon(i, color: Colors.white, size: 28),
+  // );
 
-  Widget _buildDropdown(String value, List<String> items,
-      ValueChanged<String?> onChanged) =>
+  Widget _buildDropdown(String currentValue, List<String> items,
+      ValueChanged<String?> onChanged, {String? hint}) =>
       Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        height: 50, // Feste Höhe für Dropdowns
+        padding: const EdgeInsets.symmetric(horizontal: 12.0), // Vertikales Padding entfernt
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2C),
-          borderRadius: BorderRadius.circular(8),
+          color: const Color(0xFF505050),
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: DropdownButton<String>(
-          value: value,
-          dropdownColor: const Color(0xFF2C2C2C),
-          underline: const SizedBox(),
-          isExpanded: true,
-          style: const TextStyle(color: Colors.white),
-          items: items
-              .map((s) => DropdownMenuItem(
-            value: s,
-            child: Text(s, style: const TextStyle(color: Colors.white)),
-          ))
-              .toList(),
-          onChanged: onChanged,
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: items.contains(currentValue) ? currentValue : null, // Sicherstellen, dass der Wert gültig ist
+            hint: hint != null ? Text(hint, style: const TextStyle(color: Colors.white54, fontSize: 15)) : null,
+            isExpanded: true,
+            dropdownColor: const Color(0xFF3c3c3c),
+            icon: const Icon(Icons.arrow_drop_down, color: Colors.white70, size: 24),
+            style: const TextStyle(color: Colors.white, fontSize: 15),
+            items: items
+                .map((s) => DropdownMenuItem(
+              value: s,
+              child: Text(s, overflow: TextOverflow.ellipsis),
+            ))
+                .toList(),
+            onChanged: onChanged,
+          ),
         ),
       );
 }

@@ -238,6 +238,12 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     String federalStateName = 'Unbekannt';
     if (mountainData != null &&
@@ -246,8 +252,14 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
       federalStateName = mountainData!['FederalStateid']['Name'] ?? 'Unbekannt';
     }
 
+    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Diese Einstellung ist entscheidend
+      // resizeToAvoidBottomInset auf true (Standard) oder false setzen, je nachdem,
+      // wie sich der Rest des Inhalts verhalten soll.
+      // Für das reine Ausblenden der Buttons ist es nicht mehr primär entscheidend,
+      // aber true lässt den Inhalt über die Tastatur scrollen.
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFF141212),
       appBar: AppBar(
         backgroundColor: const Color(0xFF141212),
@@ -279,7 +291,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
         ),
       ),
       body: Stack(
-        fit: StackFit.expand, // Stellt sicher, dass der Stack den Body ausfüllt
+        fit: StackFit.expand,
         children: [
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
@@ -292,17 +304,27 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
             )
           else
             SingleChildScrollView(
-              primary: false, // Versuch, Interaktion mit globalen Insets zu minimieren
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0 + 100.0), // Padding angepasst, um Platz für Buttons unten zu lassen
+              // primary: false, // Kann meist entfernt werden, wenn resizeToAvoidBottomInset: true
+              // Das Padding am Ende des SingleChildScrollView ist wichtig,
+              // damit der Inhalt nicht von den Buttons verdeckt wird, WENN sie sichtbar sind.
+              padding: EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 16.0,
+                  // Wenn die Buttons ausgeblendet werden, braucht man hier eventuell weniger oder gar kein extra Padding mehr,
+                  // es sei denn, man möchte auch ohne Buttons unten etwas Platz haben.
+                  // Für den Fall, dass die Buttons sichtbar sind (Tastatur weg), ist der Platz gut.
+                  bottom: isKeyboardVisible ? 16.0 : 16.0 + 80.0 // Weniger Padding, wenn Tastatur da, sonst Platz für Buttons
+              ),
               child: Center(
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    if (mountainData!['ImageURL'] != null && mountainData!['ImageURL'].isNotEmpty)
+                    if (mountainData!['Picture'] != null && mountainData!['Picture'].isNotEmpty)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10.0),
                         child: Image.network(
-                          mountainData!['ImageURL'],
+                          mountainData!['Picture'],
                           width: 300,
                           height: 200,
                           fit: BoxFit.cover,
@@ -388,12 +410,12 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                           ],
                         ),
                       ),
-                    // SizedBox am Ende der Column ist nicht mehr nötig, da Padding im SingleChildScrollView
                   ],
                 ),
               ),
             ),
-          if (!_isLoading && mountainData != null)
+          // Die Buttons nur anzeigen, wenn nicht geladen wird, Daten vorhanden sind UND die Tastatur NICHT sichtbar ist
+          if (!_isLoading && mountainData != null && !isKeyboardVisible)
             Positioned(
               bottom: 20,
               left: 20,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Watchlist {
+
   static Future<Map<String, dynamic>> AddToWatchlist(int userId, int mountainID) async {
     const String apiUrl = "http://193.141.60.63:8080/Watchlist";
 
@@ -10,44 +11,60 @@ class Watchlist {
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "user_id": userId,
-          "mountain_id": mountainID,
+          "UserID": userId,
+          "MountainID": mountainID,
         }),
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return {"success": true, "message": "Erfolgreich zur Watchlist hinzugefügt", "data": data['response']};
-      } else if (response.statusCode == 404) {
-        String msg;
+      if (response.statusCode == 201) {
         try {
-          final error = jsonDecode(response.body);
-          // Versuche, die spezifische Nachricht "message" zu erhalten.
-          // Wenn nicht vorhanden oder null, verwende den gesamten Antwortkörper, falls dieser nicht leer ist.
-          // Andernfalls ein Fallback.
-          msg = error["message"]?.toString() ?? (response.body.isNotEmpty ? response.body : "Element konnte nicht zur Watchlist hinzugefügt werden (Fehlercode: 404).");
+          final data = jsonDecode(response.body);
+          // Der Python-Controller gibt zurück: {"response": response.data}
+          return {
+            "success": true,
+            "message": "Erfolgreich zur Watchlist hinzugefügt",
+            "data": data['response'] // Die tatsächlichen Daten vom Server weitergeben
+          };
         } catch (e) {
-          // Wenn JSON-Parsing fehlschlägt, verwende den Antwortkörper, falls nicht leer, sonst Fallback.
-          msg = response.body.isNotEmpty ? response.body : "Fehlerhafte Antwort vom Server (Fehlercode: 404).";
+          // Dieser Fall bedeutet, dass der Server 201 gesendet hat, aber der Body kein valides JSON war
+          return {
+            "success": true, // Gemäß Statuscode trotzdem als Erfolg werten
+            "message": "Erfolgreich zur Watchlist hinzugefügt (Serverantwort war nicht lesbar)"
+          };
         }
-        return {"success": false, "message": msg};
-      } else { // Andere Fehlercodes (z.B. 500, 400, 401 etc.)
-        String msg;
+      } else {
+        // Alle anderen Statuscodes (400, 404, 500, etc.) als Fehler behandeln
+        String errorMessage;
         try {
-          final error = jsonDecode(response.body);
-          // Versuche, die spezifische Nachricht "error" oder "message" zu erhalten.
-          // Wenn nicht vorhanden oder null, verwende den gesamten Antwortkörper, falls dieser nicht leer ist.
-          // Andernfalls ein Fallback.
-          msg = error["error"]?.toString() ?? error["message"]?.toString() ?? (response.body.isNotEmpty ? response.body : "Ein Serverfehler ist aufgetreten (Fehlercode: ${response.statusCode}).");
+          final errorData = jsonDecode(response.body);
+          // Versuchen, eine spezifische Fehlermeldung aus JSON zu extrahieren
+          if (errorData != null) {
+            if (errorData["error"] != null) {
+              errorMessage = errorData["error"].toString();
+            } else if (errorData["message"] != null) {
+              errorMessage = errorData["message"].toString();
+            } else {
+              // Valides JSON, aber keine 'error' oder 'message' Schlüssel
+              errorMessage = "Unbekannte Fehlerstruktur vom Server (Code: ${response.statusCode}).";
+            }
+          } else {
+            // Sollte für eine gültige JSON-Zeichenkette nicht passieren, aber als Fallback
+            errorMessage = "Ungültige oder leere Fehlerantwort vom Server (Code: ${response.statusCode}).";
+          }
         } catch (e) {
-          // Wenn JSON-Parsing fehlschlägt, verwende den Antwortkörper, falls nicht leer, sonst Fallback.
-          msg = response.body.isNotEmpty ? response.body : "Fehlerhafte Antwort vom Server (Fehlercode: ${response.statusCode}).";
+          // JSON-Parsing fehlgeschlagen (z.B. Server sendet HTML für 404 oder nicht-JSON Fehler)
+          if (response.statusCode == 404) {
+            errorMessage = "Der angeforderte Endpunkt (/Watchlist) wurde nicht gefunden (Fehlercode: 404).";
+          } else {
+            errorMessage = "Fehlerhafte oder unerwartete Antwort vom Server (Code: ${response.statusCode}). Die Antwort konnte nicht verarbeitet werden.";
+          }
         }
-        return {"success": false, "message": msg};
+        return {"success": false, "message": errorMessage};
       }
     } catch (e) {
-      // Netzwerkfehler oder andere Fehler bei der Anfrageverarbeitung
-      return {"success": false, "message": "Kommunikationsfehler oder interner Fehler: ${e.toString()}"};
+      // Netzwerkfehler oder andere Ausnahme während der HTTP-Anfrage
+      return {"success": false, "message": "Kommunikationsfehler mit dem Server: ${e.toString()}"};
     }
   }
+
 }

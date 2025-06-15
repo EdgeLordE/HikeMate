@@ -62,20 +62,24 @@ class _ProfilePageState extends State<ProfilePage> {
       final activityCount = rows.length;
       final avgSpeed = sumDuration > 0 ? sumDist / sumDuration : 0.0;
 
-      setState(() {
-        _totalDistance = sumDist / 1000;      // km
-        _totalAscent = sumAscent;             // m
-        _totalDuration = sumDuration / 3600;   // h
-        _totalActivities = activityCount;
-        _totalCalories = sumCalories;
-        _averageSpeed = avgSpeed;             // km/h
-        _maxElevation = maxAlt;               // m
-        _activities = rows;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _totalDistance = sumDist / 1000; // km
+          _totalAscent = sumAscent; // m
+          _totalDuration = sumDuration / 3600; // h
+          _totalActivities = activityCount;
+          _totalCalories = sumCalories;
+          _averageSpeed = avgSpeed; // km/h
+          _maxElevation = maxAlt; // m
+          _activities = rows;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       debugPrint('Fehler beim Laden der Statistiken: $e');
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -87,7 +91,9 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 6),
         Text(value,
             style: const TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
         Text(label,
             style: const TextStyle(color: Colors.white70, fontSize: 12)),
       ],
@@ -105,7 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       date = DateTime.parse(activity['Date'] as String);
     } catch (_) {
-      date = DateTime.now();
+      date = DateTime.now(); // Fallback, falls das Datum ungültig ist
     }
     final formattedDate =
         '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
@@ -126,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         title: Text(
             'Distanz: ${dist.toStringAsFixed(1)} km, Dauer: ${dur.toStringAsFixed(1)} h',
-            style: const TextStyle(color: Colors.white)),
+            style: const TextStyle(color: Colors.white, fontSize: 15)),
         subtitle: Text(
             'Anstieg: $ascent m • Kalorien: $cal kcal • Max H: $alt m',
             style: const TextStyle(color: Colors.white70, fontSize: 12)),
@@ -137,12 +143,11 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final userName = User.username;
-    final initial =
-    userName.isNotEmpty ? userName[0].toUpperCase() : '?';
+    final initial = userName.isNotEmpty ? userName[0].toUpperCase() : '?';
 
     if (_isLoading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF1F1F1F),
+        backgroundColor: Color(0xFF141212),
         body: Center(
             child: CircularProgressIndicator(
                 valueColor:
@@ -151,24 +156,55 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     final stats = [
-      _buildStat(Icons.route, 'Distanz', '${_totalDistance.toStringAsFixed(1)} km'),
+      _buildStat(
+          Icons.route, 'Distanz', '${_totalDistance.toStringAsFixed(1)} km'),
       _buildStat(Icons.terrain, 'Anstieg', '$_totalAscent m'),
-      _buildStat(Icons.timer, 'Dauer', '${_totalDuration.toStringAsFixed(1)} h'),
+      _buildStat(
+          Icons.timer, 'Dauer', '${_totalDuration.toStringAsFixed(1)} h'),
       _buildStat(Icons.fitness_center, 'Aktivitäten', '$_totalActivities x'),
-      _buildStat(Icons.local_fire_department, 'Kalorien', '$_totalCalories kcal'),
-      _buildStat(Icons.speed, 'Ø Geschwindigkeit', '${_averageSpeed.toStringAsFixed(1)} km/h'),
+      _buildStat(
+          Icons.local_fire_department, 'Kalorien', '$_totalCalories kcal'),
+      _buildStat(Icons.speed, 'Ø Geschwindigkeit',
+          '${_averageSpeed.toStringAsFixed(1)} km/h'),
       _buildStat(Icons.vertical_align_top, 'Max Höhe', '$_maxElevation m'),
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
+      backgroundColor: const Color(0xFF141212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1F1F1F),
+        backgroundColor: const Color(0xFF141212),
         elevation: 0,
-        title: const Text('Profil', style: TextStyle(color: Colors.white)),
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 20, // Vergrößerter Radius
+              backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
+              child: Text(
+                initial,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22, // Vergrößerte Schriftgröße
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              userName,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22, // Vergrößerte Schriftgröße
+                  fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
+            icon: const Icon(Icons.more_vert,
+                color: Colors.lightBlueAccent, size: 30), // Icon Größe
+            color: const Color(0xFF2C2C2C),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             onSelected: (value) async {
               if (value == 'settings') {
                 Navigator.of(context).push(
@@ -177,14 +213,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 await UserService.logout(context);
               }
             },
-            itemBuilder: (_) => const [
+            itemBuilder: (_) => [
               PopupMenuItem(
                 value: 'settings',
                 child: Row(
                   children: [
-                    Icon(Icons.settings, color: Colors.black54),
-                    SizedBox(width: 8),
-                    Text('Einstellungen'),
+                    Icon(Icons.settings_outlined,
+                        color: Colors.lightBlueAccent.withOpacity(0.8)),
+                    const SizedBox(width: 10),
+                    const Text('Einstellungen',
+                        style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ),
@@ -192,9 +230,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 value: 'logout',
                 child: Row(
                   children: [
-                    Icon(Icons.logout, color: Colors.black54),
-                    SizedBox(width: 8),
-                    Text('Abmelden'),
+                    Icon(Icons.logout_outlined,
+                        color: Colors.lightBlueAccent.withOpacity(0.8)),
+                    const SizedBox(width: 10),
+                    const Text('Abmelden',
+                        style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ),
@@ -206,47 +246,14 @@ class _ProfilePageState extends State<ProfilePage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            // kleiner Abstand oben
-            const SizedBox(height: 16),
-
-            // Username mit blauem G-Avatar links
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.lightBlueAccent,
-                    child: Text(
-                      initial,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    userName,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Gesamtstatistik
+            const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Card(
                 color: const Color(0xFF2C2C2C),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-                elevation: 4,
+                    borderRadius: BorderRadius.circular(16)),
+                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -256,35 +263,37 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
-                                fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 20),
-                        Wrap(spacing: 24, runSpacing: 16, children: stats),
+                                fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 24),
+                        Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            spacing: 16,
+                            runSpacing: 20,
+                            children: stats),
                       ]),
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
-
-            // Aktivitätenverlauf
+            const SizedBox(height: 30),
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text('Aktivitätenverlauf',
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold)),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600)),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             if (_activities.isEmpty)
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text('Noch keine Aktivitäten aufgezeichnet.',
-                    style: TextStyle(color: Colors.white54)),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Center(
+                  child: Text('Noch keine Aktivitäten aufgezeichnet.',
+                      style: TextStyle(color: Colors.white54, fontSize: 16)),
+                ),
               )
             else
               ..._activities.map(_buildActivityItem),
-
             const SizedBox(height: 24),
           ],
         ),

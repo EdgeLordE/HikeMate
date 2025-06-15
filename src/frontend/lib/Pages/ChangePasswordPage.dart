@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../Class/UserService.dart';
+import '../Class/UserService.dart'; // Stellen Sie sicher, dass dieser Pfad korrekt ist
+// import '../Class/User.dart'; // Importieren, falls User.id direkt benötigt wird und nicht über UserService geht
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({Key? key}) : super(key: key);
@@ -11,99 +12,184 @@ class ChangePasswordPage extends StatefulWidget {
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _oldPassCtrl = TextEditingController();
   final TextEditingController _newPassCtrl = TextEditingController();
+  final TextEditingController _confirmNewPassCtrl = TextEditingController();
   bool _loading = false;
-  String? _message;
+
+  @override
+  void dispose() {
+    _oldPassCtrl.dispose();
+    _newPassCtrl.dispose();
+    _confirmNewPassCtrl.dispose();
+    super.dispose();
+  }
+
+  void _showSnackBar(String message, {bool isError = true}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
 
   Future<void> _submit() async {
     final oldPass = _oldPassCtrl.text.trim();
     final newPass = _newPassCtrl.text.trim();
-    if (oldPass.isEmpty || newPass.isEmpty) return;
+    final confirmNewPass = _confirmNewPassCtrl.text.trim();
+
+    if (oldPass.isEmpty || newPass.isEmpty || confirmNewPass.isEmpty) {
+      _showSnackBar('Bitte füllen Sie alle Felder aus.');
+      return;
+    }
+
+    if (newPass != confirmNewPass) {
+      _showSnackBar('Die neuen Passwörter stimmen nicht überein.');
+      return;
+    }
 
     setState(() {
       _loading = true;
-      _message = null;
     });
 
     final success = await UserService.changePassword(oldPass, newPass);
 
+    if (!mounted) return;
+
     setState(() {
       _loading = false;
-      _message = success
-          ? 'Passwort erfolgreich geändert.'
-          : 'Fehler beim Ändern des Passworts.';
     });
 
-    if (success && mounted) {
-      await Future.delayed(const Duration(seconds: 1));
-      Navigator.of(context).pop();
+    if (success) {
+      _showSnackBar('Passwort erfolgreich geändert.', isError: false);
+      _oldPassCtrl.clear();
+      _newPassCtrl.clear();
+      _confirmNewPassCtrl.clear();
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+    } else {
+      _showSnackBar('Fehler beim Ändern des Passworts. Überprüfen Sie Ihr altes Passwort.');
     }
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    bool obscureText = true,
+    required double maxWidth,
+  }) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF505050),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            borderSide: BorderSide.none,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: Colors.lightBlueAccent,
+            size: 25,
+          ),
+          hintText: hintText,
+          hintStyle: const TextStyle(color: Colors.white54),
+        ),
+        style: const TextStyle(color: Colors.white),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final formWidth = screenWidth * 0.85;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
+      backgroundColor: const Color(0xFF141212),
       appBar: AppBar(
-        title: const Text('Passwort ändern'),
-        backgroundColor: const Color(0xFF1F1F1F),
+        title: const Text(
+          'Passwort ändern',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: const Color(0xFF141212),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.lightBlueAccent),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+          },
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _oldPassCtrl,
-              obscureText: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Altes Passwort',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white24),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 40),
+                _buildTextField(
+                  controller: _oldPassCtrl,
+                  hintText: 'Altes Passwort',
+                  icon: Icons.lock_outline,
+                  maxWidth: formWidth,
                 ),
-              ),
+                const SizedBox(height: 25),
+                _buildTextField(
+                  controller: _newPassCtrl,
+                  hintText: 'Neues Passwort',
+                  icon: Icons.lock,
+                  maxWidth: formWidth,
+                ),
+                const SizedBox(height: 25),
+                _buildTextField(
+                  controller: _confirmNewPassCtrl,
+                  hintText: 'Neues Passwort bestätigen',
+                  icon: Icons.lock_clock_outlined,
+                  maxWidth: formWidth,
+                ),
+                const SizedBox(height: 30),
+                _loading
+                    ? const CircularProgressIndicator(color: Colors.lightBlueAccent)
+                    : ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxWidth: formWidth, minHeight: 48),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                      ),
+                      child: const Text(
+                        'Speichern',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _newPassCtrl,
-              obscureText: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Neues Passwort',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white24),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _loading
-                ? const CircularProgressIndicator(color: Colors.lightBlueAccent)
-                : ElevatedButton(
-              onPressed: _submit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightBlueAccent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32, vertical: 12,
-                ),
-              ),
-              child: const Text('Ändern', style: TextStyle(fontSize: 16)),
-            ),
-            if (_message != null) ...[
-              const SizedBox(height: 20),
-              Text(
-                _message!,
-                style: TextStyle(
-                  color: _message!.startsWith('Passwort erfolgreich')
-                      ? Colors.green
-                      : Colors.red,
-                ),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

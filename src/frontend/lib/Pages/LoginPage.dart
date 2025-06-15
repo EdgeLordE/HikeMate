@@ -2,49 +2,83 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'HomePage.dart';
 import 'RegistrationPage.dart';
-import '../Class/supabase_client.dart';
-import 'package:bcrypt/bcrypt.dart';
+import '../Class/supabase_client.dart'; // Stellen Sie sicher, dass dieser Import benötigt wird
 import '../Class/User.dart';
+// import 'package:bcrypt/bcrypt.dart'; // Wird vermutlich in User.login_User verwendet
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController usernameController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final formWidth = screenWidth * 0.85;
+  State<LoginPage> createState() => _LoginPageState();
+}
 
-    Future<void> login(BuildContext context) async {
-      try {
-        final result = await User.login_User(usernameController.text, passwordController.text);
+class _LoginPageState extends State<LoginPage> {
+  late TextEditingController _usernameController;
+  late TextEditingController _passwordController;
 
-        if (result["success"]) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result["message"])),
-          );
-        }
-      } catch (e) {
+  @override
+  void initState() {
+    super.initState();
+    _usernameController = TextEditingController();
+    _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _login(BuildContext context) async {
+    try {
+      // Verwenden Sie .text von den Controllern, die im State gehalten werden
+      final result = await User.login_User(
+          _usernameController.text, _passwordController.text);
+
+      if (_usernameController.text == "" && _passwordController.text == "") {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login fehlgeschlagen')),
+          const SnackBar(content: Text('Bitte Benutzername und Passwort eingeben')),
+        );
+        return;
+      }
+
+      if (!mounted) return; // Überprüfen, ob das Widget noch im Baum ist
+
+      if (result["success"] == true) { // Expliziter Check auf true
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(result["message"]?.toString() ??
+                  'Login fehlgeschlagen: Unbekannte Nachricht')),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login fehlgeschlagen: ${e.toString()}')),
+      );
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final formWidth = screenWidth * 0.85;
 
     return Scaffold(
       backgroundColor: const Color(0xFF141212),
       body: Center(
-        child: SingleChildScrollView( // Added SingleChildScrollView for smaller screens
-          padding: const EdgeInsets.symmetric(horizontal: 20.0), // Added horizontal padding
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center, // Center items horizontally
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
                 'Login',
@@ -58,7 +92,7 @@ class LoginPage extends StatelessWidget {
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: formWidth),
                 child: TextField(
-                  controller: usernameController,
+                  controller: _usernameController, // Controller aus dem State verwenden
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color(0xFF505050),
@@ -81,7 +115,7 @@ class LoginPage extends StatelessWidget {
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: formWidth),
                 child: TextField(
-                  controller: passwordController,
+                  controller: _passwordController, // Controller aus dem State verwenden
                   obscureText: true,
                   decoration: InputDecoration(
                     filled: true,
@@ -102,10 +136,10 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              ConstrainedBox( // Added ConstrainedBox for responsive width
+              ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: formWidth),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start, // Align to start within the constrained width
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Text(
                       'Noch kein Konto?',
@@ -119,7 +153,8 @@ class LoginPage extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                          MaterialPageRoute(
+                              builder: (context) => const RegistrationPage()),
                         );
                       },
                       child: const Text(
@@ -137,17 +172,19 @@ class LoginPage extends StatelessWidget {
               const SizedBox(height: 40),
               ConstrainedBox(
                 constraints: BoxConstraints(
-                    maxWidth: formWidth, minHeight: 48), // minHeight to maintain button size
-                child: SizedBox( // Use SizedBox to enforce width for ElevatedButton
-                  width: double.infinity, // Make button take full width of ConstrainedBox
+                    maxWidth: formWidth, minHeight: 48),
+                child: SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () => login(context),
+                    onPressed: () =>
+                        _login(context), // _login Methode des States aufrufen
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(40), // Adjusted border radius
+                        borderRadius: BorderRadius.circular(40),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 11), // Ensure consistent padding
+                      padding:
+                      const EdgeInsets.symmetric(vertical: 11),
                     ),
                     child: const Text(
                       'Login',

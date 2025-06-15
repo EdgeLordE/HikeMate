@@ -4,25 +4,25 @@ info:
   description: Eine API um eine Kaffeemaschine zu verwalten
   version: 1.0.0
 servers:
-- url: /
+  - url: /
 tags:
-- name: Login/Registrierung
-  description: Login und Registrierung für die API
-- name: Aktivitäten
-  description: Aktivitäten verwalten
-- name: Berge erledigt
-  description: Berge als erledigt markieren
-- name: Berge
-  description: Berge verwalten
-- name: Bundesländer
-  description: Bundesländer verwalten
-- name: Watchlist
-  description: Watchlist verwalten
+  - name: Login/Registrierung
+    description: Login und Registrierung für die API
+  - name: Aktivitäten
+    description: Aktivitäten verwalten
+  - name: Berge erledigt
+    description: Berge als erledigt markieren
+  - name: Berge
+    description: Berge verwalten
+  - name: Bundesländer
+    description: Bundesländer verwalten
+  - name: Watchlist
+    description: Watchlist verwalten
 paths:
   /Registrieren:
     post:
       tags:
-      - Login/Registrierung
+        - Login/Registrierung
       summary: Registriert einen neuen Benutzer
       operationId: post_regristration
       requestBody:
@@ -49,8 +49,8 @@ paths:
   /Login:
     post:
       tags:
-      - Login/Registrierung
-      summary: Login 
+        - Login/Registrierung
+      summary: Login
       operationId: post_login
       requestBody:
         required: true
@@ -72,7 +72,7 @@ paths:
   /Aktivitaeten:
     get:
       tags:
-      - Aktivitäten
+        - Aktivitäten
       summary: Gibt eine Liste aller Aktivitäten zurück
       operationId: get_activities
       responses:
@@ -84,15 +84,15 @@ paths:
   /Aktivitaet:
     get:
       tags:
-      - Aktivitäten
+        - Aktivitäten
       summary: Gibt eine Aktivität aufgrund der userid zurück
       operationId: get_activities_by_user_id
       parameters:
-      - name: user_id
-        in: query
-        required: true
-        schema:
-          type: integer
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
       responses:
         "200":
           description: Erfolgreich
@@ -102,15 +102,15 @@ paths:
   /DoneBerge:
     get:
       tags:
-      - Berge erledigt
+        - Berge erledigt
       summary: Gibt eine Liste aller erledigten Berge von einem Benutzer zurück
       operationId: get_done_mountains_by_user_id
       parameters:
-      - name: user_id
-        in: query
-        required: true
-        schema:
-          type: integer
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
       responses:
         "200":
           description: Erfolgreich
@@ -120,68 +120,9 @@ paths:
   /DoneBerghinzufuegen:
     post:
       tags:
-      - Berge erledigt
+        - Berge erledigt
       summary: Fügt einen erledigten Berg hinzu
       operationId: post_done_mountain_with_user_id
-      parameters:
-      - name: user_id
-        in: query
-        required: true
-        schema:
-          type: integer
-      - name: mountain_id
-        in: query
-        required: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          description: Erfolgreich hinzugefügt
-        "400":
-          description: Ungültige Eingabedaten
-      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
-  /Berg:
-    get:
-      tags:
-      - Berge
-      summary: Gibt einen Berg anhand des Namens zurück
-      operationId: get_mountain_by_name
-      parameters:
-      - name: mountain_name
-        in: query
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Erfolgreich
-        "400":
-          description: Ungültige Anfrage
-      x-openapi-router-controller: swagger_server.controllers.mountain_controller
-  /Bundesland:
-    get:
-      tags:
-      - Bundesländer
-      summary: Gibt der Name des Bundeslandes anhand der ID zurück
-      operationId: get_federal_state_by_id
-      parameters:
-      - name: federal_state_id
-        in: query
-        required: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          description: Erfolgreich
-        "400":
-          description: Ungültige Anfrage
-      x-openapi-router-controller: swagger_server.controllers.federal_state_controller
-  /Watchlist:
-    post:
-      tags:
-      - Watchlist
-      summary: Fügt einen Berg zur Watchlist hinzu
-      operationId: post_watchlist
       requestBody:
         required: true
         content:
@@ -199,15 +140,51 @@ paths:
       responses:
         "200":
           description: Erfolgreich hinzugefügt
-        "404":
+        "400":
           description: Ungültige Eingabedaten
-      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
-  /GetWatchlist:
+      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+  /Berg:
     get:
       tags:
-      - Watchlist
-      summary: Gibt die Watchlist eines Benutzers zurück
-      operationId: get_watchlist_by_user_id
+        - Berge
+      summary: Gibt einen Berg anhand des Namens zurück
+      operationId: get_mountain_by_name
+      parameters:
+        - name: mountain_name
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Erfolgreich
+        "400":
+          description: Ungültige Anfrage
+      x-openapi-router-controller: swagger_server.controllers.mountain_controller
+  /Bundesland:
+    get:
+      tags:
+        - Bundesländer
+      summary: Gibt der Name des Bundeslandes anhand der ID zurück
+      operationId: get_federal_state_by_id
+      parameters:
+        - name: federal_state_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Erfolgreich
+        "400":
+          description: Ungültige Anfrage
+      x-openapi-router-controller: swagger_server.controllers.federal_state_controller
+  /Watchlist:
+    post:
+      tags:
+        - Watchlist
+      summary: Fügt einen Berg zur Watchlist eines Benutzers hinzu.
+      operationId: add_mountain_to_watchlist
       requestBody:
         required: true
         content:
@@ -217,18 +194,286 @@ paths:
               properties:
                 UserID:
                   type: integer
+                  description: ID des Benutzers.
+                MountainID:
+                  type: integer
+                  description: ID des Berges.
               required:
                 - UserID
+                - MountainID
+      responses:
+        "201":
+          description: Berg erfolgreich zur Watchlist hinzugefügt.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                  message:
+                    type: string
+        "400":
+          description: UserID und MountainID sind erforderlich.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "403":
+          description: Berg ist bereits als erledigt markiert und kann nicht zur Watchlist hinzugefügt werden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "409":
+          description: Berg befindet sich bereits auf der Watchlist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "500":
+          description: Fehler beim Hinzufügen des Berges zur Watchlist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+                    nullable: true
+      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+    delete:
+      tags:
+        - Watchlist
+      summary: Entfernt einen Berg von der Watchlist eines Benutzers anhand von UserID und MountainID.
+      operationId: remove_mountain_from_watchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserID:
+                  type: integer
+                  description: ID des Benutzers.
+                MountainID:
+                  type: integer
+                  description: ID des Berges.
+              required:
+                - UserID
+                - MountainID
       responses:
         "200":
-          description: Erfolgreich
+          description: Berg erfolgreich von der Watchlist entfernt.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
         "400":
-          description: Ungültige Anfrage
+          description: UserID und MountainID sind erforderlich.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "404":
+          description: Berg nicht auf der Watchlist gefunden oder bereits entfernt.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "500":
+          description: Fehler beim Entfernen des Berges von der Watchlist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+                    nullable: true
+      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+  /Watchlist/{UserID}:
+    get:
+      tags:
+        - Watchlist
+      summary: Ruft alle Watchlist-Einträge für einen Benutzer ab, einschließlich Bergdetails.
+      operationId: fetch_watchlist
+      parameters:
+        - name: UserID
+          in: path
+          required: true
+          description: ID des Benutzers, dessen Watchlist abgerufen werden soll.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Watchlist erfolgreich abgerufen.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        WatchlistID:
+                          type: integer
+                        MountainID:
+                          type: integer
+                        Mountain:
+                          type: object
+                          properties:
+                            Mountainid:
+                              type: integer
+                            Name:
+                              type: string
+                            Height:
+                              type: integer
+                            Picture:
+                              type: string
+                              nullable: true
+                            FederalStateid:
+                              type: object
+                              properties:
+                                Name:
+                                  type: string
+        "500":
+          description: Fehler beim Abrufen der Watchlist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+                    nullable: true
+      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+  /Watchlist/entry/{WatchlistID}:
+    delete:
+      tags:
+        - Watchlist
+      summary: Löscht einen bestimmten Eintrag von der Watchlist anhand der WatchlistID.
+      operationId: delete_watchlist_entry # Benannt nach der Python-Funktion
+      parameters:
+        - name: WatchlistID
+          in: path
+          required: true
+          description: ID des Watchlist-Eintrags, der gelöscht werden soll.
+          schema:
+            type: integer
+        - name: UserID
+          in: query
+          required: true
+          description: ID des Benutzers zur Autorisierung.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Watchlist-Eintrag erfolgreich gelöscht.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "204":
+          description: Watchlist-Eintrag erfolgreich gelöscht (kein Inhalt).
+        "404":
+          description: Watchlist-Eintrag nicht gefunden oder Benutzer nicht autorisiert.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "500":
+          description: Fehler beim Löschen des Watchlist-Eintrags.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+                    nullable: true
+      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+  /Watchlist/check:
+    get:
+      tags:
+        - Watchlist
+      summary: Überprüft, ob sich ein bestimmter Berg auf der Watchlist eines Benutzers befindet.
+      operationId: check_if_mountain_is_on_watchlist
+      parameters:
+        - name: UserID
+          in: query
+          required: true
+          description: ID des Benutzers.
+          schema:
+            type: integer
+        - name: MountainID
+          in: query
+          required: true
+          description: ID des Berges.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Status, ob der Berg auf der Watchlist ist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      isOnWatchlist:
+                        type: boolean
+        "500":
+          description: Interner Serverfehler.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
   /ChangePassword:
     post:
       tags:
-      - Login/Registrierung
+        - Login/Registrierung
       summary: Ändert das Passwort eines Benutzers mit dem Username
       operationId: post_change_password
       requestBody:
@@ -257,7 +502,7 @@ paths:
   /ChnageUsername:
     post:
       tags:
-      - Login/Registrierung
+        - Login/Registrierung
       summary: Ändert den Username eines Benutzers
       operationId: post_change_username
       requestBody:

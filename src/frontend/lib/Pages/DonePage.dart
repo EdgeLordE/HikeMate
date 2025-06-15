@@ -1,21 +1,9 @@
-// pubspec.yaml dependencies:
-// dependencies:
-//   flutter:
-//     sdk: flutter
-//   supabase_flutter: ^1.0.0
-//   flutter_map: ^6.0.1
-//   latlong2: ^0.9.0
-//   csv: ^5.0.0
-//   path_provider: ^2.0.11
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../Class/supabase_client.dart';
 import '../Class/User.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:csv/csv.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 class DonePage extends StatefulWidget {
   const DonePage({Key? key}) : super(key: key);
@@ -31,7 +19,6 @@ class _DonePageState extends State<DonePage>
   List<Map<String, dynamic>> _watchlist = [];
   bool _isLoading = false;
 
-  // Filter, search & sort
   String _searchQuery = '';
   String _filterState = 'Alle';
   String _sortMode = 'Neu → Alt';
@@ -87,9 +74,7 @@ class _DonePageState extends State<DonePage>
           .select(
           'DoneID, Date, Mountain(Mountainid,Name,Height,FederalState(Name))')
           .eq('UserID', User.id);
-      _doneList = res is List
-          ? List<Map<String, dynamic>>.from(res)
-          : [];
+      _doneList = res is List ? List<Map<String, dynamic>>.from(res) : [];
     } catch (_) {
       _doneList = [];
     }
@@ -99,11 +84,10 @@ class _DonePageState extends State<DonePage>
     try {
       final res = await supabase
           .from('Watchlist')
-          .select('WatchlistID, Mountain(Mountainid,Name,Height,FederalState(Name))')
+          .select(
+          'WatchlistID, Mountain(Mountainid,Name,Height,FederalState(Name))')
           .eq('UserID', User.id);
-      _watchlist = res is List
-          ? List<Map<String, dynamic>>.from(res)
-          : [];
+      _watchlist = res is List ? List<Map<String, dynamic>>.from(res) : [];
     } catch (_) {
       _watchlist = [];
     }
@@ -112,7 +96,7 @@ class _DonePageState extends State<DonePage>
   String _formatDate(String iso) {
     try {
       final dt = DateTime.parse(iso);
-      return '${dt.day.toString().padLeft(2,'0')}.${dt.month.toString().padLeft(2,'0')}.${dt.year}';
+      return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
     } catch (_) {
       return iso;
     }
@@ -126,8 +110,8 @@ class _DonePageState extends State<DonePage>
           .eq('DoneID', id)
           .eq('UserID', User.id);
       setState(() => _doneList.removeWhere((e) => e['DoneID'] == id));
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Eintrag gelöscht')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Eintrag gelöscht')));
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Fehler: $e')));
@@ -166,32 +150,14 @@ class _DonePageState extends State<DonePage>
     }
   }
 
-  Future<void> _exportCsv() async {
-    final rows = [
-      ['Name', 'Höhe', 'Bundesland', 'Datum'],
-      ..._doneList.map((e) => [
-        e['Mountain']['Name'],
-        e['Mountain']['Height'].toString(),
-        e['Mountain']['FederalState']['Name'],
-        _formatDate(e['Date']),
-      ])
-    ];
-    final csv = const ListToCsvConverter().convert(rows);
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/done.csv');
-    await file.writeAsString(csv);
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Exportiert: done.csv')));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF141212),
       appBar: AppBar(
         backgroundColor: const Color(0xFF141212),
-        title: const Text('Meine Berge',
-            style: TextStyle(color: Colors.white)),
+        title:
+        const Text('Meine Berge', style: TextStyle(color: Colors.white)),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.lightBlueAccent,
@@ -201,8 +167,8 @@ class _DonePageState extends State<DonePage>
       body: _isLoading
           ? const Center(
           child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(
-                  Colors.lightBlueAccent)))
+              valueColor:
+              AlwaysStoppedAnimation(Colors.lightBlueAccent)))
           : TabBarView(
         controller: _tabController,
         children: [
@@ -210,19 +176,14 @@ class _DonePageState extends State<DonePage>
           _watchView(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _exportCsv,
-        child: const Icon(Icons.download),
-        tooltip: 'Export CSV',
-      ),
     );
   }
 
   Widget _doneView() {
     return Column(
       children: [
-        _filterBar(),
-        Expanded(flex: 3,
+        _searchAndFilterBar(),
+        Expanded(
           child: _filteredDone.isEmpty
               ? const Center(
               child: Text('Noch keine Berge abgehakt.',
@@ -271,53 +232,49 @@ class _DonePageState extends State<DonePage>
     );
   }
 
-  Widget _filterBar() => Card(
-    color: const Color(0xFF1E1E1E),
-    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Row(
+  Widget _searchAndFilterBar() {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
         children: [
-          Expanded( // Suchfeld nimmt übrigen Platz ein
-            flex: 2,
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Suche...',
-                prefixIcon: const Icon(Icons.search, color: Colors.white70),
-                filled: true,
-                fillColor: const Color(0xFF2C2C2C),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+          TextField(
+            decoration: InputDecoration(
+              hintText: 'Suche...',
+              prefixIcon: const Icon(Icons.search, color: Colors.white70),
+              filled: true,
+              fillColor: const Color(0xFF2C2C2C),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            style: const TextStyle(color: Colors.white),
+            onChanged: (v) => setState(() => _searchQuery = v),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDropdown(
+                  _filterState,
+                  ['Alle', 'Tirol', 'Salzburg', 'Kärnten', 'Vorarlberg', 'Wien'],
+                      (v) => setState(() => _filterState = v!),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
-              onChanged: (v) => setState(() => _searchQuery = v),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded( // Dropdowns nehmen gleichmäßigen Platz ein
-            child: _buildDropdown(
-              _filterState,
-              ['Alle', 'Tirol', 'Salzburg', 'Kärnten', 'Vorarlberg', 'Wien'],
-                  (v) => setState(() => _filterState = v!),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildDropdown(
-              _sortMode,
-              ['Neu → Alt', 'Alt → Neu', 'A → Z', 'Z → A'],
-                  (v) => setState(() => _sortMode = v!),
-            ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildDropdown(
+                  _sortMode,
+                  ['Neu → Alt', 'Alt → Neu', 'A → Z', 'Z → A'],
+                      (v) => setState(() => _sortMode = v!),
+                ),
+              ),
+            ],
           ),
         ],
       ),
-    ),
-  );
-
+    );
+  }
 
   Widget _entryCard({
     required String name,
@@ -331,8 +288,7 @@ class _DonePageState extends State<DonePage>
       color: const Color(0xFF1E1E1E),
       child: ListTile(
         title: Text(name, style: const TextStyle(color: Colors.white)),
-        subtitle: Text(
-            date != null ? '$date • $subtitle' : subtitle,
+        subtitle: Text(date != null ? '$date • $subtitle' : subtitle,
             style: const TextStyle(color: Colors.white70)),
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
           if (actionIcons != null) ...actionIcons,
@@ -352,28 +308,27 @@ class _DonePageState extends State<DonePage>
     child: Icon(i, color: Colors.white),
   );
 
-  // Helper for styled dropdowns
-  Widget _buildDropdown(String value, List<String> items, ValueChanged<String?> onChanged) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: DropdownButton<String>(
-        value: value,
-        dropdownColor: const Color(0xFF2C2C2C),
-        underline: const SizedBox(),
-        isExpanded: true, // <- hinzugefügt
-        style: const TextStyle(color: Colors.white),
-        items: items
-            .map((s) => DropdownMenuItem(
-          value: s,
-          child: Text(s, style: const TextStyle(color: Colors.white)),
-        ))
-            .toList(),
-        onChanged: onChanged,
-      ),
-    );
-  }
+  Widget _buildDropdown(String value, List<String> items,
+      ValueChanged<String?> onChanged) =>
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C2C2C),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: DropdownButton<String>(
+          value: value,
+          dropdownColor: const Color(0xFF2C2C2C),
+          underline: const SizedBox(),
+          isExpanded: true,
+          style: const TextStyle(color: Colors.white),
+          items: items
+              .map((s) => DropdownMenuItem(
+            value: s,
+            child: Text(s, style: const TextStyle(color: Colors.white)),
+          ))
+              .toList(),
+          onChanged: onChanged,
+        ),
+      );
 }

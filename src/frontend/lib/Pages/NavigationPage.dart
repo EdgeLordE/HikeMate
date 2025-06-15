@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import '../Class/LocationTracker.dart';
 import '../Class/TrackingStorage.dart';
 import '../Class/supabase_client.dart';
+import 'emergency_page.dart';
 
 class NavigationPage extends StatefulWidget {
   const NavigationPage({super.key});
@@ -44,14 +45,11 @@ class _NavigationPageState extends State<NavigationPage> {
           setState(() {});
         });
       }
-
       setState(() {});
     });
 
     _moveToCurrentLocation();
   }
-
-
 
   @override
   void dispose() {
@@ -64,7 +62,6 @@ class _NavigationPageState extends State<NavigationPage> {
       LatLng(pos.latitude, pos.longitude),
       14.0,
     );
-
   }
 
   void _toggleTracking() {
@@ -90,7 +87,6 @@ class _NavigationPageState extends State<NavigationPage> {
 
     setState(() {});
   }
-
 
   String _formatAltitude(double altitude) => "${altitude.toStringAsFixed(0)} m";
   String _formatDistance(double distance) => "${distance.toInt()} m";
@@ -183,7 +179,8 @@ class _NavigationPageState extends State<NavigationPage> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tiles.bergfex.at/styles/bergfex-osm/{z}/{x}/{y}.jpg',
+                urlTemplate:
+                'https://tiles.bergfex.at/styles/bergfex-osm/{z}/{x}/{y}.jpg',
                 userAgentPackageName: 'com.example.app',
                 retinaMode: RetinaMode.isHighDensity(context),
                 maxZoom: 19,
@@ -200,6 +197,32 @@ class _NavigationPageState extends State<NavigationPage> {
               ),
             ],
           ),
+
+          // SOS-Button oben links
+          Positioned(
+            top: 40,
+            left: 10,
+            child: SizedBox(
+              width: 45,
+              height: 45,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (_) => const EmergencyPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.all(8),
+                ),
+                child: const Icon(Icons.sos, color: Colors.white, size: 24),
+              ),
+            ),
+          ),
+
           if (!_trackingService.isTracking)
             Positioned(
               bottom: 5,
@@ -209,8 +232,10 @@ class _NavigationPageState extends State<NavigationPage> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 60, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: _toggleTracking,
                   child: const Text(
@@ -220,12 +245,11 @@ class _NavigationPageState extends State<NavigationPage> {
                 ),
               ),
             ),
+
           if (!_trackingService.isTracking)
-          Positioned(
-            bottom: 7,
-            right: 10,
-            child: Align(
-              alignment: Alignment.bottomRight,
+            Positioned(
+              bottom: 7,
+              right: 10,
               child: SizedBox(
                 width: 45,
                 height: 45,
@@ -233,14 +257,16 @@ class _NavigationPageState extends State<NavigationPage> {
                   onPressed: _moveToCurrentLocation,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey[900],
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.all(10),
                   ),
-                  child: const Icon(Icons.my_location, color: Colors.white, size: 20),
+                  child:
+                  const Icon(Icons.my_location, color: Colors.white, size: 20),
                 ),
               ),
             ),
-          ),
+
           if (_trackingService.isTracking)
             Align(
               alignment: Alignment.bottomCenter,
@@ -248,7 +274,8 @@ class _NavigationPageState extends State<NavigationPage> {
                 height: 190,
                 width: double.infinity,
                 color: const Color(0xFF1E1E1E),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -257,16 +284,20 @@ class _NavigationPageState extends State<NavigationPage> {
                       children: [
                         Column(
                           children: [
-                            _buildInfoBox('Dauer', _formatDuration(_trackingService.duration)),
+                            _buildInfoBox(
+                                'Dauer', _formatDuration(_trackingService.duration)),
                             const SizedBox(height: 5),
-                            _buildInfoBox('Anstieg', _formatAltitude(_trackingService.totalAscent)),
+                            _buildInfoBox('Anstieg',
+                                _formatAltitude(_trackingService.totalAscent)),
                           ],
                         ),
                         Column(
                           children: [
-                            _buildInfoBox('Distanz', _formatDistance(_trackingService.totalDistance)),
+                            _buildInfoBox('Distanz',
+                                _formatDistance(_trackingService.totalDistance)),
                             const SizedBox(height: 5),
-                            _buildInfoBox('Seehöhe', _formatAltitude(_trackingService.altitude)),
+                            _buildInfoBox('Seehöhe',
+                                _formatAltitude(_trackingService.altitude)),
                           ],
                         ),
                       ],
@@ -278,8 +309,10 @@ class _NavigationPageState extends State<NavigationPage> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
                           ),
                           onPressed: _toggleTracking,
                           child: const Text(
@@ -293,24 +326,24 @@ class _NavigationPageState extends State<NavigationPage> {
                 ),
               ),
             ),
+
           if (_trackingService.isTracking)
             Positioned(
               top: 40,
               right: 10,
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: SizedBox(
-                  width: 45,
-                  height: 45,
-                  child: ElevatedButton(
-                    onPressed: _moveToCurrentLocation,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[900],
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.all(10),
-                    ),
-                    child: const Icon(Icons.my_location, color: Colors.white, size: 20),
+              child: SizedBox(
+                width: 45,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: _moveToCurrentLocation,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[900],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.all(10),
                   ),
+                  child:
+                  const Icon(Icons.my_location, color: Colors.white, size: 20),
                 ),
               ),
             ),
@@ -333,10 +366,13 @@ class _NavigationPageState extends State<NavigationPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 11, color: Colors.white70)),
+            Text(title,
+                style: const TextStyle(fontSize: 11, color: Colors.white70)),
             Text(value,
                 style: const TextStyle(
-                    fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold)),
+                    fontSize: 23,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold)),
           ],
         ),
       ),

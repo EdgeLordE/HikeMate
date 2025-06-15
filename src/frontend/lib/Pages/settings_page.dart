@@ -87,7 +87,7 @@ class _SettingsPageState extends State<SettingsPage> {
               TextFormField(
                 controller: _phoneController,
                 decoration: InputDecoration(
-                  hintText: '+49...',
+                  hintText: '+43...',
                   filled: true,
                   fillColor: const Color(0xFF2C2C2C),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

@@ -25,8 +25,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   Future<void> register() async {
-    // Der BuildContext ist über 'context' in der State-Klasse verfügbar.
-    // Es ist gute Praxis, 'mounted' zu prüfen, bevor man nach einem await auf den context zugreift.
     try {
       final result = await User.register_User(
         firstNameController.text,
@@ -41,10 +39,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrierung erfolgreich!')),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
+        // Kehren Sie zur vorherigen Seite zurück (sollte die LoginPage sein).
+        // Dadurch wird die LoginPage nicht dupliziert oder unnötig im Stapel behalten.
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        } else {
+          // Fallback, falls die RegistrationPage die erste Seite im Stapel war
+          // (unwahrscheinlich im typischen App-Fluss, aber zur Sicherheit).
+          // In diesem Fall ersetzen wir sie durch die LoginPage.
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result["message"] ?? 'Registrierung fehlgeschlagen')),
@@ -127,28 +134,28 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 ),
                 const SizedBox(height: 50),
                 _buildTextField(
-                  controller: firstNameController, // Verwendet den State-Controller
+                  controller: firstNameController,
                   hintText: 'Vorname',
                   icon: Icons.person_2,
                   maxWidth: formWidth,
                 ),
                 const SizedBox(height: 25),
                 _buildTextField(
-                  controller: lastNameController, // Verwendet den State-Controller
+                  controller: lastNameController,
                   hintText: 'Nachname',
                   icon: Icons.person_2,
                   maxWidth: formWidth,
                 ),
                 const SizedBox(height: 25),
                 _buildTextField(
-                  controller: usernameController, // Verwendet den State-Controller
+                  controller: usernameController,
                   hintText: 'Benutzername',
                   icon: Icons.person,
                   maxWidth: formWidth,
                 ),
                 const SizedBox(height: 25),
                 _buildTextField(
-                  controller: passwordController, // Verwendet den State-Controller
+                  controller: passwordController,
                   hintText: 'Passwort',
                   icon: Icons.lock,
                   obscureText: true,
@@ -161,7 +168,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: register, // Ruft die register-Methode des States auf
+                      onPressed: register,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
                         shape: RoundedRectangleBorder(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../Class/supabase_client.dart';
 import '../Class/User.dart';
 import '../Class/Mountain.dart';
 import '../Class/Watchlist.dart';
+import '../Class/Done.dart'; // <-- REST-API für Done
 
 class SearchMountainPage extends StatefulWidget {
   const SearchMountainPage({super.key});
@@ -15,55 +15,51 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
   final TextEditingController _controller = TextEditingController();
   Map<String, dynamic>? mountainData;
   bool _isLoading = false;
-  bool _isOnWatchlist = false; // Neue Statusvariable
+  bool _isOnWatchlist = false;
+  bool _isDone = false;
 
   @override
   void initState() {
     super.initState();
-    // Optional: Wenn die Seite mit einem initialen Berg geladen werden könnte,
-    // müsste hier _checkIfOnWatchlist aufgerufen werden.
   }
 
   Future<void> _checkIfOnWatchlist() async {
     if (mountainData == null || User.id == null) {
-      if (mounted) {
-        setState(() {
-          _isOnWatchlist = false;
-        });
-      }
+      if (mounted) setState(() => _isOnWatchlist = false);
       return;
     }
     final mountainIdValue = mountainData!['Mountainid'];
     if (mountainIdValue == null || mountainIdValue is! int) {
-      if (mounted) {
-        setState(() {
-          _isOnWatchlist = false;
-        });
-      }
+      if (mounted) setState(() => _isOnWatchlist = false);
       return;
     }
-
     try {
-      final existingWatchlistItem = await supabase
-          .from('Watchlist')
-          .select('MountainID')
-          .eq('UserID', User.id!)
-          .eq('MountainID', mountainIdValue)
-          .limit(1)
-          .maybeSingle();
+      final result = await Watchlist.checkIfMountainIsOnWatchlist(User.id!, mountainIdValue);
       if (mounted) {
         setState(() {
-          _isOnWatchlist = existingWatchlistItem != null;
+          _isOnWatchlist = result["success"] == true ? (result["isOnWatchlist"] ?? false) : false;
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isOnWatchlist = false; // Bei Fehler auf false setzen
-        });
-        debugPrint('Fehler beim Überprüfen des Watchlist-Status: $e');
-        // Optional eine Fehlermeldung anzeigen
-      }
+    } catch (_) {
+      if (mounted) setState(() => _isOnWatchlist = false);
+    }
+  }
+
+  Future<void> _checkIfDone() async {
+    if (mountainData == null || User.id == null) {
+      if (mounted) setState(() => _isDone = false);
+      return;
+    }
+    final mountainIdValue = mountainData!['Mountainid'];
+    if (mountainIdValue == null || mountainIdValue is! int) {
+      if (mounted) setState(() => _isDone = false);
+      return;
+    }
+    try {
+      final result = await Done.isMountainDoneSimple(User.id!, mountainIdValue);
+      if (mounted) setState(() => _isDone = result);
+    } catch (_) {
+      if (mounted) setState(() => _isDone = false);
     }
   }
 
@@ -81,7 +77,8 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
       setState(() {
         _isLoading = true;
         mountainData = null;
-        _isOnWatchlist = false; // Zurücksetzen beim neuen Laden
+        _isOnWatchlist = false;
+        _isDone = false;
       });
     }
 
@@ -95,11 +92,13 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
             setState(() {
               mountainData = mountains.first as Map<String, dynamic>;
             });
-            await _checkIfOnWatchlist(); // Watchlist-Status prüfen
+            await _checkIfOnWatchlist();
+            await _checkIfDone();
           } else {
             setState(() {
               mountainData = null;
-              _isOnWatchlist = false; // Sicherstellen, dass es false ist
+              _isOnWatchlist = false;
+              _isDone = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Kein Berg mit diesem Namen gefunden")),
@@ -108,7 +107,8 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
         } else {
           setState(() {
             mountainData = null;
-            _isOnWatchlist = false; // Sicherstellen, dass es false ist
+            _isOnWatchlist = false;
+            _isDone = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(result["message"] ?? "Fehler beim Abrufen der Bergdaten")),
@@ -119,7 +119,8 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
       if (mounted) {
         setState(() {
           mountainData = null;
-          _isOnWatchlist = false; // Sicherstellen, dass es false ist
+          _isOnWatchlist = false;
+          _isDone = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Ein Fehler ist aufgetreten: $e")),
@@ -145,10 +146,10 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
     }
 
     final mountainIdValue = mountainData!['Mountainid'];
-    if (mountainIdValue == null) {
+    if (mountainIdValue == null || mountainIdValue is! int) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Berg-ID nicht in den Daten gefunden.')),
+          const SnackBar(content: Text('Berg-ID nicht in den Daten gefunden oder ungültig.')),
         );
       }
       return;
@@ -163,32 +164,44 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
     }
 
     try {
-      final response = await supabase
-          .from('Done')
-          .select('MountainID')
-          .eq('UserID', User.id!)
-          .eq('MountainID', mountainIdValue)
-          .limit(1)
-          .maybeSingle();
+      // REST-API: Prüfen ob erledigt
+      final alreadyDone = await Done.isMountainDoneSimple(User.id!, mountainIdValue);
+      if (mounted && alreadyDone) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Berg bereits abgehakt')),
+        );
+        setState(() => _isDone = true);
+        return;
+      }
 
+      // REST-API: Berg als erledigt markieren
+      final result = await Done.addMountainToDone(User.id!, mountainIdValue);
       if (mounted) {
-        if (response != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Berg bereits abgehakt')),
-          );
-        } else {
-          await supabase.from('Done').insert({
-            'UserID': User.id!,
-            'MountainID': mountainIdValue,
-            'Date': DateTime.now().toIso8601String(),
-          });
+        if (result["success"] == true) {
+          setState(() => _isDone = true);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Berg erfolgreich abgehakt')),
           );
-          // Wenn ein Berg abgehakt wird, könnte er von der Watchlist entfernt werden
-          // oder zumindest der Status neu geprüft werden, falls das gewünscht ist.
-          // Fürs Erste bleibt _isOnWatchlist unverändert, es sei denn, es gibt eine explizite Anforderung.
-          // await _checkIfOnWatchlist(); // Optional: Watchlist-Status neu prüfen
+          // Wenn der Berg auf der Watchlist war, von dort entfernen (über API)
+          if (_isOnWatchlist) {
+            final removeResult = await Watchlist.removeMountainFromWatchlist(User.id!, mountainIdValue);
+            if (removeResult["success"] == true) {
+              setState(() {
+                _isOnWatchlist = false;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Berg auch von Watchlist entfernt')),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Fehler beim Entfernen von der Watchlist (API): ${removeResult["message"]}')),
+              );
+            }
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"] ?? 'Fehler beim Abhaken des Berges')),
+          );
         }
       }
     } catch (e) {
@@ -229,65 +242,55 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
       return;
     }
 
-    try {
-      // Prüfen, ob der Berg bereits abgehakt wurde
-      final doneResponse = await supabase
-          .from('Done')
-          .select('MountainID')
-          .eq('UserID', User.id!)
-          .eq('MountainID', mountainIdValue)
-          .limit(1)
-          .maybeSingle();
-
-      if (mounted && doneResponse != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Dieser Berg wurde bereits abgehakt und kann nicht zur Watchlist hinzugefügt/entfernt werden.')),
-        );
-        return;
-      }
-
+    // REST-API: Prüfen, ob erledigt
+    final alreadyDone = await Done.isMountainDoneSimple(User.id!, mountainIdValue);
+    if (mounted && alreadyDone) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dieser Berg wurde bereits abgehakt und kann nicht zur Watchlist hinzugefügt/entfernt werden.')),
+      );
       if (_isOnWatchlist) {
-        // Von Watchlist entfernen
-        await supabase
-            .from('Watchlist')
-            .delete()
-            .eq('UserID', User.id!)
-            .eq('MountainID', mountainIdValue);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Berg von Watchlist entfernt')),
-          );
+        setState(() {
+          _isOnWatchlist = false;
+        });
+      }
+      return;
+    }
+
+    // Watchlist-Aktionen über die Watchlist-API
+    if (_isOnWatchlist) {
+      final result = await Watchlist.removeMountainFromWatchlist(User.id!, mountainIdValue);
+      if (mounted) {
+        if (result["success"] == true) {
           setState(() {
             _isOnWatchlist = false;
           });
-        }
-      } else {
-        // Zur Watchlist hinzufügen
-        final result = await Watchlist.AddToWatchlist(User.id!, mountainIdValue);
-        if (mounted) {
-          if (result["success"] == true) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Berg erfolgreich zur Watchlist hinzugefügt')),
-            );
-            setState(() {
-              _isOnWatchlist = true;
-            });
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(result["message"] ?? 'Fehler beim Hinzufügen zur Watchlist')),
-            );
-          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Von Watchlist entfernt')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"] ?? 'Fehler beim Entfernen von der Watchlist')),
+          );
         }
       }
-    } catch (e) {
+    } else {
+      final result = await Watchlist.addMountainToWatchlist(User.id!, mountainIdValue);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler bei der Watchlist-Aktion: $e')),
-        );
+        if (result["success"] == true) {
+          setState(() {
+            _isOnWatchlist = true;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Zur Watchlist hinzugefügt')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"] ?? 'Fehler beim Hinzufügen zur Watchlist')),
+          );
+        }
       }
     }
   }
-
 
   Widget _buildInfoBox(String title, String value) {
     return Expanded(
@@ -501,7 +504,7 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: addMountainToDone,
+                      onPressed: _isDone ? null : addMountainToDone,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.lightBlueAccent,
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -509,9 +512,9 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text(
-                        'Abhaken',
-                        style: TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.w600),
+                      child: Text(
+                        _isDone ? 'Bereits abgehakt' : 'Abhaken',
+                        style: const TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -523,11 +526,11 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
                     ),
                     child: IconButton(
                       icon: Icon(
-                          _isOnWatchlist ? Icons.favorite : Icons.favorite_border, // Geändertes Icon
+                          _isOnWatchlist ? Icons.favorite : Icons.favorite_border,
                           color: Colors.white
                       ),
-                      tooltip: _isOnWatchlist ? 'Von Watchlist entfernen' : 'Zur Watchlist hinzufügen', // Geänderter Tooltip
-                      onPressed: _toggleWatchlistStatus, // Geänderte Funktion
+                      tooltip: _isOnWatchlist ? 'Von Watchlist entfernen' : 'Zur Watchlist hinzufügen',
+                      onPressed: _toggleWatchlistStatus,
                     ),
                   ),
                 ],

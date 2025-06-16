@@ -1,70 +1,156 @@
 import 'dart:convert';
+import 'package:flutter/material.dart'; // Für debugPrint
 import 'package:http/http.dart' as http;
+import 'User.dart'; // Um auf User.baseUrl und User.id zuzugreifen
 
 class Watchlist {
+  // Basis-URL von der User-Klasse übernehmen oder hier definieren, falls abweichend
+  static const String _baseUrl = User.baseUrl;
 
-  static Future<Map<String, dynamic>> AddToWatchlist(int userId, int mountainID) async {
-    const String apiUrl = "http://193.141.60.63:8080/Watchlist";
-
+  static Future<Map<String, dynamic>> addMountainToWatchlist(int userId, int mountainId) async {
+    final String apiUrl = "$_baseUrl/Watchlist";
+    debugPrint('Watchlist.addMountainToWatchlist() URL: $apiUrl');
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "UserID": userId,
-          "MountainID": mountainID,
+          "MountainID": mountainId,
         }),
       );
+      debugPrint('Watchlist.addMountainToWatchlist() status: ${response.statusCode}');
+      debugPrint('Watchlist.addMountainToWatchlist() body: ${response.body}');
+
+      final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        try {
-          final data = jsonDecode(response.body);
-          // Der Python-Controller gibt zurück: {"response": response.data}
-          return {
-            "success": true,
-            "message": "Erfolgreich zur Watchlist hinzugefügt",
-            "data": data['response'] // Die tatsächlichen Daten vom Server weitergeben
-          };
-        } catch (e) {
-          // Dieser Fall bedeutet, dass der Server 201 gesendet hat, aber der Body kein valides JSON war
-          return {
-            "success": true, // Gemäß Statuscode trotzdem als Erfolg werten
-            "message": "Erfolgreich zur Watchlist hinzugefügt (Serverantwort war nicht lesbar)"
-          };
+        return {"success": true, "message": responseBody["message"] ?? "Erfolgreich zur Watchlist hinzugefügt", "data": responseBody["response"]};
+      } else {
+        return {"success": false, "message": responseBody["error"] ?? responseBody["message"] ?? "Unbekannter Fehler"};
+      }
+    } catch (e) {
+      debugPrint('Fehler beim Hinzufügen zur Watchlist: $e');
+      return {"success": false, "message": "Fehler: $e"};
+    }
+  }
+
+  static Future<Map<String, dynamic>> removeMountainFromWatchlist(int userId, int mountainId) async {
+    final String apiUrl = "$_baseUrl/Watchlist";
+    debugPrint('Watchlist.removeMountainFromWatchlist() URL: $apiUrl');
+    try {
+      final response = await http.delete(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "UserID": userId,
+          "MountainID": mountainId,
+        }),
+      );
+      debugPrint('Watchlist.removeMountainFromWatchlist() status: ${response.statusCode}');
+      debugPrint('Watchlist.removeMountainFromWatchlist() body: ${response.body}');
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {"success": true, "message": responseBody["message"] ?? "Erfolgreich von Watchlist entfernt"};
+      } else {
+        return {"success": false, "message": responseBody["error"] ?? responseBody["message"] ?? "Unbekannter Fehler"};
+      }
+    } catch (e) {
+      debugPrint('Fehler beim Entfernen von der Watchlist: $e');
+      return {"success": false, "message": "Fehler: $e"};
+    }
+  }
+
+
+  static Future<Map<String, dynamic>> checkIfMountainIsOnWatchlist(int userId, int mountainId) async {
+    final String apiUrl = "$_baseUrl/Watchlist/check?UserID=$userId&MountainID=$mountainId";
+    debugPrint('Watchlist.checkIfMountainIsOnWatchlist() URL: $apiUrl');
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {'Accept': 'application/json'},
+      );
+
+      debugPrint('Watchlist.checkIfMountainIsOnWatchlist() status: ${response.statusCode}');
+      debugPrint('Watchlist.checkIfMountainIsOnWatchlist() body: ${response.body}');
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (responseBody.containsKey("response") &&
+            responseBody["response"] is Map &&
+            responseBody["response"].containsKey("isOnWatchlist")) {
+          return {"success": true, "isOnWatchlist": responseBody["response"]["isOnWatchlist"]};
+        } else {
+          debugPrint('Watchlist.checkIfMountainIsOnWatchlist() 200 OK but unexpected response structure: ${response.body}');
+          return {"success": false, "message": "Ungültige Erfolgsantwort vom Server."};
         }
       } else {
-        // Alle anderen Statuscodes (400, 404, 500, etc.) als Fehler behandeln
-        String errorMessage;
-        try {
-          final errorData = jsonDecode(response.body);
-          // Versuchen, eine spezifische Fehlermeldung aus JSON zu extrahieren
-          if (errorData != null) {
-            if (errorData["error"] != null) {
-              errorMessage = errorData["error"].toString();
-            } else if (errorData["message"] != null) {
-              errorMessage = errorData["message"].toString();
-            } else {
-              // Valides JSON, aber keine 'error' oder 'message' Schlüssel
-              errorMessage = "Unbekannte Fehlerstruktur vom Server (Code: ${response.statusCode}).";
-            }
-          } else {
-            // Sollte für eine gültige JSON-Zeichenkette nicht passieren, aber als Fallback
-            errorMessage = "Ungültige oder leere Fehlerantwort vom Server (Code: ${response.statusCode}).";
-          }
-        } catch (e) {
-          // JSON-Parsing fehlgeschlagen (z.B. Server sendet HTML für 404 oder nicht-JSON Fehler)
-          if (response.statusCode == 404) {
-            errorMessage = "Der angeforderte Endpunkt (/Watchlist) wurde nicht gefunden (Fehlercode: 404).";
-          } else {
-            errorMessage = "Fehlerhafte oder unerwartete Antwort vom Server (Code: ${response.statusCode}). Die Antwort konnte nicht verarbeitet werden.";
-          }
+        String errorMessage = "Fehler beim Überprüfen des Watchlist-Status";
+        if (responseBody.containsKey("error") && responseBody["error"] != null) {
+          errorMessage = responseBody["error"].toString();
+        } else if (responseBody.containsKey("message") && responseBody["message"] != null) {
+          errorMessage = responseBody["message"].toString();
         }
         return {"success": false, "message": errorMessage};
       }
     } catch (e) {
-      // Netzwerkfehler oder andere Ausnahme während der HTTP-Anfrage
-      return {"success": false, "message": "Kommunikationsfehler mit dem Server: ${e.toString()}"};
+      debugPrint('Client-seitiger Fehler beim Überprüfen des Watchlist-Status: $e');
+      return {"success": false, "message": "Client-seitiger Fehler: $e"};
     }
   }
 
+  static Future<Map<String, dynamic>> fetchWatchlist(int userId) async {
+    final String apiUrl = "$_baseUrl/Watchlist/$userId";
+    debugPrint('Watchlist.fetchWatchlist() URL: $apiUrl');
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+      );
+      debugPrint('Watchlist.fetchWatchlist() status: ${response.statusCode}');
+      debugPrint('Watchlist.fetchWatchlist() body: ${response.body}');
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {"success": true, "data": responseBody["response"]};
+      } else {
+        return {"success": false, "message": responseBody["error"] ?? "Fehler beim Abrufen der Watchlist"};
+      }
+    } catch (e) {
+
+      return {"success": false, "message": "Fehler: $e"};
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteWatchlistEntry(int watchlistId, int userId) async {
+    final String apiUrl = "$_baseUrl/Watchlist/entry/$watchlistId?UserID=$userId";
+    debugPrint('Watchlist.deleteWatchlistEntry() URL: $apiUrl');
+    try {
+      final response = await http.delete(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+      );
+      debugPrint('Watchlist.deleteWatchlistEntry() status: ${response.statusCode}');
+      debugPrint('Watchlist.deleteWatchlistEntry() body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return {"success": true, "message": responseBody["message"] ?? "Watchlist-Eintrag erfolgreich gelöscht"};
+      } else if (response.statusCode == 204) { // No content, but successful
+        return {"success": true, "message": "Watchlist-Eintrag erfolgreich gelöscht"};
+      }
+      else {
+        final responseBody = jsonDecode(response.body);
+        return {"success": false, "message": responseBody["error"] ?? "Fehler beim Löschen des Watchlist-Eintrags"};
+      }
+    } catch (e) {
+      debugPrint('Fehler beim Löschen des Watchlist-Eintrags: $e');
+      return {"success": false, "message": "Fehler: $e"};
+    }
+  }
 }

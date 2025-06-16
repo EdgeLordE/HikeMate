@@ -105,4 +105,24 @@ def is_mountain_done_by_user():
         return {"error": str(e)}, 500
 
 
+def delete_done_mountain():
+    """
+    Löscht einen erledigten Berg für einen User.
+    Erwartet: DELETE /Done?DoneID=...&UserID=...
+    """
+    try:
+        done_id = connexion.request.args.get("DoneID")
+        user_id = connexion.request.args.get("UserID")
+        if not done_id or not user_id:
+            return {"error": "DoneID und UserID sind erforderlich."}, 400
+
+        response = supabase.table('Done').delete().eq("DoneID", done_id).eq("UserID", user_id).execute()
+        return {"message": "Done-Eintrag gelöscht."}, 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+
+
+
     

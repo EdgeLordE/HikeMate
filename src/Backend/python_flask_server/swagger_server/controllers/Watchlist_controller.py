@@ -95,8 +95,7 @@ def check_if_mountain_is_on_watchlist():
         except ValueError:
             return {"error": "UserID und MountainID müssen Integer sein."}, 400
 
-        response = supabase.table('Watchlist').select("*") \
-            .eq("UserID", user_id).eq("MountainID", mountain_id).execute()
+        response = supabase.table('Watchlist').select("*").eq("UserID", user_id).eq("MountainID", mountain_id).execute()
 
         is_on_watchlist = bool(response.data and len(response.data) > 0)
         return {"response": {"isOnWatchlist": is_on_watchlist}}, 200

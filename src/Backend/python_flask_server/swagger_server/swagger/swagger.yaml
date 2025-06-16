@@ -525,3 +525,70 @@ paths:
         "400":
           description: Ungültige Eingabedaten
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+  /DoneBerg/check:
+    get:
+      tags:
+        - Berge erledigt
+      summary: Prüft, ob ein Berg für einen User als erledigt markiert ist
+      operationId: check_if_mountain_is_done
+      parameters:
+        - name: UserID
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: MountainID
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Status, ob der Berg erledigt ist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      isDone:
+                        type: boolean
+        "400":
+          description: Fehlende oder ungültige Parameter
+        "500":
+          description: Serverfehler
+      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+  /DoneBerg/is_done:
+    get:
+      tags:
+        - Berge erledigt
+      summary: Prüft, ob ein Berg für einen User als erledigt markiert ist
+      operationId: is_mountain_done_by_user
+      parameters:
+        - name: UserID
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: MountainID
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Gibt zurück, ob der Berg erledigt ist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isDone:
+                    type: boolean
+        "400":
+          description: Fehlende oder ungültige Parameter
+        "500":
+          description: Serverfehler
+      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller

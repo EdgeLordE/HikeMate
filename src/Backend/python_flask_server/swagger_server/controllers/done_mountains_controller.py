@@ -1,6 +1,7 @@
 import connexion
 import json
 from datetime import datetime
+import win32timezone
 
 
 from supabase import create_client
@@ -48,6 +49,61 @@ def post_done_mountain_with_user_id():
         return {"message": "Mountain marked as done", "done_mountain": response.data}, 201
     except Exception as e:
         return {"error": str(e)}, 500
+    
+def check_if_mountain_is_done():
+    """
+    Prüft, ob ein Berg für einen User als erledigt markiert ist.
+    Erwartet: GET /DoneBerg/check?UserID=...&MountainID=...
+    """
+    try:
+        user_id = connexion.request.args.get("UserID")
+        mountain_id = connexion.request.args.get("MountainID")
+
+        if not user_id or not mountain_id:
+            return {"error": "UserID und MountainID sind erforderlich."}, 400
+
+        try:
+            user_id = int(user_id)
+            mountain_id = int(mountain_id)
+        except ValueError:
+            return {"error": "UserID und MountainID müssen Integer sein."}, 400
+
+        response = supabase.table('Done').select("*") \
+            .eq("UserID", user_id).eq("MountainID", mountain_id).execute()
+
+        is_done = bool(response.data and len(response.data) > 0)
+        return {"response": {"isDone": is_done}}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+    
+
+def is_mountain_done_by_user():
+    """
+    Prüft, ob ein Berg für einen User als erledigt markiert ist.
+    Erwartet: GET /DoneBerg/is_done?UserID=...&MountainID=...
+    """
+    try:
+        user_id = connexion.request.args.get("UserID")
+        mountain_id = connexion.request.args.get("MountainID")
+
+        if not user_id or not mountain_id:
+            return {"error": "UserID und MountainID sind erforderlich."}, 400
+
+        try:
+            user_id = int(user_id)
+            mountain_id = int(mountain_id)
+        except ValueError:
+            return {"error": "UserID und MountainID müssen Integer sein."}, 400
+
+        response = supabase.table('Done').select("MountainID") \
+            .eq("UserID", user_id).eq("MountainID", mountain_id).limit(1).execute()
+
+        is_done = response.data is not None and len(response.data) > 0
+        return {"isDone": is_done}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 
 
@@ -88,19 +144,6 @@ def add_mountain_to_done():
             return {"error": "Failed to add mountain to done list", "details": str(response.error)}, 500
     except Exception as e:
         print(f"Error in add_mountain_to_done: {e}")
-        return {"error": str(e)}, 500
-
-def check_if_mountain_is_done(UserID, MountainID):
-    """
-    Check if a mountain is in a user's done list.
-    Query parameters: UserID, MountainID
-    """
-    try:
-        response = supabase.table('Done').select('DoneID').eq('UserID', UserID).eq('MountainID', MountainID).limit(1).execute()
-        is_done = bool(response.data)
-        return {"response": {"isDone": is_done}}, 200
-    except Exception as e:
-        print(f"Error in check_if_mountain_is_done: {e}")
         return {"error": str(e)}, 500
 
 def fetch_done_list(UserID):

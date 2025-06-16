@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../Class/supabase_client.dart';
 import '../Class/User.dart';
+import '../Class/Watchlist.dart';
+import '../Class/Done.dart'; // Importiert die Klasse Done für Datenoperationen
 // import 'package:flutter_map/flutter_map.dart'; // Nicht verwendet in diesem Snippet
 // import 'package:latlong2/latlong.dart'; // Nicht verwendet in diesem Snippet
 
@@ -116,13 +118,13 @@ class _DonePageState extends State<DonePage>
 
   Future<void> _fetchDone() async {
     try {
-      final res = await supabase
-          .from('Done')
-          .select(
-          'DoneID, Date, Mountain(Mountainid,Name,Height,FederalState(Name))')
-          .eq('UserID', User.id);
+      final result = await Done.fetchDoneList(User.id);
       if (mounted) {
-        _doneList = res is List ? List<Map<String, dynamic>>.from(res) : [];
+        if (result["success"] == true && result["data"] is List) {
+          _doneList = List<Map<String, dynamic>>.from(result["data"]);
+        } else {
+          _doneList = [];
+        }
       }
     } catch (_) {
       if (mounted) _doneList = [];
@@ -131,13 +133,13 @@ class _DonePageState extends State<DonePage>
 
   Future<void> _fetchWatchlist() async {
     try {
-      final res = await supabase
-          .from('Watchlist')
-          .select(
-          'WatchlistID, Mountain(Mountainid,Name,Height,FederalState(Name))')
-          .eq('UserID', User.id);
+      final result = await Watchlist.fetchWatchlist(User.id);
       if (mounted) {
-        _watchlist = res is List ? List<Map<String, dynamic>>.from(res) : [];
+        if (result["success"] == true && result["data"] is List) {
+          _watchlist = List<Map<String, dynamic>>.from(result["data"]);
+        } else {
+          _watchlist = [];
+        }
       }
     } catch (_) {
       if (mounted) _watchlist = [];
@@ -155,40 +157,48 @@ class _DonePageState extends State<DonePage>
 
   Future<void> _deleteDone(int id) async {
     try {
-      await supabase
-          .from('Done')
-          .delete()
-          .eq('DoneID', id)
-          .eq('UserID', User.id);
+      final result = await Done.deleteDone(id, User.id);
       if (mounted) {
-        setState(() => _doneList.removeWhere((e) => e['DoneID'] == id));
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Eintrag gelöscht'), backgroundColor: Colors.redAccent));
+        if (result["success"] == true) {
+          setState(() => _doneList.removeWhere((e) => e['DoneID'] == id));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Eintrag gelöscht'), backgroundColor: Colors.redAccent),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Fehler beim Löschen: ${result["message"] ?? ""}'), backgroundColor: Colors.red),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Fehler beim Löschen: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler beim Löschen: $e'), backgroundColor: Colors.red),
+        );
       }
     }
   }
 
   Future<void> _deleteWatch(int id) async {
     try {
-      await supabase
-          .from('Watchlist')
-          .delete()
-          .eq('WatchlistID', id)
-          .eq('UserID', User.id);
+      final result = await Watchlist.deleteWatchlistEntry(id, User.id);
       if (mounted) {
-        setState(() => _watchlist.removeWhere((e) => e['WatchlistID'] == id));
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Von Watchlist entfernt'), backgroundColor: Colors.orangeAccent));
+        if (result["success"] == true) {
+          setState(() => _watchlist.removeWhere((e) => e['WatchlistID'] == id));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"] ?? 'Von Watchlist entfernt'), backgroundColor: Colors.orangeAccent),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"] ?? 'Fehler beim Entfernen'), backgroundColor: Colors.red),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red),
+        );
       }
     }
   }

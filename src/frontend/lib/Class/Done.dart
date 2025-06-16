@@ -76,4 +76,49 @@ class Done {
     }
   }
 
+  static Future<Map<String, dynamic>> deleteDone(int doneId, int userId) async {
+    final url = Uri.parse('$_baseUrl/Done?DoneID=$doneId&UserID=$userId');
+    try {
+      final response = await http.delete(url, headers: {'Accept': 'application/json'});
+      debugPrint('Done.deleteDone() status: ${response.statusCode}');
+      debugPrint('Done.deleteDone() body: ${response.body}');
+      if (response.statusCode == 200) {
+        return {"success": true};
+      } else {
+        final data = jsonDecode(response.body);
+        return {
+          "success": false,
+          "message": data["error"] ?? data["message"] ?? "Unbekannter Fehler"
+        };
+      }
+    } catch (e) {
+      debugPrint('Fehler bei Done.deleteDone(): $e');
+      return {"success": false, "message": "Client-Fehler: $e"};
+    }
+  }
+
+  static Future<Map<String, dynamic>> fetchDoneList(int userId) async {
+    final url = Uri.parse('$_baseUrl/Done?UserID=$userId');
+    try {
+      final response = await http.get(url, headers: {'Accept': 'application/json'});
+      debugPrint('Done.fetchDoneList() status: ${response.statusCode}');
+      debugPrint('Done.fetchDoneList() body: ${response.body}');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          "success": true,
+          "data": data["data"] ?? []
+        };
+      } else {
+        final data = jsonDecode(response.body);
+        return {
+          "success": false,
+          "message": data["error"] ?? data["message"] ?? "Unbekannter Fehler"
+        };
+      }
+    } catch (e) {
+      debugPrint('Fehler bei Done.fetchDoneList(): $e');
+      return {"success": false, "message": "Client-Fehler: $e"};
+    }
+  }
 }

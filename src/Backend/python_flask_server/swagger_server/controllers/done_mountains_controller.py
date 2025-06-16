@@ -10,18 +10,6 @@ SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def get_done_mountains_by_user_id(user_id):
-    """
-    Get done activities by user ID
-    """
-    try:
-        response = supabase.table('Done').select("*").eq("UserID", user_id).execute()
-        if response.data:
-            return {"response": response.data}, 200
-        else:
-            return {"message": "No done activities found for this user"}, 404
-    except Exception as e:
-        return {"error": str(e)}, 500
     
 def post_done_mountain_with_user_id():
     """
@@ -118,6 +106,32 @@ def delete_done_mountain():
 
         response = supabase.table('Done').delete().eq("DoneID", done_id).eq("UserID", user_id).execute()
         return {"message": "Done-Eintrag gelöscht."}, 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+    
+
+def get_done_mountains_by_user_id():
+    """
+    Gibt alle erledigten Berge eines Users zurück.
+    Erwartet: GET /Done?UserID=...
+    """
+    user_id = connexion.request.args.get("UserID")
+    if not user_id:
+        return {"error": "UserID ist erforderlich."}, 400
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return {"error": "UserID muss eine Zahl sein."}, 400
+
+    try:
+        response = supabase.table('Done').select(
+            'DoneID, Date, Mountain(Mountainid,Name,Height,FederalState(Name))'
+        ).eq('UserID', user_id).execute()
+        if response.data is not None:
+            return {"data": response.data}, 200
+        else:
+            return {"data": []}, 200
     except Exception as e:
         return {"error": str(e)}, 500
 

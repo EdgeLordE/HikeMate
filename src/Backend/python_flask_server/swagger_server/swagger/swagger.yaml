@@ -98,24 +98,6 @@ paths:
         "500":
           description: Serverfehler
       x-openapi-router-controller: swagger_server.controllers.activity_controller
-  /DoneBerge:
-    get:
-      tags:
-        - Berge erledigt
-      summary: Gibt eine Liste aller erledigten Berge von einem Benutzer zurück
-      operationId: get_done_mountains_by_user_id
-      parameters:
-        - name: user_id
-          in: query
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Erfolgreich
-        "400":
-          description: Ungültige Anfrage
-      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
   /DoneBerghinzufuegen:
     post:
       tags:
@@ -676,4 +658,67 @@ paths:
           description: Fehlerhafte Anfrage
         "500":
           description: Serverfehler
+      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+  /Done:
+    get:
+      tags:
+        - Berge erledigt
+      summary: Gibt alle erledigten Berge eines Users zurück
+      operationId: get_done_mountains_by_user_id
+      parameters:
+        - name: UserID
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Erfolgreich erledigte Berge geladen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        DoneID:
+                          type: integer
+                        Date:
+                          type: string
+                          format: date-time
+                        Mountain:
+                          type: object
+                          properties:
+                            Mountainid:
+                              type: integer
+                            Name:
+                              type: string
+                            Height:
+                              type: integer
+                            FederalState:
+                              type: object
+                              properties:
+                                Name:
+                                  type: string
+        "400":
+          description: Fehlerhafte Anfrage
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "500":
+          description: Serverfehler
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller

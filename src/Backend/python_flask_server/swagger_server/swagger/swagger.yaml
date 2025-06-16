@@ -434,19 +434,22 @@ paths:
         - Watchlist
       summary: Überprüft, ob sich ein bestimmter Berg auf der Watchlist eines Benutzers befindet.
       operationId: check_if_mountain_is_on_watchlist
-      parameters:
-        - name: UserID
-          in: query
-          required: true
-          description: ID des Benutzers.
-          schema:
-            type: integer
-        - name: MountainID
-          in: query
-          required: true
-          description: ID des Berges.
-          schema:
-            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserID:
+                  type: integer
+                  description: ID des Benutzers.
+                MountainID:
+                  type: integer
+                  description: ID des Berges.
+              required:
+                - UserID
+                - MountainID
       responses:
         "200":
           description: Status, ob der Berg auf der Watchlist ist.
@@ -499,7 +502,7 @@ paths:
         "400":
           description: Ungültige Eingabedaten
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
-  /ChnageUsername:
+  /ChangeUsername:
     post:
       tags:
         - Login/Registrierung

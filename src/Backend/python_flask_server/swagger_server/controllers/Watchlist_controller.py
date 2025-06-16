@@ -80,45 +80,48 @@ def remove_mountain_from_watchlist():
         print(f"Error in remove_mountain_from_watchlist: {e}")
         return {"error": str(e)}, 500
 
-def check_if_mountain_is_on_watchlist(UserID, MountainID):
+def check_if_mountain_is_on_watchlist(): # Nimmt keine direkten Argumente mehr entgegen
     """
     Check if a mountain is on a user's watchlist.
     Corresponds to operationId: check_if_mountain_is_on_watchlist
-    Query parameters: UserID, MountainID
+    Expects JSON body: {"UserID": user_id, "MountainID": mountain_id}
     """
-    if not UserID or not MountainID:
-        return {"error": "UserID and MountainID are required as query parameters"}, 400
+    if not connexion.request.is_json:
+        return {"error": "Request must be JSON"}, 400
+
+    try:
+        data = connexion.request.json
+        UserID = data.get('UserID')
+        MountainID = data.get('MountainID')
+    except Exception: # Fehler beim Parsen des JSON
+        return {"error": "Invalid JSON request body"}, 400
+
+    if UserID is None or MountainID is None:
+        return {"error": "UserID and MountainID are required in the JSON body"}, 400
 
     try:
         user_id_int = int(UserID)
         mountain_id_int = int(MountainID)
     except (ValueError, TypeError):
-        return {"error": "UserID and MountainID must be valid integers"}, 400
+        return {"error": "UserID and MountainID in JSON body must be valid integers"}, 400
 
     try:
-        print(f"Watchlist_controller: Checking watchlist for UserID: {user_id_int}, MountainID: {mountain_id_int}")
         response = supabase.table('Watchlist').select('WatchlistID', count='exact').eq('UserID', user_id_int).eq('MountainID', mountain_id_int).limit(1).execute()
-
-        print(f"Supabase response: data={response.data}, count={response.count}, error={response.error}")
 
         if response.error:
             error_message = str(response.error.message if hasattr(response.error, 'message') else response.error)
-            print(f"Supabase query error in check_if_mountain_is_on_watchlist: {error_message}")
-            return {"error": "Failed to query watchlist due to a database error", "details": error_message}, 500
+            # Gemäß Swagger 500er Definition für /Watchlist/check (nur "error"-Feld)
+            return {"error": f"Failed to query watchlist due to a database error: {error_message}"}, 500
 
         is_on_watchlist = False
         if response.count is not None:
             is_on_watchlist = response.count > 0
-        # Optional: Fallback, falls count None ist, aber Daten vorhanden sind (weniger wahrscheinlich bei 'exact' count und limit(1))
-        # elif response.data and isinstance(response.data, list):
-        #    is_on_watchlist = len(response.data) > 0
 
-        print(f"Watchlist_controller: Mountain on watchlist: {is_on_watchlist} for UserID: {user_id_int}, MountainID: {mountain_id_int}")
         return {"response": {"isOnWatchlist": is_on_watchlist}}, 200
 
     except Exception as e:
-        print(f"Critical error in check_if_mountain_is_on_watchlist for UserID: {UserID}, MountainID: {MountainID}. Error: {str(e)}")
-        return {"error": "An unexpected server error occurred while checking watchlist", "details": str(e)}, 500
+        # Gemäß Swagger 500er Definition für /Watchlist/check (nur "error"-Feld)
+        return {"error": f"An unexpected server error occurred while checking watchlist: {str(e)}"}, 500
 
 def fetch_watchlist(UserID):
     """

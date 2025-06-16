@@ -1,7 +1,6 @@
 import connexion
 import json
 from datetime import datetime
-import win32timezone
 
 
 from supabase import create_client
@@ -133,7 +132,7 @@ def add_mountain_to_done():
         insert_data = {
             'UserID': user_id,
             'MountainID': mountain_id,
-            'Date': datetime.now(timezone.utc).isoformat()
+            'Date': datetime.now().isoformat()
         }
         response = supabase.table('Done').insert(insert_data).execute()
 

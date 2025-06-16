@@ -645,3 +645,53 @@ paths:
         "500":
           description: Serverfehler
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+  /Aktivitaet:
+    post:
+      tags:
+        - Aktivitäten
+      summary: Speichert eine neue Aktivität für einen Benutzer
+      operationId: save_activity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserID:
+                  type: integer
+                Distance:
+                  type: number
+                  description: Distanz in Metern
+                Increase:
+                  type: integer
+                  description: Höhenmeter
+                Duration:
+                  type: integer
+                  description: Dauer in Sekunden
+                Date:
+                  type: string
+                  format: date-time
+              required:
+                - UserID
+                - Distance
+                - Increase
+                - Duration
+                - Date
+      responses:
+        "201":
+          description: Aktivität erfolgreich gespeichert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  Calories:
+                    type: integer
+        "400":
+          description: Fehlerhafte Anfrage
+        "500":
+          description: Serverfehler
+      x-openapi-router-controller: swagger_server.controllers.activity_controller

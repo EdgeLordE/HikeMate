@@ -645,42 +645,26 @@ paths:
         "500":
           description: Serverfehler
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
-  /Aktivitaet:
-    post:
+  /Done:
+    delete:
       tags:
-        - Aktivitäten
-      summary: Speichert eine neue Aktivität für einen Benutzer
-      operationId: save_activity
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                UserID:
-                  type: integer
-                Distance:
-                  type: number
-                  description: Distanz in Metern
-                Increase:
-                  type: integer
-                  description: Höhenmeter
-                Duration:
-                  type: integer
-                  description: Dauer in Sekunden
-                Date:
-                  type: string
-                  format: date-time
-              required:
-                - UserID
-                - Distance
-                - Increase
-                - Duration
-                - Date
+        - Done
+      summary: Löscht einen erledigten Berg für einen User
+      operationId: delete_done_mountain
+      parameters:
+        - name: DoneID
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: UserID
+          in: query
+          required: true
+          schema:
+            type: integer
       responses:
-        "201":
-          description: Aktivität erfolgreich gespeichert
+        "200":
+          description: Done-Eintrag erfolgreich gelöscht
           content:
             application/json:
               schema:
@@ -688,10 +672,8 @@ paths:
                 properties:
                   message:
                     type: string
-                  Calories:
-                    type: integer
         "400":
           description: Fehlerhafte Anfrage
         "500":
           description: Serverfehler
-      x-openapi-router-controller: swagger_server.controllers.activity_controller
+      x-openapi-router-controller: swagger_server.controllers.done_mountains_controller

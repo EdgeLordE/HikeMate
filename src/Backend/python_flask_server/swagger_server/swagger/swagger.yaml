@@ -296,7 +296,7 @@ paths:
                     type: string
                     nullable: true
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
-  /Watchlist/{UserID}:
+  /Watchlist:
     get:
       tags:
         - Watchlist
@@ -304,7 +304,7 @@ paths:
       operationId: fetch_watchlist
       parameters:
         - name: UserID
-          in: path
+          in: query
           required: true
           description: ID des Benutzers, dessen Watchlist abgerufen werden soll.
           schema:

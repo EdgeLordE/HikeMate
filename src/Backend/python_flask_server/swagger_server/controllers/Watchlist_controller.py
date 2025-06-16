@@ -103,29 +103,35 @@ def check_if_mountain_is_on_watchlist():
     except Exception as e:
         return {"error": str(e)}, 500
 
-def fetch_watchlist(UserID):
-    """
-    Fetch all watchlist entries for a user, including mountain details.
-    Corresponds to operationId: fetch_watchlist
-    Path parameter: UserID
-    """
-    if not UserID: # Basic validation
-        return {"error": "UserID path parameter is required"}, 400
+def fetch_watchlist():
+    # Holt die UserID als Query-Parameter (z.B. /Watchlist?UserID=49)
+    from flask import request
+    import traceback
+
+    UserID = request.args.get("UserID")
+    print(f"fetch_watchlist called with UserID={UserID}")
+    if not UserID:
+        return {"error": "UserID query parameter is required"}, 400
+
+    try:
+        user_id = int(UserID)
+    except Exception:
+        return {"error": "UserID muss eine Zahl sein."}, 400
 
     try:
         response = supabase.table('Watchlist').select(
             'WatchlistID, MountainID, Mountain (Mountainid, Name, Height, Picture, FederalStateid (Name))'
-        ).eq('UserID', UserID).execute()
-
+        ).eq('UserID', user_id).execute()
+        print(f"Supabase response: {response.data}, error: {getattr(response, 'error', None)}")
         if response.data is not None:
             return {"response": response.data}, 200
-        elif response.error:
+        elif getattr(response, 'error', None):
             return {"error": "Failed to fetch watchlist", "details": str(response.error.message if response.error else "Unknown error")}, 500
         else:
-            # Should ideally not happen if data is None and no error, but good to cover
             return {"response": [], "message": "Watchlist is empty or an issue occurred"}, 200
     except Exception as e:
-        print(f"Error in fetch_watchlist: {e}")
+        print("Error in fetch_watchlist:")
+        traceback.print_exc()
         return {"error": str(e)}, 500
 
 def delete_watchlist_entry(WatchlistID, UserID):

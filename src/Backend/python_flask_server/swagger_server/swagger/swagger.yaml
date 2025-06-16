@@ -69,36 +69,35 @@ paths:
         "400":
           description: Username oder Passwort ungültig
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
-  /Aktivitaeten:
-    get:
-      tags:
-        - Aktivitäten
-      summary: Gibt eine Liste aller Aktivitäten zurück
-      operationId: get_activities
-      responses:
-        "200":
-          description: Erfolgreich
-        "400":
-          description: Ungültige Anfrage
-      x-openapi-router-controller: swagger_server.controllers.activity_controller
   /Aktivitaet:
-    get:
-      tags:
-        - Aktivitäten
-      summary: Gibt eine Aktivität aufgrund der userid zurück
-      operationId: get_activities_by_user_id
-      parameters:
-        - name: user_id
-          in: query
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Erfolgreich
-        "400":
-          description: Ungültige Anfrage
-      x-openapi-router-controller: swagger_server.controllers.activity_controller
+  get:
+    tags:
+      - Aktivitäten
+    summary: Gibt eine Aktivität aufgrund der userid zurück
+    operationId: get_activities_by_user_id
+    parameters:
+      - name: user_id
+        in: query
+        required: true
+        schema:
+          type: integer
+    responses:
+      "200":
+        description: Erfolgreich
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                activities:
+                  type: array
+                  items:
+                    type: object
+      "400":
+        description: Ungültige Anfrage
+      "500":
+        description: Serverfehler
+    x-openapi-router-controller: swagger_server.controllers.activity_controller
   /DoneBerge:
     get:
       tags:
@@ -592,3 +591,57 @@ paths:
         "500":
           description: Serverfehler
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+  /User/phone:
+    get:
+      tags:
+        - Login/Registrierung
+      summary: Gibt die Notfall-Telefonnummer eines Benutzers zurück
+      operationId: get_phone_number
+      parameters:
+        - name: UserID
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Telefonnummer erfolgreich geladen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ContactNumber:
+                    type: string
+        "400":
+          description: Fehlerhafte Anfrage
+        "500":
+          description: Serverfehler
+      x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+    put:
+      tags:
+        - Login/Registrierung
+      summary: Speichert die Notfall-Telefonnummer eines Benutzers
+      operationId: update_phone_number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserID:
+                  type: integer
+                ContactNumber:
+                  type: string
+              required:
+                - UserID
+                - ContactNumber
+      responses:
+        "200":
+          description: Telefonnummer erfolgreich gespeichert
+        "400":
+          description: Fehlerhafte Anfrage
+        "500":
+          description: Serverfehler
+      x-openapi-router-controller: swagger_server.controllers.login_regristration_controller

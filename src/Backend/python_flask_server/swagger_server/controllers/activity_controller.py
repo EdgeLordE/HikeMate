@@ -9,29 +9,27 @@ SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def get_activities():
-    """
-    Get all activities
-    """
-    try:
-        response = supabase.table('Activity').select("*").execute()
-        if response.data:
-            return {"response": response.data}, 200
-        else:
-            return {"message": "No activities found"}, 404
-    except Exception as e:
-        return {"error": str(e)}, 500
+
     
 
-def get_activities_by_user_id(user_id):
+def get_activities_by_user_id():
     """
-    Get activity by ID
+    Gibt alle Aktivitäten eines Users zurück.
+    Erwartet: GET /Aktivitaet?user_id=...
     """
     try:
-        response = supabase.table('Activity').select("*").eq("UserID", user_id).execute()
-        if response.data:
-            return {"response": response.data}, 200
-        else:
-            return {"message": "Activity not found"}, 404
+        user_id = connexion.request.args.get("user_id")
+        if not user_id:
+            return {"error": "user_id ist erforderlich."}, 400
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return {"error": "user_id muss eine Zahl sein."}, 400
+
+        response = supabase.table('Activity').select(
+            "Distance, Increase, Duration, Calories, MaxAltitude, Date"
+        ).eq("UserID", user_id).order("Date", desc=True).execute()
+
+        return {"activities": response.data}, 200
     except Exception as e:
         return {"error": str(e)}, 500

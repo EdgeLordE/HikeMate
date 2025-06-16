@@ -70,34 +70,34 @@ paths:
           description: Username oder Passwort ungültig
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
   /Aktivitaet:
-  get:
-    tags:
-      - Aktivitäten
-    summary: Gibt eine Aktivität aufgrund der userid zurück
-    operationId: get_activities_by_user_id
-    parameters:
-      - name: user_id
-        in: query
-        required: true
-        schema:
-          type: integer
-    responses:
-      "200":
-        description: Erfolgreich
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                activities:
-                  type: array
-                  items:
-                    type: object
-      "400":
-        description: Ungültige Anfrage
-      "500":
-        description: Serverfehler
-    x-openapi-router-controller: swagger_server.controllers.activity_controller
+    get:
+      tags:
+        - Aktivitäten
+      summary: Gibt eine Aktivität aufgrund der userid zurück
+      operationId: get_activities_by_user_id
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Erfolgreich
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  activities:
+                    type: array
+                    items:
+                      type: object
+        "400":
+          description: Ungültige Anfrage
+        "500":
+          description: Serverfehler
+      x-openapi-router-controller: swagger_server.controllers.activity_controller
   /DoneBerge:
     get:
       tags:

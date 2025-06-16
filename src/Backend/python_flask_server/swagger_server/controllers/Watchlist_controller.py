@@ -86,12 +86,18 @@ def check_if_mountain_is_on_watchlist(UserID, MountainID):
     Corresponds to operationId: check_if_mountain_is_on_watchlist
     Query parameters: UserID, MountainID
     """
-    if not UserID or not MountainID: # Basic validation, though Connexion handles this based on swagger
+    if not UserID or not MountainID:
         return {"error": "UserID and MountainID are required as query parameters"}, 400
 
     try:
-        # Using count='exact' for a more direct check if supported and efficient
-        response = supabase.table('Watchlist').select('WatchlistID', count='exact').eq('UserID', UserID).eq('MountainID', MountainID).limit(1).execute()
+        # Explizite Konvertierung zu Integer
+        try:
+            user_id_int = int(UserID)
+            mountain_id_int = int(MountainID)
+        except (ValueError, TypeError):
+            return {"error": "UserID and MountainID must be valid integers"}, 400
+
+        response = supabase.table('Watchlist').select('WatchlistID', count='exact').eq('UserID', user_id_int).eq('MountainID', mountain_id_int).limit(1).execute()
 
         is_on_watchlist = response.count > 0 if response.count is not None else bool(response.data)
 

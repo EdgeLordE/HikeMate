@@ -139,42 +139,39 @@ def fetch_watchlist():
         traceback.print_exc()
         return {"error": str(e)}, 500
 
-def delete_watchlist_entry():
+def delete_watchlist_entry_by_id():
     """
-    Delete a specific entry from the watchlist.
-    Entspricht operationId: delete_watchlist_entry
-    Erwartet: DELETE /Watchlist/entry?WatchlistID=...&UserID=...
+    Löscht einen Watchlist-Eintrag anhand von WatchlistID und UserID.
+    Erwartet: DELETE /DeleteWatchlist?WatchlistID=...&UserID=...
     """
     from flask import request
 
-    WatchlistID = request.args.get("WatchlistID")
-    UserID = request.args.get("UserID")
+    watchlist_id = request.args.get("WatchlistID")
+    user_id = request.args.get("UserID")
 
-    if not WatchlistID or not UserID:
-        return {"error": "WatchlistID und UserID als Query-Parameter sind erforderlich."}, 400
+    if not watchlist_id or not user_id:
+        return {"error": "WatchlistID und UserID sind erforderlich."}, 400
 
     try:
-        watchlist_id = int(WatchlistID)
-        user_id = int(UserID)
+        watchlist_id = int(watchlist_id)
+        user_id = int(user_id)
     except Exception:
         return {"error": "WatchlistID und UserID müssen Integer sein."}, 400
 
     try:
-        # Prüfen, ob der Eintrag dem User gehört
+        # Prüfen, ob der Eintrag existiert und dem User gehört
         verify_response = supabase.table('Watchlist').select('WatchlistID').eq('WatchlistID', watchlist_id).eq('UserID', user_id).limit(1).execute()
         if not verify_response.data:
-            return {"error": "Watchlist entry not found or user not authorized"}, 404
+            return {"error": "Watchlist-Eintrag nicht gefunden oder nicht autorisiert."}, 404
 
         response = supabase.table('Watchlist').delete().eq('WatchlistID', watchlist_id).eq('UserID', user_id).execute()
-
         if response.data:
-            return {"message": "Watchlist entry deleted successfully"}, 200
+            return {"message": "Watchlist-Eintrag erfolgreich gelöscht"}, 200
         elif getattr(response, 'error', None):
-            return {"error": "Failed to delete watchlist entry", "details": str(response.error.message if response.error else "Unknown error")}, 500
+            return {"error": "Fehler beim Löschen des Watchlist-Eintrags", "details": str(response.error.message if response.error else "Unknown error")}, 500
         else:
-            return {"error": "Failed to delete watchlist entry or entry already deleted"}, 404
+            return {"error": "Watchlist-Eintrag nicht gefunden oder bereits gelöscht"}, 404
     except Exception as e:
-        print(f"Error in delete_watchlist_entry: {e}")
         import traceback
         traceback.print_exc()
         return {"error": str(e)}, 500

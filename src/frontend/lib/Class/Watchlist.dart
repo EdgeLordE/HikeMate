@@ -36,16 +36,12 @@ class Watchlist {
   }
 
   static Future<Map<String, dynamic>> removeMountainFromWatchlist(int userId, int mountainId) async {
-    final String apiUrl = "$_baseUrl/Watchlist";
+    final String apiUrl = "$_baseUrl/Watchlist/entry?UserID=$userId&MountainID=$mountainId";
     debugPrint('Watchlist.removeMountainFromWatchlist() URL: $apiUrl');
     try {
       final response = await http.delete(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "UserID": userId,
-          "MountainID": mountainId,
-        }),
       );
       debugPrint('Watchlist.removeMountainFromWatchlist() status: ${response.statusCode}');
       debugPrint('Watchlist.removeMountainFromWatchlist() body: ${response.body}');
@@ -127,7 +123,7 @@ class Watchlist {
   }
 
   static Future<Map<String, dynamic>> deleteWatchlistEntry(int watchlistId, int userId) async {
-    final String apiUrl = "$_baseUrl/Watchlist/entry?WatchlistID=$watchlistId&UserID=$userId";
+    final String apiUrl = "$_baseUrl/DeleteWatchlist?WatchlistID=$watchlistId&UserID=$userId";
     debugPrint('Watchlist.deleteWatchlistEntry() URL: $apiUrl');
     try {
       final response = await http.delete(

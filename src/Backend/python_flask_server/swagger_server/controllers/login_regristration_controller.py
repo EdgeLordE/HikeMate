@@ -113,50 +113,6 @@ def post_change_username():
     return {"error": "Request must be JSON"}, 400
 
 
-def get_phone_number():
-    """
-    Gibt die Telefonnummer (ContactNumber) eines Users zurück.
-    Erwartet: GET /User/phone?UserID=...
-    """
-    try:
-        user_id = connexion.request.args.get("UserID")
-        if not user_id:
-            return {"error": "UserID ist erforderlich."}, 400
-        try:
-            user_id = int(user_id)
-        except ValueError:
-            return {"error": "UserID muss eine Zahl sein."}, 400
 
-        response = supabase.table('User').select("ContactNumber").eq("UserID", user_id).single().execute()
-        if response.data and "ContactNumber" in response.data:
-            return {"ContactNumber": response.data["ContactNumber"]}, 200
-        else:
-            return {"ContactNumber": ""}, 200
-    except Exception as e:
-        return {"error": str(e)}, 500
-
-def update_phone_number():
-    """
-    Aktualisiert die Telefonnummer (ContactNumber) eines Users.
-    Erwartet: PUT /User/phone mit JSON {"UserID": ..., "ContactNumber": "..."}
-    """
-    if not connexion.request.is_json:
-        return {"error": "Request must be JSON"}, 400
-    data = connexion.request.get_json()
-    user_id = data.get("UserID")
-    phone = data.get("ContactNumber")
-    if not user_id or phone is None:
-        return {"error": "UserID und ContactNumber sind erforderlich."}, 400
-    try:
-        user_id = int(user_id)
-    except ValueError:
-        return {"error": "UserID muss eine Zahl sein."}, 400
-
-    try:
-        response = supabase.table('User').update({"ContactNumber": phone}).eq("UserID", user_id).execute()
-        return {"message": "Telefonnummer gespeichert"}, 200
-    except Exception as e:
-        return {"error": str(e)}, 500
-    
 
 

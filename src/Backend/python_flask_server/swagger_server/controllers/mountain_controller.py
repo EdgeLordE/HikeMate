@@ -1,23 +1,41 @@
-# File: src/backend/python_flask_server/swagger_server/controllers/mountain_controller.py
+##
+# @file mountain_controller.py
+# @brief API-Controller für Bergabfragen aus der Supabase-Datenbank.
+# @details Enthält Endpunkte zur Suche von Bergen nach Name.
+# @author Emil Wagner, Mathias Florea
+# @date 2025-06-17
+# @version 1.0
+##
+
 import connexion
-import json
 from supabase import create_client, Client
-from datetime import datetime, timezone
 
-# --- Supabase Client Initialisierung ---
-SUPABASE_URL="https://cyzdfdweghhrlquxwaxl.supabase.co"
+## @brief Supabase-Projekt-URL
+SUPABASE_URL = "https://cyzdfdweghhrlquxwaxl.supabase.co"
+
+## @brief Öffentlicher API-Schlüssel zur Verbindung mit Supabase
+# @warning Verwende diesen Key nur im Backend. Nicht geeignet für den Client!
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5emRmZHdlZ2hocmxxdXh3YXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyNDk4ODYsImV4cCI6MjA2MzgyNTg4Nn0.8ImbDPx5rBu2zVQHMGQJNfs3lguOz4k0EUdycqmiTW0"
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+## @brief Erstellt einen Supabase-Client für Datenbankoperationen
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def get_mountain_by_name(mountain_name):
     """
-    Get mountain by name (case-insensitive partial match)
-    Includes: Mountainid, Name, Height, FederalStateid (Name), Picture
+    @brief Sucht Berge anhand eines Namens (case-insensitive, Teilstring).
+
+    @details
+    Gibt alle Berge zurück, deren Name (teilweise, Groß-/Kleinschreibung ignorierend) mit dem Suchbegriff übereinstimmt.
+    Es werden folgende Felder zurückgegeben: Mountainid, Name, Height, Picture, FederalStateid (Name).
+
+    @param mountain_name Der (Teil-)Name des gesuchten Berges.
+
+    @return
+      200: JSON-Objekt mit einer Liste passender Berge.
+      404: Kein Berg mit diesem Namen gefunden.
+      500: Serverfehler.
     """
     try:
-        # Using ilike for case-insensitive partial match
-        # Joining with FederalState table to get the Name
         response = supabase.table('Mountain').select(
             "Mountainid, Name, Height, Picture, FederalStateid (Name)"
         ).ilike('Name', f'%{mountain_name}%').execute()
@@ -27,8 +45,4 @@ def get_mountain_by_name(mountain_name):
         else:
             return {"message": "No mountains found with that name"}, 404
     except Exception as e:
-        print(f"Error in get_mountain_by_name: {e}")
         return {"error": str(e)}, 500
-
-
-

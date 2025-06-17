@@ -1,19 +1,41 @@
-import connexion
-import json
-from datetime import datetime
+##
+# @file done_mountains_controller.py
+# @brief API-Controller zum Verwalten erledigter Berge eines Benutzers.
+# @details Diese Datei enthält Endpunkte zur Verwaltung von "Done"-Einträgen über eine Supabase-Datenbank.
+# @author [Dein Name]
+# @date 2025-06-17
+# @version 1.0
+##
 
+import connexion  # REST-Framework zur Verbindung mit OpenAPI-Spezifikationen
+import json       # Für das Parsen und Erzeugen von JSON-Daten
+from datetime import datetime  # Für Zeitstempel
 
-from supabase import create_client
+from supabase import create_client  # Supabase Python SDK
 
-SUPABASE_URL="https://cyzdfdweghhrlquxwaxl.supabase.co"
+## @brief Supabase-Projekt-URL
+SUPABASE_URL = "https://cyzdfdweghhrlquxwaxl.supabase.co"
+
+## @brief Öffentlicher API-Schlüssel zur Verbindung mit Supabase
+# @warning Verwende diesen Key nur im Backend. Nicht geeignet für den Client.
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5emRmZHdlZ2hocmxxdXh3YXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyNDk4ODYsImV4cCI6MjA2MzgyNTg4Nn0.8ImbDPx5rBu2zVQHMGQJNfs3lguOz4k0EUdycqmiTW0"
 
+## @brief Erstellt einen Supabase-Client
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-    
 def post_done_mountain_with_user_id():
     """
-    Post done mountain with user ID (expects JSON body)
+    @brief Markiert einen Berg als erledigt für einen Benutzer.
+
+    @details
+    Erwartet einen JSON-Body mit:
+      - UserID (int): Die ID des Benutzers.
+      - MountainID (int): Die ID des Berges.
+
+    @return
+      201: Erfolgsmeldung mit gespeicherten Daten.
+      400: Fehlermeldung bei ungültigem oder fehlendem Input.
+      500: Serverfehler bei der Datenbankoperation.
     """
     if not connexion.request.is_json:
         return {"error": "Request must be JSON"}, 400
@@ -36,11 +58,21 @@ def post_done_mountain_with_user_id():
         return {"message": "Mountain marked as done", "done_mountain": response.data}, 201
     except Exception as e:
         return {"error": str(e)}, 500
-    
+
+
 def check_if_mountain_is_done():
     """
-    Prüft, ob ein Berg für einen User als erledigt markiert ist.
-    Erwartet: GET /DoneBerg/check?UserID=...&MountainID=...
+    @brief Prüft, ob ein bestimmter Berg für einen Benutzer erledigt ist.
+
+    @details
+    Erwartet Query-Parameter:
+      - UserID (int): Die ID des Benutzers.
+      - MountainID (int): Die ID des Berges.
+
+    @return
+      200: { "response": { "isDone": true/false } }
+      400: Fehlerhafte oder fehlende Parameter.
+      500: Serverfehler.
     """
     try:
         user_id = connexion.request.args.get("UserID")
@@ -63,12 +95,21 @@ def check_if_mountain_is_done():
 
     except Exception as e:
         return {"error": str(e)}, 500
-    
+
 
 def is_mountain_done_by_user():
     """
-    Prüft, ob ein Berg für einen User als erledigt markiert ist.
-    Erwartet: GET /DoneBerg/is_done?UserID=...&MountainID=...
+    @brief Alternativer Endpunkt zur Prüfung, ob ein Berg erledigt wurde.
+
+    @details
+    Erwartet Query-Parameter:
+      - UserID (int): Die ID des Benutzers.
+      - MountainID (int): Die ID des Berges.
+
+    @return
+      200: { "isDone": true/false }
+      400: Fehlerhafte oder fehlende Parameter.
+      500: Serverfehler.
     """
     try:
         user_id = connexion.request.args.get("UserID")
@@ -95,8 +136,17 @@ def is_mountain_done_by_user():
 
 def delete_done_mountain():
     """
-    Löscht einen erledigten Berg für einen User.
-    Erwartet: DELETE /Done?DoneID=...&UserID=...
+    @brief Löscht einen Eintrag eines erledigten Berges für einen Benutzer.
+
+    @details
+    Erwartet Query-Parameter:
+      - DoneID (int): Die ID des Done-Eintrags.
+      - UserID (int): Die ID des Benutzers.
+
+    @return
+      200: Erfolgreich gelöscht.
+      400: Fehlerhafte oder fehlende Parameter.
+      500: Serverfehler.
     """
     try:
         done_id = connexion.request.args.get("DoneID")
@@ -105,15 +155,28 @@ def delete_done_mountain():
             return {"error": "DoneID und UserID sind erforderlich."}, 400
 
         response = supabase.table('Done').delete().eq("DoneID", done_id).eq("UserID", user_id).execute()
+
+        if getattr(response, 'error', None):
+            return {"error": "Fehler beim Löschen des Done-Eintrags", "details": str(response.error.message if response.error else "Unknown error")}, 500
+
         return {"message": "Done-Eintrag gelöscht."}, 200
+
     except Exception as e:
         return {"error": str(e)}, 500
-    
+
 
 def get_done_mountains_by_user_id():
     """
-    Gibt alle erledigten Berge eines Users zurück.
-    Erwartet: GET /Done?UserID=...
+    @brief Gibt alle erledigten Berge eines Benutzers zurück.
+
+    @details
+    Erwartet Query-Parameter:
+      - UserID (int): Die ID des Benutzers.
+
+    @return
+      200: Liste der erledigten Berge (inkl. Name, Höhe, Bundesland).
+      400: Fehlerhafte oder fehlende Parameter.
+      500: Serverfehler.
     """
     user_id = connexion.request.args.get("UserID")
     if not user_id:
@@ -134,9 +197,3 @@ def get_done_mountains_by_user_id():
             return {"data": []}, 200
     except Exception as e:
         return {"error": str(e)}, 500
-
-
-
-
-
-    

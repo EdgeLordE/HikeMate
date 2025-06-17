@@ -1,17 +1,43 @@
+##
+# @file watchlist_controller.py
+# @brief API-Controller für die Verwaltung der Watchlist eines Benutzers.
+# @details Enthält Endpunkte zum Hinzufügen, Entfernen, Prüfen und Abrufen von Watchlist-Einträgen über Supabase.
+# @author Emil Wagner, Mathias Florea
+# @date 2025-06-17
+# @version 1.0
+##
+
 import connexion
 import json
 from supabase import create_client, Client
 
-SUPABASE_URL="https://cyzdfdweghhrlquxwaxl.supabase.co"
+## @brief Supabase-Projekt-URL
+SUPABASE_URL = "https://cyzdfdweghhrlquxwaxl.supabase.co"
+
+## @brief Öffentlicher API-Schlüssel zur Verbindung mit Supabase
+# @warning Verwende diesen Key nur im Backend. Nicht geeignet für den Client!
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5emRmZHdlZ2hocmxxdXh3YXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyNDk4ODYsImV4cCI6MjA2MzgyNTg4Nn0.8ImbDPx5rBu2zVQHMGQJNfs3lguOz4k0EUdycqmiTW0"
 
+## @brief Erstellt einen Supabase-Client für Datenbankoperationen
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def add_mountain_to_watchlist():
     """
-    Add a mountain to a user's watchlist.
-    Corresponds to operationId: add_mountain_to_watchlist
-    Expects JSON body: {"UserID": user_id, "MountainID": mountain_id}
+    @brief Fügt einen Berg zur Watchlist eines Benutzers hinzu.
+
+    @details
+    Erwartet einen JSON-Body mit:
+      - UserID (int): Die ID des Benutzers.
+      - MountainID (int): Die ID des Berges.
+
+    Prüft, ob der Berg bereits auf der Watchlist oder als erledigt markiert ist.
+
+    @return
+      201: Berg erfolgreich zur Watchlist hinzugefügt.
+      409: Berg ist bereits auf der Watchlist.
+      403: Berg ist bereits als erledigt markiert.
+      400: Fehlerhafte Eingabedaten.
+      500: Serverfehler.
     """
     if not connexion.request.is_json:
         return {"error": "Request must be JSON"}, 400
@@ -24,21 +50,20 @@ def add_mountain_to_watchlist():
         if not user_id or not mountain_id:
             return {"error": "UserID and MountainID are required"}, 400
 
-        # Check if already on watchlist
+        # Prüfen, ob bereits auf der Watchlist
         existing_watchlist = supabase.table('Watchlist').select('WatchlistID').eq('UserID', user_id).eq('MountainID', mountain_id).limit(1).execute()
         if existing_watchlist.data:
-            return {"message": "Mountain already on watchlist"}, 409 # Conflict
+            return {"message": "Mountain already on watchlist"}, 409
 
-        # Check if already done (as per frontend logic, user cannot add done mountain to watchlist)
+        # Prüfen, ob bereits erledigt
         existing_done = supabase.table('Done').select('DoneID').eq('UserID', user_id).eq('MountainID', mountain_id).limit(1).execute()
         if existing_done.data:
-            return {"error": "Mountain is already marked as done, cannot add to watchlist"}, 403 # Forbidden
+            return {"error": "Mountain is already marked as done, cannot add to watchlist"}, 403
 
         insert_data = {'UserID': user_id, 'MountainID': mountain_id}
         response = supabase.table('Watchlist').insert(insert_data).execute()
 
         if response.data:
-            # Supabase insert returns a list with the inserted item(s)
             created_item = response.data[0] if isinstance(response.data, list) and len(response.data) > 0 else response.data
             return {"response": created_item, "message": "Mountain added to watchlist"}, 201
         elif response.error:
@@ -47,13 +72,22 @@ def add_mountain_to_watchlist():
             return {"error": "Failed to add mountain to watchlist and no specific error reported"}, 500
 
     except Exception as e:
-        print(f"Error in add_mountain_to_watchlist: {e}")
         return {"error": str(e)}, 500
 
 def remove_mountain_from_watchlist():
     """
-    Entfernt einen Berg von der Watchlist eines Benutzers anhand von UserID und MountainID.
-    Erwartet: DELETE /Watchlist/entry?UserID=...&MountainID=...
+    @brief Entfernt einen Berg von der Watchlist eines Benutzers anhand von UserID und MountainID.
+
+    @details
+    Erwartet Query-Parameter:
+      - UserID (int): Die ID des Benutzers.
+      - MountainID (int): Die ID des Berges.
+
+    @return
+      200: Berg erfolgreich entfernt.
+      404: Berg nicht auf der Watchlist gefunden.
+      400: Fehlerhafte Eingabedaten.
+      500: Serverfehler.
     """
     from flask import request
 
@@ -72,7 +106,7 @@ def remove_mountain_from_watchlist():
     try:
         response = supabase.table('Watchlist').delete().eq('UserID', user_id).eq('MountainID', mountain_id).execute()
 
-        if response.data:  # Supabase delete returns the deleted rows
+        if response.data:
             return {"message": "Mountain removed from watchlist"}, 200
         elif getattr(response, 'error', None):
             return {"error": "Failed to remove mountain from watchlist", "details": str(response.error.message if response.error else "Unknown error")}, 500
@@ -80,12 +114,22 @@ def remove_mountain_from_watchlist():
             return {"message": "Mountain not found on watchlist or already removed"}, 404
 
     except Exception as e:
-        print(f"Error in remove_mountain_from_watchlist: {e}")
-        import traceback
-        traceback.print_exc()
         return {"error": str(e)}, 500
 
 def check_if_mountain_is_on_watchlist():
+    """
+    @brief Prüft, ob ein Berg auf der Watchlist eines Benutzers ist.
+
+    @details
+    Erwartet Query-Parameter:
+      - UserID (int): Die ID des Benutzers.
+      - MountainID (int): Die ID des Berges.
+
+    @return
+      200: { "isOnWatchlist": true/false }
+      400: Fehlerhafte Eingabedaten.
+      500: Serverfehler.
+    """
     try:
         user_id = connexion.request.args.get("UserID")
         mountain_id = connexion.request.args.get("MountainID")
@@ -93,7 +137,6 @@ def check_if_mountain_is_on_watchlist():
         if not user_id or not mountain_id:
             return {"error": "UserID und MountainID sind erforderlich."}, 400
 
-        # IDs in Integer umwandeln (optional, falls nötig)
         try:
             user_id = int(user_id)
             mountain_id = int(mountain_id)
@@ -109,12 +152,21 @@ def check_if_mountain_is_on_watchlist():
         return {"error": str(e)}, 500
 
 def fetch_watchlist():
-    # Holt die UserID als Query-Parameter (z.B. /Watchlist?UserID=49)
+    """
+    @brief Gibt die gesamte Watchlist eines Benutzers zurück.
+
+    @details
+    Erwartet Query-Parameter:
+      - UserID (int): Die ID des Benutzers.
+
+    @return
+      200: Liste der Watchlist-Einträge.
+      400: Fehlerhafte Eingabedaten.
+      500: Serverfehler.
+    """
     from flask import request
-    import traceback
 
     UserID = request.args.get("UserID")
-    print(f"fetch_watchlist called with UserID={UserID}")
     if not UserID:
         return {"error": "UserID query parameter is required"}, 400
 
@@ -127,7 +179,6 @@ def fetch_watchlist():
         response = supabase.table('Watchlist').select(
             'WatchlistID, MountainID, Mountain (Mountainid, Name, Height, Picture, FederalStateid (Name))'
         ).eq('UserID', user_id).execute()
-        print(f"Supabase response: {response.data}, error: {getattr(response, 'error', None)}")
         if response.data is not None:
             return {"response": response.data}, 200
         elif getattr(response, 'error', None):
@@ -135,14 +186,22 @@ def fetch_watchlist():
         else:
             return {"response": [], "message": "Watchlist is empty or an issue occurred"}, 200
     except Exception as e:
-        print("Error in fetch_watchlist:")
-        traceback.print_exc()
         return {"error": str(e)}, 500
 
 def delete_watchlist_entry_by_id():
     """
-    Löscht einen Watchlist-Eintrag anhand von WatchlistID und UserID.
-    Erwartet: DELETE /DeleteWatchlist?WatchlistID=...&UserID=...
+    @brief Löscht einen Watchlist-Eintrag anhand von WatchlistID und UserID.
+
+    @details
+    Erwartet Query-Parameter:
+      - WatchlistID (int): Die ID des Watchlist-Eintrags.
+      - UserID (int): Die ID des Benutzers.
+
+    @return
+      200: Watchlist-Eintrag erfolgreich gelöscht.
+      404: Eintrag nicht gefunden oder nicht autorisiert.
+      400: Fehlerhafte Eingabedaten.
+      500: Serverfehler.
     """
     from flask import request
 
@@ -159,7 +218,6 @@ def delete_watchlist_entry_by_id():
         return {"error": "WatchlistID und UserID müssen Integer sein."}, 400
 
     try:
-        # Prüfen, ob der Eintrag existiert und dem User gehört
         verify_response = supabase.table('Watchlist').select('WatchlistID').eq('WatchlistID', watchlist_id).eq('UserID', user_id).limit(1).execute()
         if not verify_response.data:
             return {"error": "Watchlist-Eintrag nicht gefunden oder nicht autorisiert."}, 404
@@ -172,6 +230,4 @@ def delete_watchlist_entry_by_id():
         else:
             return {"error": "Watchlist-Eintrag nicht gefunden oder bereits gelöscht"}, 404
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return {"error": str(e)}, 500

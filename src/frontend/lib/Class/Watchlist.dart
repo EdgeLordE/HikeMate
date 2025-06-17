@@ -8,7 +8,7 @@ class Watchlist {
   static const String _baseUrl = User.baseUrl;
 
   static Future<Map<String, dynamic>> addMountainToWatchlist(int userId, int mountainId) async {
-    final String apiUrl = "$_baseUrl/Watchlist";
+    final String apiUrl = "$_baseUrl/PostWatchlist";
     debugPrint('Watchlist.addMountainToWatchlist() URL: $apiUrl');
     try {
       final response = await http.post(
@@ -127,7 +127,7 @@ class Watchlist {
   }
 
   static Future<Map<String, dynamic>> deleteWatchlistEntry(int watchlistId, int userId) async {
-    final String apiUrl = "$_baseUrl/Watchlist/entry/$watchlistId?UserID=$userId";
+    final String apiUrl = "$_baseUrl/Watchlist/entry?WatchlistID=$watchlistId&UserID=$userId";
     debugPrint('Watchlist.deleteWatchlistEntry() URL: $apiUrl');
     try {
       final response = await http.delete(
@@ -140,10 +140,9 @@ class Watchlist {
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
         return {"success": true, "message": responseBody["message"] ?? "Watchlist-Eintrag erfolgreich gelöscht"};
-      } else if (response.statusCode == 204) { // No content, but successful
+      } else if (response.statusCode == 204) {
         return {"success": true, "message": "Watchlist-Eintrag erfolgreich gelöscht"};
-      }
-      else {
+      } else {
         final responseBody = jsonDecode(response.body);
         return {"success": false, "message": responseBody["error"] ?? "Fehler beim Löschen des Watchlist-Eintrags"};
       }

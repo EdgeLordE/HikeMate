@@ -160,7 +160,7 @@ paths:
         "400":
           description: Ungültige Anfrage
       x-openapi-router-controller: swagger_server.controllers.federal_state_controller
-  /Watchlist:
+  /PostWatchlist:
     post:
       tags:
         - Watchlist

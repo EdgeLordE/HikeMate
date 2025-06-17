@@ -360,19 +360,19 @@ paths:
     delete:
       tags:
         - Watchlist
-      summary: Löscht einen bestimmten Eintrag von der Watchlist anhand der WatchlistID.
+      summary: Löscht einen bestimmten Eintrag von der Watchlist anhand von UserID und MountainID.
       operationId: delete_watchlist_entry
       parameters:
-        - name: WatchlistID
-          in: query
-          required: true
-          description: ID des Watchlist-Eintrags, der gelöscht werden soll.
-          schema:
-            type: integer
         - name: UserID
           in: query
           required: true
           description: ID des Benutzers zur Autorisierung.
+          schema:
+            type: integer
+        - name: MountainID
+          in: query
+          required: true
+          description: ID des Berges, der von der Watchlist entfernt werden soll.
           schema:
             type: integer
       responses:

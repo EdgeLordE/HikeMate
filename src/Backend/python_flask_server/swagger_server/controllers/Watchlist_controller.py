@@ -52,32 +52,37 @@ def add_mountain_to_watchlist():
 
 def remove_mountain_from_watchlist():
     """
-    Remove a mountain from a user's watchlist using UserID and MountainID.
-    Corresponds to operationId: remove_mountain_from_watchlist
-    Expects JSON body: {"UserID": user_id, "MountainID": mountain_id}
+    Entfernt einen Berg von der Watchlist eines Benutzers anhand von UserID und MountainID.
+    Erwartet: DELETE /Watchlist/entry?UserID=...&MountainID=...
     """
-    if not connexion.request.is_json:
-        return {"error": "Request must be JSON"}, 400
+    from flask import request
+
+    user_id = request.args.get("UserID")
+    mountain_id = request.args.get("MountainID")
+
+    if not user_id or not mountain_id:
+        return {"error": "UserID und MountainID sind erforderlich."}, 400
 
     try:
-        data = connexion.request.json
-        user_id = data.get('UserID')
-        mountain_id = data.get('MountainID')
+        user_id = int(user_id)
+        mountain_id = int(mountain_id)
+    except Exception:
+        return {"error": "UserID und MountainID müssen Integer sein."}, 400
 
-        if not user_id or not mountain_id:
-            return {"error": "UserID and MountainID are required"}, 400
-
+    try:
         response = supabase.table('Watchlist').delete().eq('UserID', user_id).eq('MountainID', mountain_id).execute()
 
-        if response.data: # Supabase delete returns the deleted rows
+        if response.data:  # Supabase delete returns the deleted rows
             return {"message": "Mountain removed from watchlist"}, 200
-        elif response.error:
+        elif getattr(response, 'error', None):
             return {"error": "Failed to remove mountain from watchlist", "details": str(response.error.message if response.error else "Unknown error")}, 500
-        else: # No data and no error means nothing was deleted (e.g., item not found)
+        else:
             return {"message": "Mountain not found on watchlist or already removed"}, 404
 
     except Exception as e:
         print(f"Error in remove_mountain_from_watchlist: {e}")
+        import traceback
+        traceback.print_exc()
         return {"error": str(e)}, 500
 
 def check_if_mountain_is_on_watchlist():

@@ -10,6 +10,7 @@
 import connexion
 import json
 from supabase import create_client
+from swagger_server.logger import logger 
 
 ## @brief Supabase-Projekt-URL
 SUPABASE_URL = "https://cyzdfdweghhrlquxwaxl.supabase.co"
@@ -23,34 +24,41 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def get_activities_by_user_id():
     """
-@brief Gibt alle Aktivitäten eines bestimmten Benutzers zurück.
+    @brief Gibt alle Aktivitäten eines bestimmten Benutzers zurück.
 
-@details
-Diese Funktion verarbeitet einen GET-Request der Form `/Aktivitaet?user_id=...`
-und gibt eine Liste von Aktivitäten zurück, die dem Benutzer zugeordnet sind.
-Die Aktivitätsdaten werden aus der Supabase-Tabelle `Activity` gelesen
-und nach Datum absteigend sortiert.
+    @details
+    Diese Funktion verarbeitet einen GET-Request der Form `/Aktivitaet?user_id=...`
+    und gibt eine Liste von Aktivitäten zurück, die dem Benutzer zugeordnet sind.
+    Die Aktivitätsdaten werden aus der Supabase-Tabelle `Activity` gelesen
+    und nach Datum absteigend sortiert.
 
-@param user_id Die ID des Benutzers (als Query-Parameter).
+    @param user_id Die ID des Benutzers (als Query-Parameter).
 
-@return
-    200: JSON-Objekt mit einer Liste von Aktivitäten.
-    400: JSON-Fehlermeldung bei fehlender oder ungültiger user_id.
-    500: JSON-Fehlermeldung bei Serverfehler.
+    @return
+        200: JSON-Objekt mit einer Liste von Aktivitäten.
+        400: JSON-Fehlermeldung bei fehlender oder ungültiger user_id.
+        500: JSON-Fehlermeldung bei Serverfehler.
     """
     try:
         user_id = connexion.request.args.get("user_id")
+        logger.info(f"GET /Aktivitaet?user_id={user_id} aufgerufen.")
+
         if not user_id:
+            logger.warning("Request ohne user_id erhalten.")
             return {"error": "user_id ist erforderlich."}, 400
         try:
             user_id = int(user_id)
         except ValueError:
+            logger.warning(f"Ungültige user_id übergeben: {user_id}")
             return {"error": "user_id muss eine Zahl sein."}, 400
 
+        logger.info(f"Suche Aktivitäten für user_id={user_id} in Supabase.")
         response = supabase.table('Activity').select(
             "Distance, Increase, Duration, Calories, MaxAltitude, Date"
         ).eq("UserID", user_id).order("Date", desc=True).execute()
 
+        logger.info(f"{len(response.data)} Aktivitäten für user_id={user_id} gefunden.")
         return {"activities": response.data}, 200
     except Exception as e:
+        logger.error(f"Fehler beim Abrufen der Aktivitäten: {e}", exc_info=True)
         return {"error": str(e)}, 500

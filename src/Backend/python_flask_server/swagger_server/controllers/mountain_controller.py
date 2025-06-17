@@ -9,6 +9,7 @@
 
 import connexion
 from supabase import create_client, Client
+from ..logger import logger  # Logger importieren
 
 ## @brief Supabase-Projekt-URL
 SUPABASE_URL = "https://cyzdfdweghhrlquxwaxl.supabase.co"
@@ -36,13 +37,17 @@ def get_mountain_by_name(mountain_name):
       500: Serverfehler.
     """
     try:
+        logger.info(f"Suche Berge mit Name wie: {mountain_name}")
         response = supabase.table('Mountain').select(
             "Mountainid, Name, Height, Picture, FederalStateid (Name)"
         ).ilike('Name', f'%{mountain_name}%').execute()
 
         if response.data:
+            logger.info(f"{len(response.data)} Berge gefunden für Suchbegriff '{mountain_name}'.")
             return {"response": response.data}, 200
         else:
+            logger.warning(f"Kein Berg mit Name wie '{mountain_name}' gefunden.")
             return {"message": "No mountains found with that name"}, 404
     except Exception as e:
+        logger.error(f"Fehler bei der Bergsuche: {e}", exc_info=True)
         return {"error": str(e)}, 500

@@ -2,7 +2,7 @@
 # @file federal_state_controller.py
 # @brief API-Controller zum Abrufen von Bundesländern aus der Supabase-Datenbank.
 # @details Diese Datei enthält Endpunkte zur Abfrage von Bundesländern anhand ihrer ID.
-# @author [Dein Name]
+# @author Emil Wagner, Mathias Florea
 # @date 2025-06-17
 # @version 1.0
 ##
@@ -10,6 +10,7 @@
 import connexion  # REST-Framework zur Verbindung mit OpenAPI/OpenAPI-Spezifikationen
 import json       # Für das Parsen und Erzeugen von JSON-Daten
 from supabase import create_client  # Supabase Python SDK
+from swagger_server.logger import logger  # Logger importieren
 
 ## @brief Supabase-Projekt-URL
 SUPABASE_URL = "https://cyzdfdweghhrlquxwaxl.supabase.co"
@@ -36,14 +37,18 @@ def get_federal_state_by_id(federal_state_id):
       500: Serverfehler.
     """
     try:
+        logger.info(f"Suche Bundesland mit ID {federal_state_id} in Supabase.")
         # Anfrage an die Supabase-Datenbank: Suche nach Bundesland mit passender ID
         response = supabase.table('FederalState').select("*").eq("FederalStateid", federal_state_id).execute()
         if response.data:
+            logger.info(f"Bundesland gefunden: {response.data[0]}")
             # Bundesland gefunden, gib das erste Ergebnis zurück
             return {"response": response.data[0]}, 200
         else:
+            logger.warning(f"Kein Bundesland mit ID {federal_state_id} gefunden.")
             # Kein Bundesland mit dieser ID gefunden
             return {"message": "Federal state not found"}, 404
     except Exception as e:
+        logger.error(f"Fehler beim Abrufen des Bundeslandes: {e}", exc_info=True)
         # Fehler bei der Datenbankabfrage
         return {"error": str(e)}, 500

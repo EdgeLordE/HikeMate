@@ -24,20 +24,6 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 def add_mountain_to_watchlist():
     """
     @brief Fügt einen Berg zur Watchlist eines Benutzers hinzu.
-
-    @details
-    Erwartet einen JSON-Body mit:
-      - UserID (int): Die ID des Benutzers.
-      - MountainID (int): Die ID des Berges.
-
-    Prüft, ob der Berg bereits auf der Watchlist oder als erledigt markiert ist.
-
-    @return
-      201: Berg erfolgreich zur Watchlist hinzugefügt.
-      409: Berg ist bereits auf der Watchlist.
-      403: Berg ist bereits als erledigt markiert.
-      400: Fehlerhafte Eingabedaten.
-      500: Serverfehler.
     """
     if not connexion.request.is_json:
         return {"error": "Request must be JSON"}, 400
@@ -66,7 +52,7 @@ def add_mountain_to_watchlist():
         if response.data:
             created_item = response.data[0] if isinstance(response.data, list) and len(response.data) > 0 else response.data
             return {"response": created_item, "message": "Mountain added to watchlist"}, 201
-        elif response.error:
+        elif getattr(response, 'error', None):
             return {"error": "Failed to add mountain to watchlist", "details": str(response.error.message if response.error else "Unknown error")}, 500
         else:
             return {"error": "Failed to add mountain to watchlist and no specific error reported"}, 500
@@ -77,22 +63,9 @@ def add_mountain_to_watchlist():
 def remove_mountain_from_watchlist():
     """
     @brief Entfernt einen Berg von der Watchlist eines Benutzers anhand von UserID und MountainID.
-
-    @details
-    Erwartet Query-Parameter:
-      - UserID (int): Die ID des Benutzers.
-      - MountainID (int): Die ID des Berges.
-
-    @return
-      200: Berg erfolgreich entfernt.
-      404: Berg nicht auf der Watchlist gefunden.
-      400: Fehlerhafte Eingabedaten.
-      500: Serverfehler.
     """
-    from flask import request
-
-    user_id = request.args.get("UserID")
-    mountain_id = request.args.get("MountainID")
+    user_id = connexion.request.args.get("UserID")
+    mountain_id = connexion.request.args.get("MountainID")
 
     if not user_id or not mountain_id:
         return {"error": "UserID und MountainID sind erforderlich."}, 400
@@ -119,16 +92,6 @@ def remove_mountain_from_watchlist():
 def check_if_mountain_is_on_watchlist():
     """
     @brief Prüft, ob ein Berg auf der Watchlist eines Benutzers ist.
-
-    @details
-    Erwartet Query-Parameter:
-      - UserID (int): Die ID des Benutzers.
-      - MountainID (int): Die ID des Berges.
-
-    @return
-      200: { "isOnWatchlist": true/false }
-      400: Fehlerhafte Eingabedaten.
-      500: Serverfehler.
     """
     try:
         user_id = connexion.request.args.get("UserID")
@@ -154,19 +117,8 @@ def check_if_mountain_is_on_watchlist():
 def fetch_watchlist():
     """
     @brief Gibt die gesamte Watchlist eines Benutzers zurück.
-
-    @details
-    Erwartet Query-Parameter:
-      - UserID (int): Die ID des Benutzers.
-
-    @return
-      200: Liste der Watchlist-Einträge.
-      400: Fehlerhafte Eingabedaten.
-      500: Serverfehler.
     """
-    from flask import request
-
-    UserID = request.args.get("UserID")
+    UserID = connexion.request.args.get("UserID")
     if not UserID:
         return {"error": "UserID query parameter is required"}, 400
 
@@ -191,22 +143,9 @@ def fetch_watchlist():
 def delete_watchlist_entry_by_id():
     """
     @brief Löscht einen Watchlist-Eintrag anhand von WatchlistID und UserID.
-
-    @details
-    Erwartet Query-Parameter:
-      - WatchlistID (int): Die ID des Watchlist-Eintrags.
-      - UserID (int): Die ID des Benutzers.
-
-    @return
-      200: Watchlist-Eintrag erfolgreich gelöscht.
-      404: Eintrag nicht gefunden oder nicht autorisiert.
-      400: Fehlerhafte Eingabedaten.
-      500: Serverfehler.
     """
-    from flask import request
-
-    watchlist_id = request.args.get("WatchlistID")
-    user_id = request.args.get("UserID")
+    watchlist_id = connexion.request.args.get("WatchlistID")
+    user_id = connexion.request.args.get("UserID")
 
     if not watchlist_id or not user_id:
         return {"error": "WatchlistID und UserID sind erforderlich."}, 400

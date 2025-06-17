@@ -234,68 +234,6 @@ paths:
                     type: string
                     nullable: true
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
-    delete:
-      tags:
-        - Watchlist
-      summary: Entfernt einen Berg von der Watchlist eines Benutzers anhand von UserID und MountainID.
-      operationId: remove_mountain_from_watchlist
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                UserID:
-                  type: integer
-                  description: ID des Benutzers.
-                MountainID:
-                  type: integer
-                  description: ID des Berges.
-              required:
-                - UserID
-                - MountainID
-      responses:
-        "200":
-          description: Berg erfolgreich von der Watchlist entfernt.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-        "400":
-          description: UserID und MountainID sind erforderlich.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-        "404":
-          description: Berg nicht auf der Watchlist gefunden oder bereits entfernt.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-        "500":
-          description: Fehler beim Entfernen des Berges von der Watchlist.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                  details:
-                    type: string
-                    nullable: true
-      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
   /Watchlist:
     get:
       tags:
@@ -361,7 +299,7 @@ paths:
       tags:
         - Watchlist
       summary: Löscht einen bestimmten Eintrag von der Watchlist anhand von UserID und MountainID.
-      operationId: delete_watchlist_entry
+      operationId: remove_mountain_from_watchlist
       parameters:
         - name: UserID
           in: query

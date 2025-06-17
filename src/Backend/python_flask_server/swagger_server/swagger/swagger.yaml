@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: HikeMate
-  description: Eine API um eine Kaffeemaschine zu verwalten
+  description: Eine API um eine Supabasedatenbank zu verwalten
   version: 1.0.0
 servers:
   - url: /
@@ -511,60 +511,6 @@ paths:
         "500":
           description: Serverfehler
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
-  /User/phone:
-    get:
-      tags:
-        - Login/Registrierung
-      summary: Gibt die Notfall-Telefonnummer eines Benutzers zurück
-      operationId: get_phone_number
-      parameters:
-        - name: UserID
-          in: query
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Telefonnummer erfolgreich geladen
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  ContactNumber:
-                    type: string
-        "400":
-          description: Fehlerhafte Anfrage
-        "500":
-          description: Serverfehler
-      x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
-    put:
-      tags:
-        - Login/Registrierung
-      summary: Speichert die Notfall-Telefonnummer eines Benutzers
-      operationId: update_phone_number
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                UserID:
-                  type: integer
-                ContactNumber:
-                  type: string
-              required:
-                - UserID
-                - ContactNumber
-      responses:
-        "200":
-          description: Telefonnummer erfolgreich gespeichert
-        "400":
-          description: Fehlerhafte Anfrage
-        "500":
-          description: Serverfehler
-      x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
   /DeleteDone:
     delete:
       tags:

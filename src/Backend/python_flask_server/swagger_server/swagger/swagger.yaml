@@ -627,10 +627,10 @@ paths:
         "500":
           description: Serverfehler
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
-  /Done:
+  /DeleteDone:
     delete:
       tags:
-        - Done
+        - Berge erledigt
       summary: Löscht einen erledigten Berg für einen User
       operationId: delete_done_mountain
       parameters:

@@ -104,7 +104,7 @@ class Watchlist {
   }
 
   static Future<Map<String, dynamic>> fetchWatchlist(int userId) async {
-    final String apiUrl = "$_baseUrl/Watchlist/$userId";
+    final String apiUrl = "$_baseUrl/Watchlist?UserID=$userId";
     debugPrint('Watchlist.fetchWatchlist() URL: $apiUrl');
     try {
       final response = await http.get(
@@ -122,7 +122,6 @@ class Watchlist {
         return {"success": false, "message": responseBody["error"] ?? "Fehler beim Abrufen der Watchlist"};
       }
     } catch (e) {
-
       return {"success": false, "message": "Fehler: $e"};
     }
   }

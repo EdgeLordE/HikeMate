@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Class/UserService.dart'; // Stellen Sie sicher, dass dieser Pfad korrekt ist
-// import '../Class/User.dart'; // Importieren, falls User.id direkt benötigt wird und nicht über UserService geht
+import '../Class/User.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({Key? key}) : super(key: key);
@@ -51,7 +50,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       _loading = true;
     });
 
-    final success = await UserService.changePassword(oldPass, newPass);
+    final success = await User.changePassword(oldPass, newPass);
 
     if (!mounted) return;
 

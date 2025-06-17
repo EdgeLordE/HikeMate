@@ -181,18 +181,16 @@ class _DonePageState extends State<DonePage>
 
   Future<void> _deleteWatch(int id) async {
     try {
-      final result = await Watchlist.deleteWatchlistEntry(id, User.id);
+      await supabase
+          .from('Watchlist')
+          .delete()
+          .eq('WatchlistID', id)
+          .eq('UserID', User.id);
       if (mounted) {
-        if (result["success"] == true) {
-          setState(() => _watchlist.removeWhere((e) => e['WatchlistID'] == id));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result["message"] ?? 'Von Watchlist entfernt'), backgroundColor: Colors.orangeAccent),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result["message"] ?? 'Fehler beim Entfernen'), backgroundColor: Colors.red),
-          );
-        }
+        setState(() => _watchlist.removeWhere((e) => e['WatchlistID'] == id));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Von Watchlist entfernt'), backgroundColor: Colors.orangeAccent),
+        );
       }
     } catch (e) {
       if (mounted) {

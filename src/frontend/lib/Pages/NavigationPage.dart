@@ -7,7 +7,8 @@ import 'package:latlong2/latlong.dart';
 import '../Class/LocationTracker.dart';
 import '../Class/TrackingStorage.dart';
 import '../Class/supabase_client.dart';
-import 'emergency_page.dart';
+import '../Class/Activity.dart';
+
 
 class NavigationPage extends StatefulWidget {
   const NavigationPage({super.key});
@@ -146,17 +147,26 @@ class _NavigationPageState extends State<NavigationPage> {
 
   void _saveActivity() async {
     try {
+      // Beispielhafte Berechnung: 0.9 kcal pro kg pro km, 70kg angenommen
+      // Du kannst Gewicht und Formel nach Bedarf anpassen!
+      double gewicht = 70; // kg, ggf. dynamisch holen
+      double distanzKm = _trackingService.totalDistance / 1000.0; // Meter zu km
+      double calories = gewicht * distanzKm * 0.9;
+
       await supabase.from('Activity').insert({
         'UserID': User.id,
         'Distance': _trackingService.totalDistance,
         'Increase': _trackingService.totalAscent,
         'Duration': _trackingService.duration.inSeconds,
         'Date': DateTime.now().toIso8601String(),
+        'Calories': calories.round(), // als ganze Zahl speichern
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Aktivität erfolgreich gespeichert')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Fehler beim Speichern der Aktivität: $e')),
       );
@@ -174,8 +184,8 @@ class _NavigationPageState extends State<NavigationPage> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              center: LatLng(0, 0),
-              zoom: 14.0,
+              initialCenter: LatLng(0, 0), // initialCenter statt center
+              initialZoom: 14.0, // initialZoom statt zoom
             ),
             children: [
               TileLayer(
@@ -198,30 +208,7 @@ class _NavigationPageState extends State<NavigationPage> {
             ],
           ),
 
-          // SOS-Button oben links
-          Positioned(
-            top: 40,
-            left: 10,
-            child: SizedBox(
-              width: 45,
-              height: 45,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => const EmergencyPage()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.all(8),
-                ),
-                child: const Icon(Icons.sos, color: Colors.white, size: 24),
-              ),
-            ),
-          ),
+          // SOS-Button wurde entfernt
 
           if (!_trackingService.isTracking)
             Positioned(

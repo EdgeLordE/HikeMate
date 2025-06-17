@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'HomePage.dart';
 import 'RegistrationPage.dart';
-import '../Class/supabase_client.dart'; // Stellen Sie sicher, dass dieser Import benötigt wird
 import '../Class/User.dart';
-// import 'package:bcrypt/bcrypt.dart'; // Wird vermutlich in User.login_User verwendet
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

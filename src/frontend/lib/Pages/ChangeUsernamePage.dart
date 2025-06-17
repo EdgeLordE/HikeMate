@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../Class/UserService.dart';
 import '../Class/User.dart';
 
 class ChangeUsernamePage extends StatefulWidget {
@@ -56,7 +55,7 @@ class _ChangeUsernamePageState extends State<ChangeUsernamePage> {
       _loading = true;
     });
 
-    final success = await UserService.changeUsername(oldUsername, newUsername);
+    final success = await User.changeUsername(oldUsername, newUsername);
 
     if (!mounted) return;
 

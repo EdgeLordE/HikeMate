@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../Class/supabase_client.dart';
 import '../Class/User.dart';
-import '../Class/UserService.dart';
 import 'settings_page.dart';
+import '../Class/Activity.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -37,13 +36,10 @@ class _ProfilePageState extends State<ProfilePage> {
         setState(() => _isLoading = false);
         return;
       }
-      final response = await supabase
-          .from('Activity')
-          .select('Distance, Increase, Duration, Calories, MaxAltitude, Date')
-          .eq('UserID', currentUserId)
-          .order('Date', ascending: false);
 
-      final rows = List<Map<String, dynamic>>.from(response as List);
+      // Aktivitäten über die REST-API laden
+      final rows = await Activity.fetchActivitiesByUserId(currentUserId);
+
       double sumDist = 0.0;
       int sumAscent = 0;
       double sumDuration = 0.0;
@@ -210,7 +206,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const SettingsPage()));
               } else if (value == 'logout') {
-                await UserService.logout(context);
+                await User.logout(context);
               }
             },
             itemBuilder: (_) => [

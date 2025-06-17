@@ -660,3 +660,56 @@ paths:
                   error:
                     type: string
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+  /DeleteWatchlist:
+    delete:
+      tags:
+        - Watchlist
+      summary: Löscht einen Watchlist-Eintrag anhand von WatchlistID und UserID.
+      operationId: delete_watchlist_entry_by_id
+      parameters:
+        - name: WatchlistID
+          in: query
+          required: true
+          description: ID des Watchlist-Eintrags, der gelöscht werden soll.
+          schema:
+            type: integer
+        - name: UserID
+          in: query
+          required: true
+          description: ID des Benutzers zur Autorisierung.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Watchlist-Eintrag erfolgreich gelöscht.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "204":
+          description: Watchlist-Eintrag erfolgreich gelöscht (kein Inhalt).
+        "404":
+          description: Watchlist-Eintrag nicht gefunden oder Benutzer nicht autorisiert.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "500":
+          description: Fehler beim Löschen des Watchlist-Eintrags.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+                    nullable: true
+      x-openapi-router-controller: swagger_server.controllers.Watchlist_controller

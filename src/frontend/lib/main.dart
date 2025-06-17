@@ -13,29 +13,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
-  await startRestApiServer();
   await CheckInService().init();
 
   runApp(const MyApp());
 }
 
-Future<void> startRestApiServer() async {
-  try {
-    final pythonFilePath =
-        '${Directory.current.path}/src/frontend/lib/start_server.py';
-    debugPrint('Starte Python-Server: $pythonFilePath');
-
-    final process = await Process.start('python', [pythonFilePath]);
-    process.stdout.transform(SystemEncoding().decoder).listen((data) {
-      debugPrint('Python stdout: $data');
-    });
-    process.stderr.transform(SystemEncoding().decoder).listen((data) {
-      debugPrint('Python stderr: $data');
-    });
-  } catch (e) {
-    debugPrint('Fehler beim Starten des Python-Servers: $e');
-  }
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);

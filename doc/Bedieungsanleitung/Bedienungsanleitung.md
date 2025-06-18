@@ -1,6 +1,15 @@
 # Bedienungsanleitung – HikeMate
 
-## 0. Setup
+
+## 0. Installation
+
+1. **Projekt anlegen:**  
+   - Repository klonen: `git clone https://github.com/EdgeLordE/HikeMate/`  
+   - Abhängigkeiten installieren: `flutter pub get`  
+   - App starten: `flutter run`  
+
+
+## 1. Setup
 
 1. **Android-Gerät**  
    - Smartphone per USB-Kabel mit dem PC verbinden.  
@@ -12,21 +21,17 @@
    - Gerät in Xcode als vertrauenswürdig bestätigen.  
    - In den iOS-Einstellungen unter Entwickleroptionen USB-Debugging aktivieren (falls vorhanden).
 
-3. **PC-Einstellungen**  
-   - Flutter und Android SDK installiert und in PATH registriert.  
-   - Bei Android: `adb devices` im Terminal ausführen, um Verbindung zu überprüfen.  
-   - Bei iOS: `flutter devices` oder Xcode aufrufen, um das Gerät zu erkennen.
-   - In den Einstellungen sollt der Entwicklermodus an aktiviert.
-
-## Installation
-
-1. **Aus dem Quellcode**  
-   - Repository klonen: `git clone https://github.com/EdgeLordE/HikeMate/`  
-   - Abhängigkeiten installieren: `flutter pub get`  
-   - App starten: `flutter run`  
+3. **PC-Einstellungen**
+   - Per exe:
+      - unter HikeMate/bin die .exe starten
+   - Per IDE
+      - Flutter und Android SDK installiert und in PATH registriert.  
+      - Bei Android: `adb devices` im Terminal ausführen, um Verbindung zu überprüfen.  
+      - Bei iOS: `flutter devices` oder Xcode aufrufen, um das Gerät zu erkennen.
+      - In den Einstellungen sollt der Entwicklermodus an aktiviert.
 
 
-## Anleitung
+## 2. Anleitung
 
    ### 9.1 Benutzeranmeldung
 

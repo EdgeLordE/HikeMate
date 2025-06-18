@@ -1,0 +1,78 @@
+\doxysection{swagger\+\_\+server.\+controllers.\+mountain\+\_\+controller Namespace Reference}
+\hypertarget{namespaceswagger__server_1_1controllers_1_1mountain__controller}{}\label{namespaceswagger__server_1_1controllers_1_1mountain__controller}\index{swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1mountain__controller_a7b095403768e841041ad5fe78b705ff5}{get\+\_\+mountain\+\_\+by\+\_\+name}} (mountain\+\_\+name)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1mountain__controller_a6272ca4f902b7dab714d6ae507b855e5}{SUPABASE\+\_\+\+URL}} = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}
+\begin{DoxyCompactList}\small\item\em Supabase-\/\+Projekt-\/\+URL. \end{DoxyCompactList}\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1mountain__controller_ace628f60d86695ed9552d91ab2b437f0}{SUPABASE\+\_\+\+KEY}} = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}
+\begin{DoxyCompactList}\small\item\em Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1mountain__controller_a12a692fe1abca70daf978342397706d8}{supabase}} = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1mountain__controller_a6272ca4f902b7dab714d6ae507b855e5}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1mountain__controller_ace628f60d86695ed9552d91ab2b437f0}{SUPABASE\+\_\+\+KEY}})
+\begin{DoxyCompactList}\small\item\em Erstellt einen Supabase-\/\+Client für Datenbankoperationen. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1mountain__controller_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1mountain__controller_a7b095403768e841041ad5fe78b705ff5}\index{swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}!get\_mountain\_by\_name@{get\_mountain\_by\_name}}
+\index{get\_mountain\_by\_name@{get\_mountain\_by\_name}!swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}}
+\doxysubsubsection{\texorpdfstring{get\_mountain\_by\_name()}{get\_mountain\_by\_name()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1mountain__controller_a7b095403768e841041ad5fe78b705ff5} 
+swagger\+\_\+server.\+controllers.\+mountain\+\_\+controller.\+get\+\_\+mountain\+\_\+by\+\_\+name (\begin{DoxyParamCaption}\item[{}]{mountain\+\_\+name}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Sucht Berge anhand eines Namens (case-insensitive, Teilstring).
+
+@details
+Gibt alle Berge zurück, deren Name (teilweise, Groß-/Kleinschreibung ignorierend) mit dem Suchbegriff übereinstimmt.
+Es werden folgende Felder zurückgegeben: Mountainid, Name, Height, Picture, FederalStateid (Name).
+
+@param mountain_name Der (Teil-)Name des gesuchten Berges.
+
+@return
+  200: JSON-Objekt mit einer Liste passender Berge.
+  404: Kein Berg mit diesem Namen gefunden.
+  500: Serverfehler.
+\end{DoxyVerb}
+ 
+
+\label{doc-var-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1mountain__controller_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1mountain__controller_a12a692fe1abca70daf978342397706d8}\index{swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}!supabase@{supabase}}
+\index{supabase@{supabase}!swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}}
+\doxysubsubsection{\texorpdfstring{supabase}{supabase}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1mountain__controller_a12a692fe1abca70daf978342397706d8} 
+swagger\+\_\+server.\+controllers.\+mountain\+\_\+controller.\+supabase = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1mountain__controller_a6272ca4f902b7dab714d6ae507b855e5}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1mountain__controller_ace628f60d86695ed9552d91ab2b437f0}{SUPABASE\+\_\+\+KEY}})}
+
+
+
+Erstellt einen Supabase-\/\+Client für Datenbankoperationen. 
+
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1mountain__controller_ace628f60d86695ed9552d91ab2b437f0}\index{swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}!SUPABASE\_KEY@{SUPABASE\_KEY}}
+\index{SUPABASE\_KEY@{SUPABASE\_KEY}!swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_KEY}{SUPABASE\_KEY}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1mountain__controller_ace628f60d86695ed9552d91ab2b437f0} 
+str swagger\+\_\+server.\+controllers.\+mountain\+\_\+controller.\+SUPABASE\+\_\+\+KEY = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}}
+
+
+
+Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. 
+
+\begin{DoxyWarning}{Warning}
+Verwende diesen Key nur im Backend. Nicht geeignet für den Client! 
+\end{DoxyWarning}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1mountain__controller_a6272ca4f902b7dab714d6ae507b855e5}\index{swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}!SUPABASE\_URL@{SUPABASE\_URL}}
+\index{SUPABASE\_URL@{SUPABASE\_URL}!swagger\_server.controllers.mountain\_controller@{swagger\_server.controllers.mountain\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_URL}{SUPABASE\_URL}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1mountain__controller_a6272ca4f902b7dab714d6ae507b855e5} 
+str swagger\+\_\+server.\+controllers.\+mountain\+\_\+controller.\+SUPABASE\+\_\+\+URL = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}}
+
+
+
+Supabase-\/\+Projekt-\/\+URL. 
+

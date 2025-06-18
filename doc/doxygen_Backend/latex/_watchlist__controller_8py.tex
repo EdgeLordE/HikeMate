@@ -1,0 +1,52 @@
+\doxysection{C\+:/\+Users/43681/source/repos/\+Hike\+Mate/src/\+Backend/python\+\_\+flask\+\_\+server/swagger\+\_\+server/controllers/\+Watchlist\+\_\+controller.py File Reference}
+\hypertarget{_watchlist__controller_8py}{}\label{_watchlist__controller_8py}\index{C:/Users/43681/source/repos/HikeMate/src/Backend/python\_flask\_server/swagger\_server/controllers/Watchlist\_controller.py@{C:/Users/43681/source/repos/HikeMate/src/Backend/python\_flask\_server/swagger\_server/controllers/Watchlist\_controller.py}}
+
+
+API-\/\+Controller für die Verwaltung der Watchlist eines Benutzers.  
+
+
+\doxysubsubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \mbox{\hyperlink{namespaceswagger__server}{swagger\+\_\+server}}
+\item 
+namespace \mbox{\hyperlink{namespaceswagger__server_1_1controllers}{swagger\+\_\+server.\+controllers}}
+\item 
+namespace \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_acbac04b9e445aea69f83dad553e248df}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+add\+\_\+mountain\+\_\+to\+\_\+watchlist}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_ac35e1c3fe4b6644a8e8e57c08049fb78}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+remove\+\_\+mountain\+\_\+from\+\_\+watchlist}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a53d70bc46ba258e22f3396eee489138f}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+check\+\_\+if\+\_\+mountain\+\_\+is\+\_\+on\+\_\+watchlist}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a0c26f1d84bd3cc8e0132e87a93679aef}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+fetch\+\_\+watchlist}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a5276d1c6944d3d82b4a8fbe58622e32e}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+delete\+\_\+watchlist\+\_\+entry\+\_\+by\+\_\+id}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a6b3eeee434505a9b183aa9747de8b9d5}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+SUPABASE\+\_\+\+URL}} = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}
+\begin{DoxyCompactList}\small\item\em Supabase-\/\+Projekt-\/\+URL. \end{DoxyCompactList}\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a9978db5bd33dcf7480f27e5765d3c7b4}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+SUPABASE\+\_\+\+KEY}} = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}
+\begin{DoxyCompactList}\small\item\em Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. \end{DoxyCompactList}\item 
+Client \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_aa2778b18ace81fa88ab13a984f71862a}{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+supabase}} = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a6b3eeee434505a9b183aa9747de8b9d5}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a9978db5bd33dcf7480f27e5765d3c7b4}{SUPABASE\+\_\+\+KEY}})
+\begin{DoxyCompactList}\small\item\em Erstellt einen Supabase-\/\+Client für Datenbankoperationen. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+API-\/\+Controller für die Verwaltung der Watchlist eines Benutzers. 
+
+Enthält Endpunkte zum Hinzufügen, Entfernen, Prüfen und Abrufen von Watchlist-\/\+Einträgen über Supabase. \begin{DoxyAuthor}{Author}
+Emil Wagner, Mathias Florea 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2025-\/06-\/17 
+\end{DoxyDate}
+\begin{DoxyVersion}{Version}
+1.\+0 
+\end{DoxyVersion}

@@ -1,0 +1,77 @@
+\doxysection{swagger\+\_\+server.\+controllers.\+federal\+\_\+state\+\_\+controller Namespace Reference}
+\hypertarget{namespaceswagger__server_1_1controllers_1_1federal__state__controller}{}\label{namespaceswagger__server_1_1controllers_1_1federal__state__controller}\index{swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1federal__state__controller_aaa987a1f12b49a99a95c462b03b3c6b6}{get\+\_\+federal\+\_\+state\+\_\+by\+\_\+id}} (federal\+\_\+state\+\_\+id)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ae33f462d823211206ee71b64dac50ec5}{SUPABASE\+\_\+\+URL}} = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}
+\begin{DoxyCompactList}\small\item\em Supabase-\/\+Projekt-\/\+URL. \end{DoxyCompactList}\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ab9f40665e051b63140d9d4acbf7d9977}{SUPABASE\+\_\+\+KEY}} = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}
+\begin{DoxyCompactList}\small\item\em Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ae2e773d1b7184109f6fe7a67f68ef474}{supabase}} = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ae33f462d823211206ee71b64dac50ec5}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ab9f40665e051b63140d9d4acbf7d9977}{SUPABASE\+\_\+\+KEY}})
+\begin{DoxyCompactList}\small\item\em Erstellt einen Supabase-\/\+Client für Datenbankoperationen. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1federal__state__controller_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1federal__state__controller_aaa987a1f12b49a99a95c462b03b3c6b6}\index{swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}!get\_federal\_state\_by\_id@{get\_federal\_state\_by\_id}}
+\index{get\_federal\_state\_by\_id@{get\_federal\_state\_by\_id}!swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}}
+\doxysubsubsection{\texorpdfstring{get\_federal\_state\_by\_id()}{get\_federal\_state\_by\_id()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1federal__state__controller_aaa987a1f12b49a99a95c462b03b3c6b6} 
+swagger\+\_\+server.\+controllers.\+federal\+\_\+state\+\_\+controller.\+get\+\_\+federal\+\_\+state\+\_\+by\+\_\+id (\begin{DoxyParamCaption}\item[{}]{federal\+\_\+state\+\_\+id}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Gibt ein Bundesland anhand seiner ID zurück.
+
+@details
+Diese Funktion sucht in der Supabase-Tabelle `FederalState` nach einem Eintrag mit der angegebenen ID.
+
+@param federal_state_id Die ID des Bundeslandes (als Funktionsparameter).
+
+@return
+  200: JSON-Objekt mit den Daten des Bundeslandes.
+  404: Bundesland nicht gefunden.
+  500: Serverfehler.
+\end{DoxyVerb}
+ 
+
+\label{doc-var-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1federal__state__controller_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ae2e773d1b7184109f6fe7a67f68ef474}\index{swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}!supabase@{supabase}}
+\index{supabase@{supabase}!swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}}
+\doxysubsubsection{\texorpdfstring{supabase}{supabase}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ae2e773d1b7184109f6fe7a67f68ef474} 
+swagger\+\_\+server.\+controllers.\+federal\+\_\+state\+\_\+controller.\+supabase = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ae33f462d823211206ee71b64dac50ec5}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ab9f40665e051b63140d9d4acbf7d9977}{SUPABASE\+\_\+\+KEY}})}
+
+
+
+Erstellt einen Supabase-\/\+Client für Datenbankoperationen. 
+
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ab9f40665e051b63140d9d4acbf7d9977}\index{swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}!SUPABASE\_KEY@{SUPABASE\_KEY}}
+\index{SUPABASE\_KEY@{SUPABASE\_KEY}!swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_KEY}{SUPABASE\_KEY}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ab9f40665e051b63140d9d4acbf7d9977} 
+str swagger\+\_\+server.\+controllers.\+federal\+\_\+state\+\_\+controller.\+SUPABASE\+\_\+\+KEY = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}}
+
+
+
+Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. 
+
+\begin{DoxyWarning}{Warning}
+Verwende diesen Key nur im Backend. Nicht geeignet für den Client! 
+\end{DoxyWarning}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ae33f462d823211206ee71b64dac50ec5}\index{swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}!SUPABASE\_URL@{SUPABASE\_URL}}
+\index{SUPABASE\_URL@{SUPABASE\_URL}!swagger\_server.controllers.federal\_state\_controller@{swagger\_server.controllers.federal\_state\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_URL}{SUPABASE\_URL}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1federal__state__controller_ae33f462d823211206ee71b64dac50ec5} 
+str swagger\+\_\+server.\+controllers.\+federal\+\_\+state\+\_\+controller.\+SUPABASE\+\_\+\+URL = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}}
+
+
+
+Supabase-\/\+Projekt-\/\+URL. 
+

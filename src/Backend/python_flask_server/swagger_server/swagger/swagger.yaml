@@ -23,67 +23,185 @@ paths:
     post:
       tags:
         - Login/Registrierung
-      summary: Registriert einen neuen Benutzer
+      summary: Registriert einen neuen Benutzer im HikeMate-System
+      description: |
+        Erstellt einen neuen Benutzer-Account mit den angegebenen persönlichen Daten. 
+        Der Benutzername muss eindeutig sein und das Passwort wird verschlüsselt gespeichert.
+        Nach erfolgreicher Registrierung kann sich der Benutzer anmelden und alle App-Funktionen nutzen.
       operationId: post_regristration
       requestBody:
         required: true
+        description: Persönliche Daten des neuen Benutzers
         content:
           application/json:
             schema:
               type: object
+              required:
+                - FirstName
+                - LastName
+                - Username
+                - Password
               properties:
                 FirstName:
                   type: string
+                  description: Vorname des Benutzers
+                  example: Max
+                  minLength: 2
+                  maxLength: 50
                 LastName:
                   type: string
+                  description: Nachname des Benutzers
+                  example: Mustermann
+                  minLength: 2
+                  maxLength: 50
                 Username:
                   type: string
+                  description: Eindeutiger Benutzername für die Anmeldung
+                  example: maxmuster2024
+                  minLength: 3
+                  maxLength: 30
                 Password:
                   type: string
+                  description: Passwort (mindestens 8 Zeichen, wird verschlüsselt gespeichert)
+                  example: sicheresPasswort123!
+                  minLength: 8
+            example:
+              FirstName: Max
+              LastName: Mustermann
+              Username: maxmuster2024
+              Password: sicheresPasswort123!
       responses:
         "200":
-          description: Benutzer erfolgreich registriert
+          description: Benutzer wurde erfolgreich registriert und ist nun im System verfügbar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Registrierung erfolgreich abgeschlossen
+                  userId:
+                    type: integer
+                    example: 42
+              example:
+                message: Registrierung erfolgreich abgeschlossen
+                userId: 42
         "400":
-          description: Ungültige Eingabedaten
+          description: Ungültige Eingabedaten oder Benutzername bereits vergeben
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Benutzername 'maxmuster2024' existiert bereits
+              example:
+                error: Benutzername 'maxmuster2024' existiert bereits
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+
   /Login:
     post:
       tags:
         - Login/Registrierung
-      summary: Login
+      summary: Authentifiziert einen Benutzer und erstellt eine Session
+      description: |
+        Überprüft die Zugangsdaten eines Benutzers und gibt bei erfolgreicher Authentifizierung
+        ein Session-Token zurück. Dieses Token kann für weitere authentifizierte API-Aufrufe verwendet werden.
       operationId: post_login
       requestBody:
         required: true
+        description: Anmeldedaten des Benutzers
         content:
           application/json:
             schema:
               type: object
+              required:
+                - Username
+                - Password
               properties:
                 Username:
                   type: string
+                  description: Benutzername des registrierten Benutzers
+                  example: maxmuster2024
                 Password:
                   type: string
+                  description: Passwort des Benutzers
+                  example: sicheresPasswort123!
+            example:
+              Username: maxmuster2024
+              Password: sicheresPasswort123!
       responses:
         "200":
-          description: Benutzer erfolgreich eingeloggt
+          description: Login erfolgreich, Session wurde erstellt
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Authentifizierungs-Token für weitere API-Aufrufe
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQyLCJ1c2VybmFtZSI6Im1heG11c3RlciIsImV4cCI6MTYxNjE2MTYxNn0.abc123
+                  user:
+                    type: object
+                    properties:
+                      UserID:
+                        type: integer
+                        example: 42
+                      Username:
+                        type: string
+                        example: maxmuster2024
+                      FirstName:
+                        type: string
+                        example: Max
+                      LastName:
+                        type: string
+                        example: Mustermann
+              example:
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQyLCJ1c2VybmFtZSI6Im1heG11c3RlciIsImV4cCI6MTYxNjE2MTYxNn0.abc123
+                user:
+                  UserID: 42
+                  Username: maxmuster2024
+                  FirstName: Max
+                  LastName: Mustermann
         "400":
-          description: Username oder Passwort ungültig
+          description: Ungültige Anmeldedaten oder fehlende Parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Benutzername oder Passwort ist falsch
+              example:
+                error: Benutzername oder Passwort ist falsch
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+
   /Aktivitaet:
     get:
       tags:
         - Aktivitäten
-      summary: Gibt eine Aktivität aufgrund der userid zurück
+      summary: Ruft alle Aktivitäten eines Benutzers ab
+      description: |
+        Gibt eine chronologische Liste aller aufgezeichneten Aktivitäten (Wanderungen, Bergtouren) 
+        für den angegebenen Benutzer zurück. Die Aktivitäten enthalten detaillierte Informationen 
+        wie zurückgelegte Strecke, Höhenmeter, Kalorienverbrauch und Dauer.
       operationId: get_activities_by_user_id
       parameters:
         - name: user_id
           in: query
           required: true
+          description: Eindeutige ID des Benutzers, dessen Aktivitäten abgerufen werden sollen
           schema:
             type: integer
+            minimum: 1
+            example: 42
       responses:
         "200":
-          description: Erfolgreich
+          description: Aktivitäten erfolgreich abgerufen
           content:
             application/json:
               schema:
@@ -93,98 +211,305 @@ paths:
                     type: array
                     items:
                       type: object
+                      properties:
+                        ActivityID:
+                          type: integer
+                          description: Eindeutige ID der Aktivität
+                          example: 15
+                        Increase:
+                          type: number
+                          description: Gesamter Höhenanstieg in Metern
+                          example: 850
+                        MaxAltitude:
+                          type: number
+                          description: Höchste erreichte Höhe in Metern
+                          example: 2100
+                        Calories:
+                          type: number
+                          description: Verbrannte Kalorien
+                          example: 1450
+                        Date:
+                          type: string
+                          description: Datum der Aktivität
+                          example: "2024-06-15"
+                        UserID:
+                          type: integer
+                          description: ID des Benutzers
+                          example: 42
+                        Distance:
+                          type: number
+                          description: Zurückgelegte Strecke in Kilometern
+                          example: 14.2
+                        Duration:
+                          type: number
+                          description: Dauer der Aktivität in Minuten
+                          example: 245
+              example:
+                activities:
+                  - ActivityID: 15
+                    Increase: 850
+                    MaxAltitude: 2100
+                    Calories: 1450
+                    Date: "2024-06-15"
+                    UserID: 42
+                    Distance: 14.2
+                    Duration: 245
+                  - ActivityID: 14
+                    Increase: 600
+                    MaxAltitude: 1800
+                    Calories: 980
+                    Date: "2024-06-10"
+                    UserID: 42
+                    Distance: 9.5
+                    Duration: 180
         "400":
-          description: Ungültige Anfrage
+          description: Ungültige Anfrage oder fehlende Parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: UserID ist erforderlich und muss eine positive Zahl sein
         "500":
-          description: Serverfehler
+          description: Interner Serverfehler beim Abrufen der Aktivitäten
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Datenbankfehler beim Laden der Aktivitäten
       x-openapi-router-controller: swagger_server.controllers.activity_controller
+
   /DoneBerghinzufuegen:
     post:
       tags:
         - Berge erledigt
-      summary: Fügt einen erledigten Berg hinzu
+      summary: Markiert einen Berg als erfolgreich bestiegen
+      description: |
+        Fügt einen Eintrag hinzu, dass ein Benutzer einen bestimmten Berg erfolgreich bestiegen hat.
+        Dies dient der Dokumentation persönlicher Bergerfolge. Ein Berg kann pro Benutzer nur einmal 
+        als erledigt markiert werden.
       operationId: post_done_mountain_with_user_id
       requestBody:
         required: true
+        description: Informationen über den erledigten Berg
         content:
           application/json:
             schema:
               type: object
-              properties:
-                UserID:
-                  type: integer
-                MountainID:
-                  type: integer
               required:
                 - UserID
                 - MountainID
+              properties:
+                UserID:
+                  type: integer
+                  description: ID des Benutzers, der den Berg bestiegen hat
+                  example: 42
+                  minimum: 1
+                MountainID:
+                  type: integer
+                  description: ID des erfolgreich bestiegenen Berges
+                  example: 7
+                  minimum: 1
+            example:
+              UserID: 42
+              MountainID: 7
       responses:
         "200":
-          description: Erfolgreich hinzugefügt
+          description: Berg wurde erfolgreich als erledigt markiert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Berg 'Zugspitze' wurde als erledigt gespeichert
+                  doneId:
+                    type: integer
+                    example: 128
+              example:
+                message: Berg 'Zugspitze' wurde als erledigt gespeichert
+                doneId: 128
         "400":
-          description: Ungültige Eingabedaten
+          description: Ungültige Eingabedaten oder Berg bereits als erledigt markiert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Berg wurde bereits als erledigt markiert
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+
   /Berg:
     get:
       tags:
         - Berge
-      summary: Gibt einen Berg anhand des Namens zurück
+      summary: Sucht Berge anhand des Namens
+      description: |
+        Durchsucht die Bergdatenbank nach Bergen, deren Name ganz oder teilweise 
+        mit dem Suchbegriff übereinstimmt. Die Suche ist nicht case-sensitiv und 
+        unterstützt Teilstring-Matching für flexible Suchergebnisse.
       operationId: get_mountain_by_name
       parameters:
         - name: mountain_name
           in: query
           required: true
+          description: Name oder Teilname des gesuchten Berges (case-insensitive)
           schema:
             type: string
+            minLength: 2
+            example: Zugspitze
       responses:
         "200":
-          description: Erfolgreich
+          description: Berge gefunden, die dem Suchkriterium entsprechen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mountains:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Mountainid:
+                          type: integer
+                          description: Eindeutige ID des Berges
+                          example: 7
+                        Name:
+                          type: string
+                          description: Vollständiger Name des Berges
+                          example: Zugspitze
+                        Height:
+                          type: integer
+                          description: Höhe des Berges in Metern über dem Meeresspiegel
+                          example: 2962
+                        FederalStateid:
+                          type: integer
+                          description: ID des zugehörigen Bundeslandes
+                          example: 1
+                        Picture:
+                          type: string
+                          description: URL zu einem Bild des Berges
+                          example: "https://example.com/images/zugspitze.jpg"
+              example:
+                mountains:
+                  - Mountainid: 7
+                    Name: Zugspitze
+                    Height: 2962
+                    FederalStateid: 1
+                    Picture: "https://example.com/images/zugspitze.jpg"
+                  - Mountainid: 23
+                    Name: Zugspitzplatt
+                    Height: 2340
+                    FederalStateid: 1
+                    Picture: "https://example.com/images/zugspitzplatt.jpg"
         "400":
-          description: Ungültige Anfrage
+          description: Ungültige Suchanfrage oder fehlender Suchbegriff
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Suchbegriff muss mindestens 2 Zeichen lang sein
       x-openapi-router-controller: swagger_server.controllers.mountain_controller
+
   /Bundesland:
     get:
       tags:
         - Bundesländer
-      summary: Gibt der Name des Bundeslandes anhand der ID zurück
+      summary: Ruft Bundesland-Informationen anhand der ID ab
+      description: |
+        Gibt detaillierte Informationen über ein spezifisches Bundesland zurück,
+        identifiziert durch die eindeutige Bundesland-ID. Wird zur geografischen 
+        Zuordnung von Bergen verwendet.
       operationId: get_federal_state_by_id
       parameters:
         - name: federal_state_id
           in: query
           required: true
+          description: Eindeutige ID des Bundeslandes
           schema:
             type: integer
+            minimum: 1
+            example: 1
       responses:
         "200":
-          description: Erfolgreich
+          description: Bundesland-Informationen erfolgreich abgerufen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  FederalStateid:
+                    type: integer
+                    description: Eindeutige ID des Bundeslandes
+                    example: 1
+                  Name:
+                    type: string
+                    description: Vollständiger Name des Bundeslandes
+                    example: Tirol
+              example:
+                FederalStateid: 1
+                Name: Tirol
         "400":
-          description: Ungültige Anfrage
+          description: Ungültige Anfrage oder Bundesland nicht gefunden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Bundesland mit ID 999 nicht gefunden
       x-openapi-router-controller: swagger_server.controllers.federal_state_controller
+
   /PostWatchlist:
     post:
       tags:
         - Watchlist
-      summary: Fügt einen Berg zur Watchlist eines Benutzers hinzu.
+      summary: Fügt einen Berg zur persönlichen Watchlist hinzu
+      description: |
+        Fügt einen Berg zur persönlichen Wunschliste eines Benutzers hinzu. 
+        Berge auf der Watchlist sind Ziele, die der Benutzer noch besteigen möchte.
+        Ein Berg kann nicht zur Watchlist hinzugefügt werden, wenn er bereits als erledigt markiert ist.
       operationId: add_mountain_to_watchlist
       requestBody:
         required: true
+        description: Berg und Benutzer für die Watchlist
         content:
           application/json:
             schema:
               type: object
-              properties:
-                UserID:
-                  type: integer
-                  description: ID des Benutzers.
-                MountainID:
-                  type: integer
-                  description: ID des Berges.
               required:
                 - UserID
                 - MountainID
+              properties:
+                UserID:
+                  type: integer
+                  description: ID des Benutzers, der den Berg zur Watchlist hinzufügen möchte
+                  example: 42
+                  minimum: 1
+                MountainID:
+                  type: integer
+                  description: ID des Berges, der zur Watchlist hinzugefügt werden soll
+                  example: 7
+                  minimum: 1
+            example:
+              UserID: 42
+              MountainID: 7
       responses:
         "201":
-          description: Berg erfolgreich zur Watchlist hinzugefügt.
+          description: Berg wurde erfolgreich zur Watchlist hinzugefügt
           content:
             application/json:
               schema:
@@ -192,10 +517,19 @@ paths:
                 properties:
                   response:
                     type: object
+                    properties:
+                      watchlistId:
+                        type: integer
+                        example: 89
                   message:
                     type: string
+                    example: Berg 'Zugspitze' wurde zur Watchlist hinzugefügt
+              example:
+                response:
+                  watchlistId: 89
+                message: Berg 'Zugspitze' wurde zur Watchlist hinzugefügt
         "400":
-          description: UserID und MountainID sind erforderlich.
+          description: Ungültige Anfrage oder fehlende Parameter
           content:
             application/json:
               schema:
@@ -203,8 +537,9 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: UserID und MountainID sind erforderlich
         "403":
-          description: Berg ist bereits als erledigt markiert und kann nicht zur Watchlist hinzugefügt werden.
+          description: Berg ist bereits als erledigt markiert
           content:
             application/json:
               schema:
@@ -212,8 +547,9 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Berg ist bereits als erledigt markiert und kann nicht zur Watchlist hinzugefügt werden
         "409":
-          description: Berg befindet sich bereits auf der Watchlist.
+          description: Berg befindet sich bereits auf der Watchlist
           content:
             application/json:
               schema:
@@ -221,8 +557,9 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: Berg befindet sich bereits auf der Watchlist
         "500":
-          description: Fehler beim Hinzufügen des Berges zur Watchlist.
+          description: Serverfehler beim Hinzufügen zur Watchlist
           content:
             application/json:
               schema:
@@ -230,26 +567,35 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Fehler beim Hinzufügen des Berges zur Watchlist
                   details:
                     type: string
                     nullable: true
+                    example: Datenbankverbindung fehlgeschlagen
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+
   /Watchlist:
     get:
       tags:
         - Watchlist
-      summary: Ruft alle Watchlist-Einträge für einen Benutzer ab, einschließlich Bergdetails.
+      summary: Ruft die komplette Watchlist eines Benutzers ab
+      description: |
+        Gibt alle Berge zurück, die sich auf der persönlichen Watchlist eines Benutzers befinden.
+        Jeder Eintrag enthält detaillierte Informationen über den Berg einschließlich Name, 
+        Höhe, Bundesland und Bild-URL.
       operationId: fetch_watchlist
       parameters:
         - name: UserID
           in: query
           required: true
-          description: ID des Benutzers, dessen Watchlist abgerufen werden soll.
+          description: ID des Benutzers, dessen Watchlist abgerufen werden soll
           schema:
             type: integer
+            minimum: 1
+            example: 42
       responses:
         "200":
-          description: Watchlist erfolgreich abgerufen.
+          description: Watchlist erfolgreich abgerufen
           content:
             application/json:
               schema:
@@ -262,27 +608,57 @@ paths:
                       properties:
                         WatchlistID:
                           type: integer
+                          description: Eindeutige ID des Watchlist-Eintrags
+                          example: 89
                         MountainID:
                           type: integer
+                          description: ID des Berges
+                          example: 7
                         Mountain:
                           type: object
+                          description: Detaillierte Berg-Informationen
                           properties:
                             Mountainid:
                               type: integer
+                              example: 7
                             Name:
                               type: string
+                              example: Zugspitze
                             Height:
                               type: integer
+                              example: 2962
                             Picture:
                               type: string
                               nullable: true
+                              example: "https://example.com/images/zugspitze.jpg"
                             FederalStateid:
                               type: object
                               properties:
                                 Name:
                                   type: string
+                                  example: Tirol
+              example:
+                response:
+                  - WatchlistID: 89
+                    MountainID: 7
+                    Mountain:
+                      Mountainid: 7
+                      Name: Zugspitze
+                      Height: 2962
+                      Picture: "https://example.com/images/zugspitze.jpg"
+                      FederalStateid:
+                        Name: Tirol
+                  - WatchlistID: 90
+                    MountainID: 12
+                    Mountain:
+                      Mountainid: 12
+                      Name: Großglockner
+                      Height: 3798
+                      Picture: "https://example.com/images/grossglockner.jpg"
+                      FederalStateid:
+                        Name: Kärnten
         "500":
-          description: Fehler beim Abrufen der Watchlist.
+          description: Serverfehler beim Abrufen der Watchlist
           content:
             application/json:
               schema:
@@ -290,32 +666,42 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Fehler beim Abrufen der Watchlist
                   details:
                     type: string
                     nullable: true
+                    example: Datenbankverbindung unterbrochen
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+
   /Watchlist/entry:
     delete:
       tags:
         - Watchlist
-      summary: Löscht einen bestimmten Eintrag von der Watchlist anhand von UserID und MountainID.
+      summary: Entfernt einen Berg von der Watchlist
+      description: |
+        Löscht einen spezifischen Berg von der Watchlist eines Benutzers. 
+        Der Berg wird anhand der UserID und MountainID identifiziert und entfernt.
       operationId: remove_mountain_from_watchlist
       parameters:
         - name: UserID
           in: query
           required: true
-          description: ID des Benutzers zur Autorisierung.
+          description: ID des Benutzers zur Autorisierung
           schema:
             type: integer
+            minimum: 1
+            example: 42
         - name: MountainID
           in: query
           required: true
-          description: ID des Berges, der von der Watchlist entfernt werden soll.
+          description: ID des Berges, der von der Watchlist entfernt werden soll
           schema:
             type: integer
+            minimum: 1
+            example: 7
       responses:
         "200":
-          description: Watchlist-Eintrag erfolgreich gelöscht.
+          description: Berg wurde erfolgreich von der Watchlist entfernt
           content:
             application/json:
               schema:
@@ -323,10 +709,11 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: Berg 'Zugspitze' wurde von der Watchlist entfernt
         "204":
-          description: Watchlist-Eintrag erfolgreich gelöscht (kein Inhalt).
+          description: Berg wurde erfolgreich entfernt (kein Inhalt zurückgegeben)
         "404":
-          description: Watchlist-Eintrag nicht gefunden oder Benutzer nicht autorisiert.
+          description: Berg nicht auf der Watchlist gefunden oder Benutzer nicht autorisiert
           content:
             application/json:
               schema:
@@ -334,8 +721,9 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Berg nicht auf der Watchlist gefunden oder Zugriff verweigert
         "500":
-          description: Fehler beim Löschen des Watchlist-Eintrags.
+          description: Serverfehler beim Entfernen des Berges
           content:
             application/json:
               schema:
@@ -343,32 +731,42 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Fehler beim Löschen des Watchlist-Eintrags
                   details:
                     type: string
                     nullable: true
+                    example: Datenbankfehler
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+
   /Watchlist/check:
     get:
       tags:
         - Watchlist
-      summary: Überprüft, ob sich ein bestimmter Berg auf der Watchlist eines Benutzers befindet.
+      summary: Überprüft, ob ein Berg auf der Watchlist steht
+      description: |
+        Prüft, ob sich ein bestimmter Berg auf der Watchlist eines Benutzers befindet.
+        Gibt einen booleschen Wert zurück, der anzeigt, ob der Berg bereits zur Watchlist hinzugefügt wurde.
       operationId: check_if_mountain_is_on_watchlist
       parameters:
         - name: UserID
           in: query
           required: true
-          description: ID des Benutzers, dessen Watchlist überprüft werden soll.
+          description: ID des Benutzers, dessen Watchlist überprüft werden soll
           schema:
             type: integer
+            minimum: 1
+            example: 42
         - name: MountainID
           in: query
           required: true
-          description: ID des Berges, der überprüft werden soll.
+          description: ID des Berges, der überprüft werden soll
           schema:
             type: integer
+            minimum: 1
+            example: 7
       responses:
         "200":
-          description: Status, ob der Berg auf der Watchlist ist.
+          description: Überprüfung erfolgreich abgeschlossen
           content:
             application/json:
               schema:
@@ -379,8 +777,13 @@ paths:
                     properties:
                       isOnWatchlist:
                         type: boolean
+                        description: True, wenn der Berg auf der Watchlist steht
+                        example: true
+              example:
+                response:
+                  isOnWatchlist: true
         "500":
-          description: Interner Serverfehler.
+          description: Serverfehler bei der Überprüfung
           content:
             application/json:
               schema:
@@ -388,82 +791,156 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Fehler bei der Watchlist-Überprüfung
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+
   /ChangePassword:
     post:
       tags:
         - Login/Registrierung
-      summary: Ändert das Passwort eines Benutzers mit dem Username
+      summary: Ändert das Passwort eines Benutzers
+      description: |
+        Ermöglicht einem Benutzer, sein aktuelles Passwort zu ändern. 
+        Das alte Passwort muss zur Sicherheit bestätigt werden, bevor das neue Passwort gesetzt wird.
+        Das neue Passwort wird verschlüsselt in der Datenbank gespeichert.
       operationId: post_change_password
       requestBody:
         required: true
+        description: Alte und neue Passwort-Informationen
         content:
           application/json:
             schema:
               type: object
-              properties:
-                Username:
-                  type: string
-                OldPassword:
-                  type: string
-                NewPassword:
-                  type: string
               required:
                 - Username
                 - OldPassword
                 - NewPassword
+              properties:
+                Username:
+                  type: string
+                  description: Benutzername des Accounts
+                  example: maxmuster2024
+                OldPassword:
+                  type: string
+                  description: Aktuelles Passwort zur Bestätigung
+                  example: altesPasswort123!
+                NewPassword:
+                  type: string
+                  description: Neues Passwort (mindestens 8 Zeichen)
+                  example: neuesPasswort456!
+                  minLength: 8
+            example:
+              Username: maxmuster2024
+              OldPassword: altesPasswort123!
+              NewPassword: neuesPasswort456!
       responses:
         "200":
-          description: Passwort erfolgreich geändert
+          description: Passwort wurde erfolgreich geändert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Passwort wurde erfolgreich aktualisiert
         "400":
-          description: Ungültige Eingabedaten
+          description: Ungültige Eingabedaten oder falsches altes Passwort
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Altes Passwort ist falsch oder neues Passwort zu schwach
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+
   /ChangeUsername:
     post:
       tags:
         - Login/Registrierung
-      summary: Ändert den Username eines Benutzers
+      summary: Ändert den Benutzernamen eines Accounts
+      description: |
+        Ermöglicht einem Benutzer, seinen Benutzernamen zu ändern. 
+        Der neue Benutzername muss eindeutig sein und darf nicht bereits von einem anderen Benutzer verwendet werden.
       operationId: post_change_username
       requestBody:
         required: true
+        description: Aktueller und neuer Benutzername
         content:
           application/json:
             schema:
               type: object
-              properties:
-                Username:
-                  type: string
-                NewUsername:
-                  type: string
               required:
                 - Username
                 - NewUsername
+              properties:
+                Username:
+                  type: string
+                  description: Aktueller Benutzername
+                  example: maxmuster2024
+                NewUsername:
+                  type: string
+                  description: Gewünschter neuer Benutzername
+                  example: maxmustermann2024
+                  minLength: 3
+                  maxLength: 30
+            example:
+              Username: maxmuster2024
+              NewUsername: maxmustermann2024
       responses:
         "200":
-          description: Username erfolgreich geändert
+          description: Benutzername wurde erfolgreich geändert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Benutzername wurde erfolgreich zu 'maxmustermann2024' geändert
         "400":
-          description: Ungültige Eingabedaten
+          description: Ungültige Eingabedaten oder neuer Benutzername bereits vergeben
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Benutzername 'maxmustermann2024' ist bereits vergeben
       x-openapi-router-controller: swagger_server.controllers.login_regristration_controller
+
   /DoneBerg/check:
     get:
       tags:
         - Berge erledigt
-      summary: Prüft, ob ein Berg für einen User als erledigt markiert ist
+      summary: Überprüft, ob ein Berg als erledigt markiert ist
+      description: |
+        Prüft, ob ein bestimmter Berg für einen Benutzer bereits als erfolgreich bestiegen markiert wurde.
+        Gibt einen booleschen Wert zurück, der den Status des Berges für diesen Benutzer anzeigt.
       operationId: check_if_mountain_is_done
       parameters:
         - name: UserID
           in: query
           required: true
+          description: ID des Benutzers
           schema:
             type: integer
+            minimum: 1
+            example: 42
         - name: MountainID
           in: query
           required: true
+          description: ID des zu überprüfenden Berges
           schema:
             type: integer
+            minimum: 1
+            example: 7
       responses:
         "200":
-          description: Status, ob der Berg erledigt ist
+          description: Überprüfung erfolgreich abgeschlossen
           content:
             application/json:
               schema:
@@ -474,31 +951,62 @@ paths:
                     properties:
                       isDone:
                         type: boolean
+                        description: True, wenn der Berg als erledigt markiert ist
+                        example: true
+              example:
+                response:
+                  isDone: true
         "400":
           description: Fehlende oder ungültige Parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: UserID und MountainID sind erforderlich
         "500":
-          description: Serverfehler
+          description: Serverfehler bei der Überprüfung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Datenbankfehler bei der Abfrage
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+
   /DoneBerg/is_done:
     get:
       tags:
         - Berge erledigt
-      summary: Prüft, ob ein Berg für einen User als erledigt markiert ist
+      summary: Alternative Überprüfung für erledigte Berge
+      description: |
+        Alternative Route zur Überprüfung, ob ein Berg für einen Benutzer als erledigt markiert ist.
+        Funktional identisch mit /DoneBerg/check, aber mit simplerer Response-Struktur.
       operationId: is_mountain_done_by_user
       parameters:
         - name: UserID
           in: query
           required: true
+          description: ID des Benutzers
           schema:
             type: integer
+            minimum: 1
+            example: 42
         - name: MountainID
           in: query
           required: true
+          description: ID des zu überprüfenden Berges
           schema:
             type: integer
+            minimum: 1
+            example: 7
       responses:
         "200":
-          description: Gibt zurück, ob der Berg erledigt ist
+          description: Status erfolgreich ermittelt
           content:
             application/json:
               schema:
@@ -506,31 +1014,61 @@ paths:
                 properties:
                   isDone:
                     type: boolean
+                    description: True, wenn der Berg erledigt ist
+                    example: false
+              example:
+                isDone: false
         "400":
           description: Fehlende oder ungültige Parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Beide Parameter UserID und MountainID sind erforderlich
         "500":
           description: Serverfehler
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Interner Serverfehler
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+
   /DeleteDone:
     delete:
       tags:
         - Berge erledigt
-      summary: Löscht einen erledigten Berg für einen User
+      summary: Entfernt einen Berg aus der Liste der erledigten Berge
+      description: |
+        Löscht einen Eintrag aus der "Erledigt"-Liste eines Benutzers. 
+        Dies kann nützlich sein, wenn ein Eintrag versehentlich erstellt wurde oder korrigiert werden muss.
       operationId: delete_done_mountain
       parameters:
         - name: DoneID
           in: query
           required: true
+          description: Eindeutige ID des zu löschenden "Done"-Eintrags
           schema:
             type: integer
+            minimum: 1
+            example: 128
         - name: UserID
           in: query
           required: true
+          description: ID des Benutzers zur Autorisierung
           schema:
             type: integer
+            minimum: 1
+            example: 42
       responses:
         "200":
-          description: Done-Eintrag erfolgreich gelöscht
+          description: Eintrag wurde erfolgreich gelöscht
           content:
             application/json:
               schema:
@@ -538,26 +1076,50 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: Berg wurde aus der Erledigt-Liste entfernt
         "400":
-          description: Fehlerhafte Anfrage
+          description: Fehlerhafte Anfrage oder ungültige Parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: DoneID und UserID sind erforderlich
         "500":
-          description: Serverfehler
+          description: Serverfehler beim Löschen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Fehler beim Löschen des Eintrags
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+
   /Done:
     get:
       tags:
         - Berge erledigt
-      summary: Gibt alle erledigten Berge eines Users zurück
+      summary: Ruft alle erledigten Berge eines Benutzers ab
+      description: |
+        Gibt eine vollständige Liste aller Berge zurück, die ein Benutzer als erfolgreich bestiegen markiert hat.
+        Jeder Eintrag enthält das Datum der Markierung sowie detaillierte Informationen über den Berg.
       operationId: get_done_mountains_by_user_id
       parameters:
         - name: UserID
           in: query
           required: true
+          description: ID des Benutzers, dessen erledigte Berge abgerufen werden sollen
           schema:
             type: integer
+            minimum: 1
+            example: 42
       responses:
         "200":
-          description: Erfolgreich erledigte Berge geladen
+          description: Erledigte Berge erfolgreich abgerufen
           content:
             application/json:
               schema:
@@ -570,23 +1132,50 @@ paths:
                       properties:
                         DoneID:
                           type: integer
+                          description: Eindeutige ID des Done-Eintrags
+                          example: 128
                         Date:
                           type: string
                           format: date-time
+                          description: Datum und Zeit der Markierung als erledigt
+                          example: "2024-06-15T14:30:00Z"
                         Mountain:
                           type: object
+                          description: Informationen über den erledigten Berg
                           properties:
                             Mountainid:
                               type: integer
+                              example: 7
                             Name:
                               type: string
+                              example: Zugspitze
                             Height:
                               type: integer
+                              example: 2962
                             FederalState:
                               type: object
                               properties:
                                 Name:
                                   type: string
+                                  example: Tirol
+              example:
+                data:
+                  - DoneID: 128
+                    Date: "2024-06-15T14:30:00Z"
+                    Mountain:
+                      Mountainid: 7
+                      Name: Zugspitze
+                      Height: 2962
+                      FederalState:
+                        Name: Tirol
+                  - DoneID: 125
+                    Date: "2024-06-10T09:15:00Z"
+                    Mountain:
+                      Mountainid: 12
+                      Name: Großglockner
+                      Height: 3798
+                      FederalState:
+                        Name: Kärnten
         "400":
           description: Fehlerhafte Anfrage
           content:
@@ -596,8 +1185,9 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: UserID ist erforderlich
         "500":
-          description: Serverfehler
+          description: Serverfehler beim Abrufen der Daten
           content:
             application/json:
               schema:
@@ -605,29 +1195,39 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Datenbankfehler beim Laden der erledigten Berge
       x-openapi-router-controller: swagger_server.controllers.done_mountains_controller
+
   /DeleteWatchlist:
     delete:
       tags:
         - Watchlist
-      summary: Löscht einen Watchlist-Eintrag anhand von WatchlistID und UserID.
+      summary: Löscht einen Watchlist-Eintrag anhand der Watchlist-ID
+      description: |
+        Entfernt einen spezifischen Eintrag von der Watchlist eines Benutzers. 
+        Der Eintrag wird anhand der eindeutigen Watchlist-ID identifiziert und gelöscht.
+        Dies ist eine alternative Methode zum Entfernen von Watchlist-Einträgen.
       operationId: delete_watchlist_entry_by_id
       parameters:
         - name: WatchlistID
           in: query
           required: true
-          description: ID des Watchlist-Eintrags, der gelöscht werden soll.
+          description: Eindeutige ID des zu löschenden Watchlist-Eintrags
           schema:
             type: integer
+            minimum: 1
+            example: 89
         - name: UserID
           in: query
           required: true
-          description: ID des Benutzers zur Autorisierung.
+          description: ID des Benutzers zur Autorisierung des Löschvorgangs
           schema:
             type: integer
+            minimum: 1
+            example: 42
       responses:
         "200":
-          description: Watchlist-Eintrag erfolgreich gelöscht.
+          description: Watchlist-Eintrag wurde erfolgreich gelöscht
           content:
             application/json:
               schema:
@@ -635,10 +1235,11 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: Watchlist-Eintrag wurde erfolgreich entfernt
         "204":
-          description: Watchlist-Eintrag erfolgreich gelöscht (kein Inhalt).
+          description: Eintrag wurde erfolgreich gelöscht (kein Inhalt zurückgegeben)
         "404":
-          description: Watchlist-Eintrag nicht gefunden oder Benutzer nicht autorisiert.
+          description: Watchlist-Eintrag nicht gefunden oder Benutzer nicht autorisiert
           content:
             application/json:
               schema:
@@ -646,8 +1247,9 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Watchlist-Eintrag nicht gefunden oder Zugriff verweigert
         "500":
-          description: Fehler beim Löschen des Watchlist-Eintrags.
+          description: Serverfehler beim Löschen des Eintrags
           content:
             application/json:
               schema:
@@ -655,7 +1257,249 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: Fehler beim Löschen des Watchlist-Eintrags
                   details:
                     type: string
                     nullable: true
+                    example: Datenbankverbindung unterbrochen
       x-openapi-router-controller: swagger_server.controllers.Watchlist_controller
+
+
+components:
+  schemas:
+    User:
+      type: object
+      description: |
+        Repräsentiert einen Benutzer des HikeMate-Systems. Ein Benutzer kann Aktivitäten durchführen, Berge als erledigt markieren, eine Watchlist pflegen und sich im System anmelden.
+      properties:
+        UserID:
+          type: integer
+          description: Eindeutige Identifikationsnummer des Benutzers (Primärschlüssel).
+          example: 1
+        Username:
+          type: string
+          description: Eindeutiger Benutzername für die Anmeldung im System.
+          example: maxmuster
+        totalKm:
+          type: integer
+          description: Gesamte, von diesem Benutzer zurückgelegte Kilometer (wird automatisch berechnet).
+          example: 120
+        totalAltitude:
+          type: integer
+          description: Gesamte, von diesem Benutzer bewältigte Höhenmeter (wird automatisch berechnet).
+          example: 3500
+        FirstName:
+          type: string
+          description: Vorname des Benutzers.
+          example: Max
+        LastName:
+          type: string
+          description: Nachname des Benutzers.
+          example: Mustermann
+        Role:
+          type: string
+          description: Rolle des Benutzers im System (z. B. "user", "admin").
+          example: user
+        Password:
+          type: string
+          description: Passwort des Benutzers (verschlüsselt gespeichert).
+          example: geheim123
+        ContactNumber:
+          type: string
+          description: Optionale Notfall-Kontaktnummer des Benutzers.
+          example: "+43 123 456789"
+    Activity:
+      type: object
+      description: |
+        Beschreibt eine Aktivität eines Benutzers, z. B. eine Wanderung oder einen Ausflug. Enthält Informationen zu Strecke, Höhenmetern, Kalorienverbrauch und Dauer.
+      properties:
+        ActivityID:
+          type: integer
+          description: Eindeutige Identifikationsnummer der Aktivität (Primärschlüssel).
+          example: 1
+        Increase:
+          type: number
+          format: float
+          description: Gesamter Höhenunterschied (Anstieg) während der Aktivität in Metern.
+          example: 500
+        MaxAltitude:
+          type: number
+          format: float
+          description: Maximale erreichte Höhe während der Aktivität in Metern.
+          example: 2100
+        Calories:
+          type: number
+          format: float
+          description: Geschätzter Kalorienverbrauch während der Aktivität.
+          example: 1200
+        Date:
+          type: string
+          format: date
+          description: Datum, an dem die Aktivität durchgeführt wurde.
+          example: "2024-06-01"
+        UserID:
+          type: integer
+          description: ID des Benutzers, dem die Aktivität zugeordnet ist (Fremdschlüssel zu User).
+          example: 1
+        Distance:
+          type: number
+          format: float
+          description: Zurückgelegte Strecke während der Aktivität in Kilometern.
+          example: 12.5
+        Duration:
+          type: number
+          format: float
+          description: Gesamtdauer der Aktivität in Minuten.
+          example: 180
+    Done:
+      type: object
+      description: |
+        Eintrag, der einen als erledigt markierten Berg für einen bestimmten Benutzer dokumentiert. Enthält das Datum und die Referenzen auf Benutzer und Berg.
+      properties:
+        DoneID:
+          type: integer
+          description: Eindeutige Identifikationsnummer des "Done"-Eintrags (Primärschlüssel).
+          example: 1
+        Date:
+          type: string
+          format: date
+          description: Datum, an dem der Berg als erledigt markiert wurde.
+          example: "2024-06-01"
+        MountainID:
+          type: integer
+          description: ID des erledigten Berges (Fremdschlüssel zu Mountain).
+          example: 5
+        UserID:
+          type: integer
+          description: ID des Benutzers, der den Berg als erledigt markiert hat (Fremdschlüssel zu User).
+          example: 1
+    Watchlist:
+      type: object
+      description: |
+        Eintrag auf der persönlichen Watchlist eines Benutzers. Jeder Eintrag verbindet einen Benutzer mit einem Berg, den er noch besteigen möchte.
+      properties:
+        WatchlistID:
+          type: integer
+          description: Eindeutige Identifikationsnummer des Watchlist-Eintrags (Primärschlüssel).
+          example: 1
+        MountainID:
+          type: integer
+          description: ID des Berges, der auf der Watchlist steht (Fremdschlüssel zu Mountain).
+          example: 5
+        UserID:
+          type: integer
+          description: ID des Benutzers, dem die Watchlist gehört (Fremdschlüssel zu User).
+          example: 1
+    Mountain:
+      type: object
+      description: |
+        Repräsentiert einen Berg, der in der HikeMate-Datenbank gespeichert ist. Enthält Informationen wie Name, Höhe, Bundesland und ein Bild.
+      properties:
+        Mountainid:
+          type: integer
+          description: Eindeutige Identifikationsnummer des Berges (Primärschlüssel).
+          example: 1
+        Name:
+          type: string
+          description: Name des Berges.
+          example: Zugspitze
+        Height:
+          type: integer
+          description: Höhe des Berges in Metern über dem Meeresspiegel.
+          example: 2962
+        FederalStateid:
+          type: integer
+          description: ID des Bundeslandes, in dem der Berg liegt (Fremdschlüssel zu FederalState).
+          example: 1
+        Picture:
+          type: string
+          description: Optionaler Link oder Pfad zu einem Bild des Berges.
+          example: "https://example.com/zugspitze.jpg"
+    FederalState:
+      type: object
+      description: |
+        Repräsentiert ein Bundesland, in dem sich Berge befinden können. Wird zur geografischen Zuordnung von Bergen verwendet.
+      properties:
+        FederalStateid:
+          type: integer
+          description: Eindeutige Identifikationsnummer des Bundeslandes (Primärschlüssel).
+          example: 1
+        Name:
+          type: string
+          description: Name des Bundeslandes (z. B. "Tirol", "Salzburg").
+          example: Tirol
+
+    # Fehler-Schemas
+    ErrorResponse:
+      type: object
+      description: |
+        Standard-Fehlerantwort für unerwartete Fehler oder Serverprobleme.
+      properties:
+        error:
+          type: string
+          description: Beschreibung des Fehlers.
+          example: Interner Serverfehler.
+        details:
+          type: string
+          description: Optionale Detailinformationen zum Fehler.
+          example: Datenbankverbindung fehlgeschlagen.
+          nullable: true
+
+    ValidationError:
+      type: object
+      description: |
+        Fehlerantwort für ungültige oder fehlende Eingabedaten.
+      properties:
+        error:
+          type: string
+          description: Beschreibung des Validierungsfehlers.
+          example: UserID fehlt oder ist ungültig.
+        fields:
+          type: object
+          description: Enthält Details zu den fehlerhaften Feldern.
+          additionalProperties:
+            type: string
+          example:
+            UserID: "Dieses Feld ist erforderlich."
+            Password: "Das Passwort muss mindestens 8 Zeichen lang sein."
+
+    NotFoundError:
+      type: object
+      description: |
+        Fehlerantwort, wenn eine angeforderte Ressource nicht gefunden wurde.
+      properties:
+        error:
+          type: string
+          description: Beschreibung des Fehlers.
+          example: Benutzer nicht gefunden.
+        resource:
+          type: string
+          description: Name der Ressource, die nicht gefunden wurde.
+          example: User
+
+    ConflictError:
+      type: object
+      description: |
+        Fehlerantwort, wenn ein Konflikt auftritt, z. B. bei doppelten Einträgen.
+      properties:
+        error:
+          type: string
+          description: Beschreibung des Konflikts.
+          example: Benutzername existiert bereits.
+        conflictField:
+          type: string
+          description: Feld, das den Konflikt verursacht hat.
+          example: Username
+    UnauthorizedError:
+      type: object
+      description: |
+        Fehlerantwort, wenn der Benutzer nicht autorisiert ist.
+      properties:
+        error:
+          type: string
+          description: Beschreibung des Autorisierungsfehlers.
+          example: Zugriff verweigert. Bitte einloggen.
+        reason:
+          type: string
+          description: Grund für die fehlende Autorisierung.
+          example: Token ungültig oder abgelaufen.

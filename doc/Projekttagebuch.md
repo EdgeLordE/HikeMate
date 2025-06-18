@@ -2,10 +2,6 @@
 
 ## Mathias
 
-# Projekttagebuch
-
-## Mathias
-
 | Datum      | Was gemacht? |
 |------------|--------------|
 | 18.06.2025 | Merge des Remote-Branches `origin/main` und Konfliktlösung<br>UnitTests für alle Klassen erstellt und Klassen angepasst, um Tests laufen zu lassen<br>Logging für alle Klassen und Pages implementiert + kleine Fixes<br>Logging-Klasse erstellt und in `main.dart` sowie in der `LoginPage` integriert |

@@ -5,6 +5,17 @@ import 'HomePage.dart';
 import 'RegistrationPage.dart';
 import '../Class/User.dart';
 
+/// Login-Seite der HikeMate App
+/// 
+/// Diese Seite ermöglicht es Benutzern sich mit ihren Anmeldedaten
+/// (Benutzername und Passwort) anzumelden. Bei erfolgreichem Login
+/// wird zur Hauptseite (HomePage) navigiert.
+/// 
+/// Features:
+/// - Eingabevalidierung (keine leeren Felder)
+/// - Fehlerbehandlung mit Benutzer-Feedback
+/// - Navigation zur Registrierungsseite
+/// - Automatische Navigation nach erfolgreichem Login
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -12,9 +23,15 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+/// State-Klasse für die LoginPage mit Form-Verwaltung
 class _LoginPageState extends State<LoginPage> {
+  /// Controller für das Benutzername-Eingabefeld
   late final TextEditingController _usernameController;
+  
+  /// Controller für das Passwort-Eingabefeld
   late final TextEditingController _passwordController;
+  
+  /// Logger für diese Seite
   final _log = LoggingService();
 
   @override
@@ -33,6 +50,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /// Führt den Login-Prozess durch
+  /// 
+  /// Validiert die Eingaben, sendet Login-Anfrage an das Backend
+  /// und behandelt die Antwort entsprechend.
   Future<void> _login(BuildContext context) async {
     final user = _usernameController.text;
     final pass = _passwordController.text;

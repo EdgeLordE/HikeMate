@@ -4,6 +4,17 @@ import 'package:HikeMate/Class/User.dart';
 import 'package:HikeMate/Pages/LoginPage.dart';
 import 'package:HikeMate/Class/Logging.dart';
 
+/// Registrierungsseite der HikeMate App
+/// 
+/// Diese Seite ermöglicht es neuen Benutzern ein Konto zu erstellen.
+/// Sie sammelt alle notwendigen Informationen (Vor-, Nachname, 
+/// Benutzername, Passwort) und registriert den Benutzer im System.
+/// 
+/// Features:
+/// - Vollständige Benutzerregistrierung
+/// - Eingabevalidierung für alle Felder
+/// - Fehlerbehandlung mit Benutzer-Feedback
+/// - Automatische Navigation zur Login-Seite nach Erfolg
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
 
@@ -11,12 +22,21 @@ class RegistrationPage extends StatefulWidget {
   State<RegistrationPage> createState() => _RegistrationPageState();
 }
 
+/// State-Klasse für die RegistrationPage mit Form-Verwaltung
 class _RegistrationPageState extends State<RegistrationPage> {
+  /// Controller für das Vorname-Eingabefeld
   final TextEditingController firstNameController = TextEditingController();
+  
+  /// Controller für das Nachname-Eingabefeld
   final TextEditingController lastNameController = TextEditingController();
+  
+  /// Controller für das Benutzername-Eingabefeld
   final TextEditingController usernameController = TextEditingController();
+  
+  /// Controller für das Passwort-Eingabefeld
   final TextEditingController passwordController = TextEditingController();
 
+  /// Logger für diese Seite
   final _log = LoggingService();
 
   @override
@@ -36,6 +56,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
     super.dispose();
   }
 
+  /// Führt die Benutzerregistrierung durch
+  /// 
+  /// Sammelt alle Formulardaten und sendet eine Registrierungsanfrage
+  /// an das Backend. Bei Erfolg wird zur Login-Seite navigiert.
   Future<void> register() async {
     final user = usernameController.text;
     try {

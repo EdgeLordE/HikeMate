@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 import '../Class/User.dart';
 
+/// Seite zum Ändern des Benutzernamens
+/// 
+/// Diese Seite ermöglicht es Benutzern ihren aktuellen Benutzernamen
+/// zu ändern. Der alte Benutzername wird zur Verifikation angezeigt.
+/// 
+/// Features:
+/// - Anzeige des aktuellen Benutzernamens
+/// - Eingabe des neuen gewünschten Benutzernamens
+/// - Validation der Eindeutigkeit des neuen Benutzernamens
+/// - Aktualisierung im Backend und lokaler Session
 class ChangeUsernamePage extends StatefulWidget {
   const ChangeUsernamePage({Key? key}) : super(key: key);
 
@@ -8,14 +18,21 @@ class ChangeUsernamePage extends StatefulWidget {
   State<ChangeUsernamePage> createState() => _ChangeUsernamePageState();
 }
 
+/// State-Klasse für die ChangeUsernamePage mit Formular-Management
 class _ChangeUsernamePageState extends State<ChangeUsernamePage> {
+  /// Controller für den alten Benutzernamen (nur zur Anzeige)
   final TextEditingController _oldUsernameController = TextEditingController();
+  
+  /// Controller für den neuen gewünschten Benutzernamen
   final TextEditingController _newUsernameController = TextEditingController();
+  
+  /// Zeigt an ob gerade eine Anfrage läuft
   bool _loading = false;
 
   @override
   void initState() {
     super.initState();
+    // Aktuellen Benutzernamen vorausfüllen
     _oldUsernameController.text = User.username;
   }
 
@@ -26,16 +43,28 @@ class _ChangeUsernamePageState extends State<ChangeUsernamePage> {
     super.dispose();
   }
 
+  /// Zeigt eine Snackbar mit Erfolgsmeldung oder Fehlermeldung
+  /// 
+  /// [message] - Die anzuzeigende Nachricht
+  /// [isError] - true für Fehlermeldung (rot), false für Erfolg (grün)
   void _showSnackBar(String message, {bool isError = true}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: isError ? Colors.redAccent : Colors.green,
-      ),
-    );
+      ),    );
   }
 
+  /// Führt die Benutzername-Änderung durch
+  /// 
+  /// Validiert die Eingaben, sendet die Änderungsanfrage an das Backend
+  /// und behandelt die Antwort entsprechend. Bei Erfolg wird der neue
+  /// Benutzername lokal gespeichert und die Seite geschlossen.
+  /// 
+  /// Validation:
+  /// - Neuer Benutzername darf nicht leer sein
+  /// - Neuer Benutzername muss sich vom alten unterscheiden
   Future<void> _submit() async {
     final oldUsername = _oldUsernameController.text.trim(); // Bleibt, da es vom User-Objekt kommt
     final newUsername = _newUsernameController.text.trim();
@@ -77,7 +106,15 @@ class _ChangeUsernamePageState extends State<ChangeUsernamePage> {
       _showSnackBar('Fehler beim Ändern des Benutzernamens. Der Benutzername ist möglicherweise bereits vergeben.');
     }
   }
-
+  /// Baut ein stilisiertes Textfeld mit einheitlichem Design
+  /// 
+  /// [controller] - TextEditingController für das Textfeld
+  /// [hintText] - Platzhaltertext für das Textfeld
+  /// [icon] - Icon das vor dem Text angezeigt wird
+  /// [readOnly] - Gibt an ob das Textfeld nur lesbar ist
+  /// [maxWidth] - Maximale Breite des Textfelds für responsive Design
+  /// 
+  /// Returns: Ein gestyltes TextField Widget mit dunklem Design
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,

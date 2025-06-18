@@ -9,7 +9,7 @@
 
 import connexion
 from supabase import create_client, Client
-from ..logger import logger  # Logger importieren
+from swagger_server.logger import logger  # Logger importieren
 
 ## @brief Supabase-Projekt-URL
 SUPABASE_URL = "https://cyzdfdweghhrlquxwaxl.supabase.co"

@@ -1,0 +1,163 @@
+\doxysection{swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller Namespace Reference}
+\hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller}{}\label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_acbac04b9e445aea69f83dad553e248df}{add\+\_\+mountain\+\_\+to\+\_\+watchlist}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_ac35e1c3fe4b6644a8e8e57c08049fb78}{remove\+\_\+mountain\+\_\+from\+\_\+watchlist}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a53d70bc46ba258e22f3396eee489138f}{check\+\_\+if\+\_\+mountain\+\_\+is\+\_\+on\+\_\+watchlist}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a0c26f1d84bd3cc8e0132e87a93679aef}{fetch\+\_\+watchlist}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a5276d1c6944d3d82b4a8fbe58622e32e}{delete\+\_\+watchlist\+\_\+entry\+\_\+by\+\_\+id}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a6b3eeee434505a9b183aa9747de8b9d5}{SUPABASE\+\_\+\+URL}} = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}
+\begin{DoxyCompactList}\small\item\em Supabase-\/\+Projekt-\/\+URL. \end{DoxyCompactList}\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a9978db5bd33dcf7480f27e5765d3c7b4}{SUPABASE\+\_\+\+KEY}} = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}
+\begin{DoxyCompactList}\small\item\em Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. \end{DoxyCompactList}\item 
+Client \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_aa2778b18ace81fa88ab13a984f71862a}{supabase}} = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a6b3eeee434505a9b183aa9747de8b9d5}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a9978db5bd33dcf7480f27e5765d3c7b4}{SUPABASE\+\_\+\+KEY}})
+\begin{DoxyCompactList}\small\item\em Erstellt einen Supabase-\/\+Client für Datenbankoperationen. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_acbac04b9e445aea69f83dad553e248df}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}!add\_mountain\_to\_watchlist@{add\_mountain\_to\_watchlist}}
+\index{add\_mountain\_to\_watchlist@{add\_mountain\_to\_watchlist}!swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection{\texorpdfstring{add\_mountain\_to\_watchlist()}{add\_mountain\_to\_watchlist()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_acbac04b9e445aea69f83dad553e248df} 
+swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+add\+\_\+mountain\+\_\+to\+\_\+watchlist (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}/**
+ * @brief Fügt einen Berg zur Watchlist eines Benutzers hinzu.
+ * @details
+ *  - Erwartet einen JSON-Body mit:
+ *      - UserID (int): Die ID des Benutzers.
+ *      - MountainID (int): Die ID des Berges.
+ *  - Prüft, ob der Berg bereits auf der Watchlist oder als erledigt markiert ist.
+ * @return
+ *  - 201: Berg erfolgreich zur Watchlist hinzugefügt.
+ *  - 400: Fehlerhafte Eingabedaten.
+ *  - 403: Berg ist bereits als erledigt markiert.
+ *  - 409: Berg ist bereits auf der Watchlist.
+ *  - 500: Serverfehler.
+ */
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a53d70bc46ba258e22f3396eee489138f}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}!check\_if\_mountain\_is\_on\_watchlist@{check\_if\_mountain\_is\_on\_watchlist}}
+\index{check\_if\_mountain\_is\_on\_watchlist@{check\_if\_mountain\_is\_on\_watchlist}!swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection{\texorpdfstring{check\_if\_mountain\_is\_on\_watchlist()}{check\_if\_mountain\_is\_on\_watchlist()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a53d70bc46ba258e22f3396eee489138f} 
+swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+check\+\_\+if\+\_\+mountain\+\_\+is\+\_\+on\+\_\+watchlist (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}/**
+ * @brief Prüft, ob ein Berg auf der Watchlist eines Benutzers ist.
+ * @details
+ *  - Erwartet Query-Parameter:
+ *      - UserID (int): Die ID des Benutzers.
+ *      - MountainID (int): Die ID des Berges.
+ * @return
+ *  - 200: { "isOnWatchlist": true/false }
+ *  - 400: Fehlerhafte Eingabedaten.
+ *  - 500: Serverfehler.
+ */
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a5276d1c6944d3d82b4a8fbe58622e32e}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}!delete\_watchlist\_entry\_by\_id@{delete\_watchlist\_entry\_by\_id}}
+\index{delete\_watchlist\_entry\_by\_id@{delete\_watchlist\_entry\_by\_id}!swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection{\texorpdfstring{delete\_watchlist\_entry\_by\_id()}{delete\_watchlist\_entry\_by\_id()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a5276d1c6944d3d82b4a8fbe58622e32e} 
+swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+delete\+\_\+watchlist\+\_\+entry\+\_\+by\+\_\+id (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}/**
+ * @brief Löscht einen Watchlist-Eintrag anhand von WatchlistID und UserID.
+ * @details
+ *  - Erwartet Query-Parameter:
+ *      - WatchlistID (int): Die ID des Watchlist-Eintrags.
+ *      - UserID (int): Die ID des Benutzers.
+ *  - Löscht den Eintrag, falls vorhanden und autorisiert.
+ * @return
+ *  - 200: Watchlist-Eintrag erfolgreich gelöscht.
+ *  - 400: Fehlerhafte Eingabedaten.
+ *  - 404: Eintrag nicht gefunden oder nicht autorisiert.
+ *  - 500: Serverfehler.
+ */
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a0c26f1d84bd3cc8e0132e87a93679aef}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}!fetch\_watchlist@{fetch\_watchlist}}
+\index{fetch\_watchlist@{fetch\_watchlist}!swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection{\texorpdfstring{fetch\_watchlist()}{fetch\_watchlist()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a0c26f1d84bd3cc8e0132e87a93679aef} 
+swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+fetch\+\_\+watchlist (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}/**
+ * @brief Gibt die gesamte Watchlist eines Benutzers zurück.
+ * @details
+ *  - Erwartet Query-Parameter:
+ *      - UserID (int): Die ID des Benutzers.
+ *  - Gibt eine Liste aller Berge auf der Watchlist zurück, inkl. Bergdetails.
+ * @return
+ *  - 200: Liste der Watchlist-Einträge.
+ *  - 400: Fehlerhafte Eingabedaten.
+ *  - 500: Serverfehler.
+ */
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_ac35e1c3fe4b6644a8e8e57c08049fb78}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}!remove\_mountain\_from\_watchlist@{remove\_mountain\_from\_watchlist}}
+\index{remove\_mountain\_from\_watchlist@{remove\_mountain\_from\_watchlist}!swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection{\texorpdfstring{remove\_mountain\_from\_watchlist()}{remove\_mountain\_from\_watchlist()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_ac35e1c3fe4b6644a8e8e57c08049fb78} 
+swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+remove\+\_\+mountain\+\_\+from\+\_\+watchlist (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}/**
+ * @brief Entfernt einen Berg von der Watchlist eines Benutzers.
+ * @details
+ *  - Erwartet Query-Parameter:
+ *      - UserID (int): Die ID des Benutzers.
+ *      - MountainID (int): Die ID des Berges.
+ * @return
+ *  - 200: Berg erfolgreich entfernt.
+ *  - 400: Fehlerhafte Eingabedaten.
+ *  - 404: Berg nicht auf der Watchlist gefunden.
+ *  - 500: Serverfehler.
+ */
+\end{DoxyVerb}
+ 
+
+\label{doc-var-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_aa2778b18ace81fa88ab13a984f71862a}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}!supabase@{supabase}}
+\index{supabase@{supabase}!swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection{\texorpdfstring{supabase}{supabase}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_aa2778b18ace81fa88ab13a984f71862a} 
+Client swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+supabase = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a6b3eeee434505a9b183aa9747de8b9d5}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a9978db5bd33dcf7480f27e5765d3c7b4}{SUPABASE\+\_\+\+KEY}})}
+
+
+
+Erstellt einen Supabase-\/\+Client für Datenbankoperationen. 
+
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a9978db5bd33dcf7480f27e5765d3c7b4}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}!SUPABASE\_KEY@{SUPABASE\_KEY}}
+\index{SUPABASE\_KEY@{SUPABASE\_KEY}!swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_KEY}{SUPABASE\_KEY}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a9978db5bd33dcf7480f27e5765d3c7b4} 
+str swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+SUPABASE\+\_\+\+KEY = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}}
+
+
+
+Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. 
+
+\begin{DoxyWarning}{Warning}
+Verwende diesen Key nur im Backend. Nicht geeignet für den Client! 
+\end{DoxyWarning}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a6b3eeee434505a9b183aa9747de8b9d5}\index{swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}!SUPABASE\_URL@{SUPABASE\_URL}}
+\index{SUPABASE\_URL@{SUPABASE\_URL}!swagger\_server.controllers.Watchlist\_controller@{swagger\_server.controllers.Watchlist\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_URL}{SUPABASE\_URL}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1_watchlist__controller_a6b3eeee434505a9b183aa9747de8b9d5} 
+str swagger\+\_\+server.\+controllers.\+Watchlist\+\_\+controller.\+SUPABASE\+\_\+\+URL = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}}
+
+
+
+Supabase-\/\+Projekt-\/\+URL. 
+

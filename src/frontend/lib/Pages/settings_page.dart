@@ -5,6 +5,19 @@ import 'ChangePasswordPage.dart';
 import '../Class/supabase_client.dart';
 import '../Class/User.dart';
 
+/// Einstellungsseite der HikeMate App
+/// 
+/// Diese Seite bietet alle Benutzer-Einstellungen und Profilverwaltung:
+/// - Telefonnummer bearbeiten
+/// - Benutzername ändern
+/// - Passwort ändern
+/// - Logout-Funktion
+/// 
+/// Features:
+/// - Persistente Speicherung aller Änderungen
+/// - Formular-Validation für Telefonnummer
+/// - Navigation zu speziellen Change-Pages
+/// - Sichere Logout-Funktionalität
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
 
@@ -12,10 +25,18 @@ class SettingsPage extends StatefulWidget {
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
+/// State-Klasse für die SettingsPage mit Formular-Management
 class _SettingsPageState extends State<SettingsPage> {
+  /// Logger für diese Seite
   final _log = LoggingService();
+  
+  /// Form-Key für Validation
   final _formKey = GlobalKey<FormState>();
+  
+  /// Controller für das Telefonnummer-Eingabefeld
   final TextEditingController _phoneController = TextEditingController();
+  
+  /// Zeigt an ob gerade Daten geladen werden
   bool _loading = true;
 
   @override
@@ -25,6 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _loadPhoneNumber();
   }
 
+  /// Lädt die gespeicherte Telefonnummer vom Backend
   Future<void> _loadPhoneNumber() async {
     if (User.id == null) {
       _log.w('Benutzer nicht angemeldet, kann Telefonnummer nicht laden.');
@@ -57,10 +79,13 @@ class _SettingsPageState extends State<SettingsPage> {
     } finally {
       if (mounted) {
         setState(() => _loading = false);
-      }
-    }
+      }    }
   }
 
+  /// Speichert die eingegebene Telefonnummer
+  /// 
+  /// Validiert das Formular und speichert die Telefonnummer über Supabase.
+  /// Bei Erfolg wird eine grüne Bestätigung angezeigt, bei Fehlern eine rote Meldung.
   Future<void> _savePhoneNumber() async {
     if (!_formKey.currentState!.validate()) return;
     if (User.id == null) {
@@ -102,10 +127,16 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void dispose() {
     _log.i('SettingsPage disposed.');
-    _phoneController.dispose();
-    super.dispose();
+    _phoneController.dispose();    super.dispose();
   }
 
+  /// Erstellt ein einheitliches Design für Einstellungs-ListTiles
+  /// 
+  /// [icon] - Das anzuzeigende Icon
+  /// [title] - Der Titel der Einstellung
+  /// [onTap] - Callback-Funktion beim Antippen
+  /// 
+  /// Rückgabe: Styled ListTile Widget für die Einstellungsliste
   Widget _buildSettingsTile({
     required IconData icon,
     required String title,

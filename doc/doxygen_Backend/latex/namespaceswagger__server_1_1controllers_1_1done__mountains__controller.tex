@@ -1,0 +1,156 @@
+\doxysection{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller Namespace Reference}
+\hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller}{}\label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_afa06b7fe57f22e3d0e30872e73381e87}{post\+\_\+done\+\_\+mountain\+\_\+with\+\_\+user\+\_\+id}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_a28e95bd7b9d190689047869b445d4503}{check\+\_\+if\+\_\+mountain\+\_\+is\+\_\+done}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_ad2591a78ccfe84b0a2bdcba711193377}{is\+\_\+mountain\+\_\+done\+\_\+by\+\_\+user}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af0c0971bb5a9f6ca397a0e8df8c55549}{delete\+\_\+done\+\_\+mountain}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_aca31fd5cba9b70886ccb5b48b2b5abdf}{get\+\_\+done\+\_\+mountains\+\_\+by\+\_\+user\+\_\+id}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af90ead9137ed004c3f6a93fa0b257a21}{SUPABASE\+\_\+\+URL}} = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}
+\begin{DoxyCompactList}\small\item\em Supabase-\/\+Projekt-\/\+URL. \end{DoxyCompactList}\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af8d8f41da8b926b1ca1029c2b60f08a4}{SUPABASE\+\_\+\+KEY}} = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}
+\begin{DoxyCompactList}\small\item\em Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_aed9c09c4a8ebff4da7f8072c5f8e9203}{supabase}} = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af90ead9137ed004c3f6a93fa0b257a21}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af8d8f41da8b926b1ca1029c2b60f08a4}{SUPABASE\+\_\+\+KEY}})
+\begin{DoxyCompactList}\small\item\em Erstellt einen Supabase-\/\+Client. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_a28e95bd7b9d190689047869b445d4503}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}!check\_if\_mountain\_is\_done@{check\_if\_mountain\_is\_done}}
+\index{check\_if\_mountain\_is\_done@{check\_if\_mountain\_is\_done}!swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection{\texorpdfstring{check\_if\_mountain\_is\_done()}{check\_if\_mountain\_is\_done()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_a28e95bd7b9d190689047869b445d4503} 
+swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+check\+\_\+if\+\_\+mountain\+\_\+is\+\_\+done (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Prüft, ob ein bestimmter Berg für einen Benutzer erledigt ist.
+
+@details
+Erwartet Query-Parameter:
+  - UserID (int): Die ID des Benutzers.
+  - MountainID (int): Die ID des Berges.
+
+@return
+  200: { "response": { "isDone": true/false } }
+  400: Fehlerhafte oder fehlende Parameter.
+  500: Serverfehler.
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af0c0971bb5a9f6ca397a0e8df8c55549}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}!delete\_done\_mountain@{delete\_done\_mountain}}
+\index{delete\_done\_mountain@{delete\_done\_mountain}!swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection{\texorpdfstring{delete\_done\_mountain()}{delete\_done\_mountain()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af0c0971bb5a9f6ca397a0e8df8c55549} 
+swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+delete\+\_\+done\+\_\+mountain (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Löscht einen Eintrag eines erledigten Berges für einen Benutzer.
+
+@details
+Erwartet Query-Parameter:
+  - DoneID (int): Die ID des Done-Eintrags.
+  - UserID (int): Die ID des Benutzers.
+
+@return
+  200: Erfolgreich gelöscht.
+  400: Fehlerhafte oder fehlende Parameter.
+  500: Serverfehler.
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_aca31fd5cba9b70886ccb5b48b2b5abdf}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}!get\_done\_mountains\_by\_user\_id@{get\_done\_mountains\_by\_user\_id}}
+\index{get\_done\_mountains\_by\_user\_id@{get\_done\_mountains\_by\_user\_id}!swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection{\texorpdfstring{get\_done\_mountains\_by\_user\_id()}{get\_done\_mountains\_by\_user\_id()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_aca31fd5cba9b70886ccb5b48b2b5abdf} 
+swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+get\+\_\+done\+\_\+mountains\+\_\+by\+\_\+user\+\_\+id (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Gibt alle erledigten Berge eines Benutzers zurück.
+
+@details
+Erwartet Query-Parameter:
+  - UserID (int): Die ID des Benutzers.
+
+@return
+  200: Liste der erledigten Berge (inkl. Name, Höhe, Bundesland).
+  400: Fehlerhafte oder fehlende Parameter.
+  500: Serverfehler.
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_ad2591a78ccfe84b0a2bdcba711193377}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}!is\_mountain\_done\_by\_user@{is\_mountain\_done\_by\_user}}
+\index{is\_mountain\_done\_by\_user@{is\_mountain\_done\_by\_user}!swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection{\texorpdfstring{is\_mountain\_done\_by\_user()}{is\_mountain\_done\_by\_user()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_ad2591a78ccfe84b0a2bdcba711193377} 
+swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+is\+\_\+mountain\+\_\+done\+\_\+by\+\_\+user (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Alternativer Endpunkt zur Prüfung, ob ein Berg erledigt wurde.
+
+@details
+Erwartet Query-Parameter:
+  - UserID (int): Die ID des Benutzers.
+  - MountainID (int): Die ID des Berges.
+
+@return
+  200: { "isDone": true/false }
+  400: Fehlerhafte oder fehlende Parameter.
+  500: Serverfehler.
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_afa06b7fe57f22e3d0e30872e73381e87}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}!post\_done\_mountain\_with\_user\_id@{post\_done\_mountain\_with\_user\_id}}
+\index{post\_done\_mountain\_with\_user\_id@{post\_done\_mountain\_with\_user\_id}!swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection{\texorpdfstring{post\_done\_mountain\_with\_user\_id()}{post\_done\_mountain\_with\_user\_id()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_afa06b7fe57f22e3d0e30872e73381e87} 
+swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+post\+\_\+done\+\_\+mountain\+\_\+with\+\_\+user\+\_\+id (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Markiert einen Berg als erledigt für einen Benutzer.
+
+@details
+Erwartet einen JSON-Body mit:
+  - UserID (int): Die ID des Benutzers.
+  - MountainID (int): Die ID des Berges.
+
+@return
+  201: Erfolgsmeldung mit gespeicherten Daten.
+  400: Fehlermeldung bei ungültigem oder fehlendem Input.
+  500: Serverfehler bei der Datenbankoperation.
+\end{DoxyVerb}
+ 
+
+\label{doc-var-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_aed9c09c4a8ebff4da7f8072c5f8e9203}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}!supabase@{supabase}}
+\index{supabase@{supabase}!swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection{\texorpdfstring{supabase}{supabase}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_aed9c09c4a8ebff4da7f8072c5f8e9203} 
+swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+supabase = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af90ead9137ed004c3f6a93fa0b257a21}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af8d8f41da8b926b1ca1029c2b60f08a4}{SUPABASE\+\_\+\+KEY}})}
+
+
+
+Erstellt einen Supabase-\/\+Client. 
+
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af8d8f41da8b926b1ca1029c2b60f08a4}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}!SUPABASE\_KEY@{SUPABASE\_KEY}}
+\index{SUPABASE\_KEY@{SUPABASE\_KEY}!swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_KEY}{SUPABASE\_KEY}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af8d8f41da8b926b1ca1029c2b60f08a4} 
+str swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+SUPABASE\+\_\+\+KEY = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}}
+
+
+
+Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. 
+
+\begin{DoxyWarning}{Warning}
+Verwende diesen Key nur im Backend. Nicht geeignet für den Client. 
+\end{DoxyWarning}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af90ead9137ed004c3f6a93fa0b257a21}\index{swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}!SUPABASE\_URL@{SUPABASE\_URL}}
+\index{SUPABASE\_URL@{SUPABASE\_URL}!swagger\_server.controllers.done\_mountains\_controller@{swagger\_server.controllers.done\_mountains\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_URL}{SUPABASE\_URL}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af90ead9137ed004c3f6a93fa0b257a21} 
+str swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+SUPABASE\+\_\+\+URL = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}}
+
+
+
+Supabase-\/\+Projekt-\/\+URL. 
+

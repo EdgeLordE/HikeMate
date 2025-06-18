@@ -1,0 +1,93 @@
+@startuml Klassendiagramm
+class Activity {
+  + Future<List<Map<String, dynamic>>> fetchActivitiesByUserId(int userId)
+}
+class Done {
+  - String _baseUrl
+  + Future<bool> isMountainDone(int userId, int mountainId)
+  + Future<bool> isMountainDoneSimple(int userId, int mountainId)
+  + Future<Map<String, dynamic>> addMountainToDone(int userId, int mountainId)
+  + Future<Map<String, dynamic>> deleteDone(int doneId, int userId)
+  + Future<Map<String, dynamic>> fetchDoneList(int userId)
+}
+class TrackingService {
+  - TrackingService _instance
+  + bool isTracking
+  + double totalDistance
+  + double totalAscent
+  + double altitude
+  + Duration duration
+  - LatLng? _previousPosition
+  - double? _previousAltitude
+  - Timer? _durationTimer
+  - Timer? _altitudeTimer
+  - StreamSubscription<Position>? _positionStream
+  + List<LatLng> path
+  - var _onUpdate
+  + Stream<void> onUpdate
+  - Stopwatch _stopwatch
+  + TrackingStorage trackingStorage
+  + Future<void> start()
+  + Future<void> stop()
+  - Future<Position?> _checkAndRequestPermissions()
+  + void dispose()
+}
+class LoggingService {
+  - LoggingService _instance
+  - Logger _logger
+  - IOSink? _sink
+  + Future<void> init()
+  + void d(String message)
+  + void i(String message)
+  + void w(String message)
+  + void e(String message, [Object? error, StackTrace? stackTrace])
+}
+class Mountain {
+  + Future<Map<String, dynamic>> SearchMountainByName(String name)
+}
+class TrackingStorage {
+  + Future<void> saveTrackingData(double totalDistance, double totalAscent, List<LatLng> path)
+  + Future<void> saveTrackingDuration(Duration duration)
+  + Future<Duration> loadTrackingDuration()
+  + Future<void> saveAltitude(double altitude)
+  + Future<void> saveTrackingState(bool isTracking)
+  + Future<bool> loadTrackingState()
+  + Future<Map<String, dynamic>> loadTrackingData()
+  + Future<void> requestNotificationPermission()
+  + Future<void> enableBackgroundTracking()
+  + Future<void> disableBackgroundTracking()
+  + Future<bool> wasTrackingActive()
+}
+class User {
+  - int _id
+  - String _firstName
+  - String _lastName
+  - String _username
+  + String baseUrl
+  + int get id
+  + String get firstName
+  + String get lastName
+  + String get username
+  + set id(int value)
+  + set firstName(String value)
+  + set lastName(String value)
+  + set username(String value)
+  + void setUser(int id, String firstName, String lastName, String username)
+  + void clearUser()
+  + Future<Map<String, dynamic>> login_User(String username, String password)
+  + Future<Map<String, dynamic>> register_User(String firstName, String lastName, String username, String password)
+  + Future<void> logout(BuildContext context)
+  + Future<bool> changeUsername(String oldUsername, String newUsername)
+  + Future<bool> changePassword(String oldPassword, String newPassword)
+  + Future<String?> loadPhoneNumber()
+  + Future<bool> savePhoneNumber(String phone)
+}
+class Watchlist {
+  - String _baseUrl
+  + Future<Map<String, dynamic>> addMountainToWatchlist(int userId, int mountainId)
+  + Future<Map<String, dynamic>> removeMountainFromWatchlist(int userId, int mountainId)
+  + Future<Map<String, dynamic>> checkIfMountainIsOnWatchlist(int userId, int mountainId)
+  + Future<Map<String, dynamic>> fetchWatchlist(int userId)
+  + Future<Map<String, dynamic>> deleteWatchlistEntry(int watchlistId, int userId)
+}
+@enduml

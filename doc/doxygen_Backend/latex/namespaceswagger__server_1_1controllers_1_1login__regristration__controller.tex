@@ -1,0 +1,152 @@
+\doxysection{swagger\+\_\+server.\+controllers.\+login\+\_\+regristration\+\_\+controller Namespace Reference}
+\hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller}{}\label{namespaceswagger__server_1_1controllers_1_1login__regristration__controller}\index{swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_aed8d4c9c4a5e631c1f1c91873ab2e5a5}{post\+\_\+regristration}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a23e1093035fe23d8cdd0bc6f33e08815}{post\+\_\+login}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a6a2f22982fa5d77075f20c6f5d4ded3e}{post\+\_\+change\+\_\+password}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a0a592bfdb657e4d108d6ad4bd4441eeb}{post\+\_\+change\+\_\+username}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_acf0e2c1e76a73c0261bac05bd9d826c0}{SUPABASE\+\_\+\+URL}} = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}
+\begin{DoxyCompactList}\small\item\em Supabase-\/\+Projekt-\/\+URL. \end{DoxyCompactList}\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a8faaf26456320fda5535076994a5c5a5}{SUPABASE\+\_\+\+KEY}} = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}
+\begin{DoxyCompactList}\small\item\em Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a2da5d9e312807ddd7fa4c49f6a73c5dd}{supabase}} = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_acf0e2c1e76a73c0261bac05bd9d826c0}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a8faaf26456320fda5535076994a5c5a5}{SUPABASE\+\_\+\+KEY}})
+\begin{DoxyCompactList}\small\item\em Erstellt einen Supabase-\/\+Client für Datenbankoperationen. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a6a2f22982fa5d77075f20c6f5d4ded3e}\index{swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}!post\_change\_password@{post\_change\_password}}
+\index{post\_change\_password@{post\_change\_password}!swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}}
+\doxysubsubsection{\texorpdfstring{post\_change\_password()}{post\_change\_password()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a6a2f22982fa5d77075f20c6f5d4ded3e} 
+swagger\+\_\+server.\+controllers.\+login\+\_\+regristration\+\_\+controller.\+post\+\_\+change\+\_\+password (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Ändert das Passwort eines Benutzers.
+
+@details
+Erwartet einen JSON-Body mit:
+  - Username (str)
+  - OldPassword (str)
+  - NewPassword (str)
+
+Prüft, ob der Benutzer existiert und das alte Passwort korrekt ist.
+
+@return
+  200: Passwort erfolgreich geändert.
+  401: Altes Passwort ist falsch.
+  404: Benutzer nicht gefunden.
+  400: Fehlerhafte Eingabedaten.
+  500: Fehler beim Ändern des Passworts.
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a0a592bfdb657e4d108d6ad4bd4441eeb}\index{swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}!post\_change\_username@{post\_change\_username}}
+\index{post\_change\_username@{post\_change\_username}!swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}}
+\doxysubsubsection{\texorpdfstring{post\_change\_username()}{post\_change\_username()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a0a592bfdb657e4d108d6ad4bd4441eeb} 
+swagger\+\_\+server.\+controllers.\+login\+\_\+regristration\+\_\+controller.\+post\+\_\+change\+\_\+username (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Ändert den Benutzernamen eines Benutzers.
+
+@details
+Erwartet einen JSON-Body mit:
+  - Username (str): Der aktuelle Benutzername.
+  - NewUsername (str): Der neue gewünschte Benutzername.
+
+Prüft, ob der Benutzer existiert und ob der neue Username noch nicht vergeben ist.
+
+@return
+  200: Benutzername erfolgreich geändert.
+  404: Benutzer nicht gefunden.
+  409: Neuer Username existiert bereits.
+  400: Fehlerhafte Eingabedaten.
+  500: Fehler beim Ändern des Benutzernamens.
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a23e1093035fe23d8cdd0bc6f33e08815}\index{swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}!post\_login@{post\_login}}
+\index{post\_login@{post\_login}!swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}}
+\doxysubsubsection{\texorpdfstring{post\_login()}{post\_login()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a23e1093035fe23d8cdd0bc6f33e08815} 
+swagger\+\_\+server.\+controllers.\+login\+\_\+regristration\+\_\+controller.\+post\+\_\+login (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Loggt einen Benutzer ein.
+
+@details
+Erwartet einen JSON-Body mit:
+  - Username (str)
+  - Password (str)
+
+Prüft, ob Username und Passwort korrekt sind.
+
+@return
+  200: Login erfolgreich, Benutzerdaten werden zurückgegeben.
+  401: Ungültiger Username oder Passwort.
+  400: Fehlerhafte Eingabedaten.
+\end{DoxyVerb}
+ \Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_aed8d4c9c4a5e631c1f1c91873ab2e5a5}\index{swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}!post\_regristration@{post\_regristration}}
+\index{post\_regristration@{post\_regristration}!swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}}
+\doxysubsubsection{\texorpdfstring{post\_regristration()}{post\_regristration()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_aed8d4c9c4a5e631c1f1c91873ab2e5a5} 
+swagger\+\_\+server.\+controllers.\+login\+\_\+regristration\+\_\+controller.\+post\+\_\+regristration (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Registriert einen neuen Benutzer.
+
+@details
+Erwartet einen JSON-Body mit:
+  - Username (str)
+  - Password (str)
+  - FirstName (str)
+  - LastName (str)
+
+Prüft, ob der Username bereits existiert. Das Passwort wird mit bcrypt gehasht.
+
+@return
+  200: Benutzer erfolgreich registriert.
+  409: Username existiert bereits.
+  400: Fehlerhafte Eingabedaten.
+\end{DoxyVerb}
+ 
+
+\label{doc-var-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a2da5d9e312807ddd7fa4c49f6a73c5dd}\index{swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}!supabase@{supabase}}
+\index{supabase@{supabase}!swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}}
+\doxysubsubsection{\texorpdfstring{supabase}{supabase}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a2da5d9e312807ddd7fa4c49f6a73c5dd} 
+swagger\+\_\+server.\+controllers.\+login\+\_\+regristration\+\_\+controller.\+supabase = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_acf0e2c1e76a73c0261bac05bd9d826c0}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a8faaf26456320fda5535076994a5c5a5}{SUPABASE\+\_\+\+KEY}})}
+
+
+
+Erstellt einen Supabase-\/\+Client für Datenbankoperationen. 
+
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a8faaf26456320fda5535076994a5c5a5}\index{swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}!SUPABASE\_KEY@{SUPABASE\_KEY}}
+\index{SUPABASE\_KEY@{SUPABASE\_KEY}!swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_KEY}{SUPABASE\_KEY}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_a8faaf26456320fda5535076994a5c5a5} 
+str swagger\+\_\+server.\+controllers.\+login\+\_\+regristration\+\_\+controller.\+SUPABASE\+\_\+\+KEY = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}}
+
+
+
+Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. 
+
+\begin{DoxyWarning}{Warning}
+Verwende diesen Key nur im Backend. Nicht geeignet für den Client! 
+\end{DoxyWarning}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_acf0e2c1e76a73c0261bac05bd9d826c0}\index{swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}!SUPABASE\_URL@{SUPABASE\_URL}}
+\index{SUPABASE\_URL@{SUPABASE\_URL}!swagger\_server.controllers.login\_regristration\_controller@{swagger\_server.controllers.login\_regristration\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_URL}{SUPABASE\_URL}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1login__regristration__controller_acf0e2c1e76a73c0261bac05bd9d826c0} 
+str swagger\+\_\+server.\+controllers.\+login\+\_\+regristration\+\_\+controller.\+SUPABASE\+\_\+\+URL = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}}
+
+
+
+Supabase-\/\+Projekt-\/\+URL. 
+

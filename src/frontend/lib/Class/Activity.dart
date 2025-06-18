@@ -3,9 +3,26 @@ import 'package:http/http.dart' as http;
 import 'Logging.dart';
 import 'User.dart';
 
+/// Klasse für die Verwaltung von Wanderaktivitäten in der HikeMate App
+/// 
+/// Diese Klasse stellt Methoden zur Verfügung, um Aktivitätsdaten
+/// vom Backend-Server zu laden und zu verwalten.
 class Activity {
+  /// Logger für diese Klasse - wird für alle Log-Nachrichten verwendet
   static final _log = LoggingService();
 
+  /// Lädt alle Aktivitäten für einen bestimmten Benutzer vom Server
+  /// 
+  /// Diese Methode sendet eine HTTP GET-Anfrage an das Backend,
+  /// um alle Wanderaktivitäten eines Benutzers zu bekommen.
+  /// 
+  /// [userId] - Die eindeutige ID des Benutzers (muss größer als 0 sein)
+  /// 
+  /// Rückgabe: Eine Liste mit Maps, die jeweils eine Aktivität enthalten.
+  /// Jede Map hat Felder wie 'id', 'name', 'date', 'distance', etc.
+  /// 
+  /// Bei Fehlern oder wenn der Server nicht antwortet, wird eine
+  /// leere Liste zurückgegeben.
   static Future<List<Map<String, dynamic>>> fetchActivitiesByUserId(
       int userId, [http.Client? client]) async {
     final httpClient = client ?? http.Client();

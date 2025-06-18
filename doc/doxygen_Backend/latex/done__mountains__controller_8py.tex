@@ -1,0 +1,52 @@
+\doxysection{C\+:/\+Users/43681/source/repos/\+Hike\+Mate/src/\+Backend/python\+\_\+flask\+\_\+server/swagger\+\_\+server/controllers/done\+\_\+mountains\+\_\+controller.py File Reference}
+\hypertarget{done__mountains__controller_8py}{}\label{done__mountains__controller_8py}\index{C:/Users/43681/source/repos/HikeMate/src/Backend/python\_flask\_server/swagger\_server/controllers/done\_mountains\_controller.py@{C:/Users/43681/source/repos/HikeMate/src/Backend/python\_flask\_server/swagger\_server/controllers/done\_mountains\_controller.py}}
+
+
+API-\/\+Controller zum Verwalten erledigter Berge eines Benutzers.  
+
+
+\doxysubsubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \mbox{\hyperlink{namespaceswagger__server}{swagger\+\_\+server}}
+\item 
+namespace \mbox{\hyperlink{namespaceswagger__server_1_1controllers}{swagger\+\_\+server.\+controllers}}
+\item 
+namespace \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_afa06b7fe57f22e3d0e30872e73381e87}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+post\+\_\+done\+\_\+mountain\+\_\+with\+\_\+user\+\_\+id}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_a28e95bd7b9d190689047869b445d4503}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+check\+\_\+if\+\_\+mountain\+\_\+is\+\_\+done}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_ad2591a78ccfe84b0a2bdcba711193377}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+is\+\_\+mountain\+\_\+done\+\_\+by\+\_\+user}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af0c0971bb5a9f6ca397a0e8df8c55549}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+delete\+\_\+done\+\_\+mountain}} ()
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_aca31fd5cba9b70886ccb5b48b2b5abdf}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+get\+\_\+done\+\_\+mountains\+\_\+by\+\_\+user\+\_\+id}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af90ead9137ed004c3f6a93fa0b257a21}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+SUPABASE\+\_\+\+URL}} = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}
+\begin{DoxyCompactList}\small\item\em Supabase-\/\+Projekt-\/\+URL. \end{DoxyCompactList}\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af8d8f41da8b926b1ca1029c2b60f08a4}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+SUPABASE\+\_\+\+KEY}} = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}
+\begin{DoxyCompactList}\small\item\em Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_aed9c09c4a8ebff4da7f8072c5f8e9203}{swagger\+\_\+server.\+controllers.\+done\+\_\+mountains\+\_\+controller.\+supabase}} = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af90ead9137ed004c3f6a93fa0b257a21}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1done__mountains__controller_af8d8f41da8b926b1ca1029c2b60f08a4}{SUPABASE\+\_\+\+KEY}})
+\begin{DoxyCompactList}\small\item\em Erstellt einen Supabase-\/\+Client. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+API-\/\+Controller zum Verwalten erledigter Berge eines Benutzers. 
+
+Diese Datei enthält Endpunkte zur Verwaltung von "{}\+Done"{}-\/Einträgen über eine Supabase-\/\+Datenbank. \begin{DoxyAuthor}{Author}
+Emil Wagner, Mathias Florea 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2025-\/06-\/17 
+\end{DoxyDate}
+\begin{DoxyVersion}{Version}
+1.\+0 
+\end{DoxyVersion}

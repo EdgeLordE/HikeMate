@@ -1,0 +1,80 @@
+\doxysection{swagger\+\_\+server.\+controllers.\+activity\+\_\+controller Namespace Reference}
+\hypertarget{namespaceswagger__server_1_1controllers_1_1activity__controller}{}\label{namespaceswagger__server_1_1controllers_1_1activity__controller}\index{swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1activity__controller_a0f481a427971734d5edaadb46b254365}{get\+\_\+activities\+\_\+by\+\_\+user\+\_\+id}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1activity__controller_a0d9ab52f0875129897d4ad1d85018b6d}{SUPABASE\+\_\+\+URL}} = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}
+\begin{DoxyCompactList}\small\item\em Supabase-\/\+Projekt-\/\+URL. \end{DoxyCompactList}\item 
+str \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1activity__controller_ae372b8761649c09ebef91a623132ad4b}{SUPABASE\+\_\+\+KEY}} = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}
+\begin{DoxyCompactList}\small\item\em Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1activity__controller_ad4ff552308d81fc1dfa9d6e7a1dd3cbe}{supabase}} = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1activity__controller_a0d9ab52f0875129897d4ad1d85018b6d}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1activity__controller_ae372b8761649c09ebef91a623132ad4b}{SUPABASE\+\_\+\+KEY}})
+\begin{DoxyCompactList}\small\item\em Erstellt einen Supabase-\/\+Client. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1activity__controller_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1activity__controller_a0f481a427971734d5edaadb46b254365}\index{swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}!get\_activities\_by\_user\_id@{get\_activities\_by\_user\_id}}
+\index{get\_activities\_by\_user\_id@{get\_activities\_by\_user\_id}!swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}}
+\doxysubsubsection{\texorpdfstring{get\_activities\_by\_user\_id()}{get\_activities\_by\_user\_id()}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1activity__controller_a0f481a427971734d5edaadb46b254365} 
+swagger\+\_\+server.\+controllers.\+activity\+\_\+controller.\+get\+\_\+activities\+\_\+by\+\_\+user\+\_\+id (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Gibt alle Aktivitäten eines bestimmten Benutzers zurück.
+
+@details
+Diese Funktion verarbeitet einen GET-Request der Form `/Aktivitaet?user_id=...`
+und gibt eine Liste von Aktivitäten zurück, die dem Benutzer zugeordnet sind.
+Die Aktivitätsdaten werden aus der Supabase-Tabelle `Activity` gelesen
+und nach Datum absteigend sortiert.
+
+@param user_id Die ID des Benutzers (als Query-Parameter).
+
+@return
+    200: JSON-Objekt mit einer Liste von Aktivitäten.
+    400: JSON-Fehlermeldung bei fehlender oder ungültiger user_id.
+    500: JSON-Fehlermeldung bei Serverfehler.
+\end{DoxyVerb}
+ 
+
+\label{doc-var-members}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1activity__controller_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1activity__controller_ad4ff552308d81fc1dfa9d6e7a1dd3cbe}\index{swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}!supabase@{supabase}}
+\index{supabase@{supabase}!swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}}
+\doxysubsubsection{\texorpdfstring{supabase}{supabase}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1activity__controller_ad4ff552308d81fc1dfa9d6e7a1dd3cbe} 
+swagger\+\_\+server.\+controllers.\+activity\+\_\+controller.\+supabase = create\+\_\+client(\mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1activity__controller_a0d9ab52f0875129897d4ad1d85018b6d}{SUPABASE\+\_\+\+URL}}, \mbox{\hyperlink{namespaceswagger__server_1_1controllers_1_1activity__controller_ae372b8761649c09ebef91a623132ad4b}{SUPABASE\+\_\+\+KEY}})}
+
+
+
+Erstellt einen Supabase-\/\+Client. 
+
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1activity__controller_ae372b8761649c09ebef91a623132ad4b}\index{swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}!SUPABASE\_KEY@{SUPABASE\_KEY}}
+\index{SUPABASE\_KEY@{SUPABASE\_KEY}!swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_KEY}{SUPABASE\_KEY}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1activity__controller_ae372b8761649c09ebef91a623132ad4b} 
+str swagger\+\_\+server.\+controllers.\+activity\+\_\+controller.\+SUPABASE\+\_\+\+KEY = "{}ey\+Jhb\+Gci\+Oi\+JIUz\+I1\+Ni\+Is\+In\+R5c\+CI6\+Ikp\+XVCJ9.\+ey\+Jpc3\+Mi\+Oi\+Jzd\+XBh\+Ym\+Fz\+ZSIs\+In\+Jl\+Zi\+I6\+Im\+N5em\+Rm\+ZHdl\+Z2hocmxxd\+Xh3\+YXhs\+Iiwicm9s\+ZSI6\+Im\+Fub24i\+LCJp\+YXQi\+Oj\+E3\+NDgy\+NDk4\+ODYs\+Im\+V4c\+CI6\+Mj\+A2\+Mzgy\+NTg4\+Nn0.\+8\+Imb\+DPx5r\+Bu2z\+VQHMGQJNfs3lgu\+Oz4k0\+EUdycqmi\+TW0"{}}
+
+
+
+Öffentlicher API-\/\+Schlüssel zur Verbindung mit Supabase. 
+
+\begin{DoxyWarning}{Warning}
+Verwende diesen Key nur im Backend. Nicht geeignet für den Client. 
+\end{DoxyWarning}
+\Hypertarget{namespaceswagger__server_1_1controllers_1_1activity__controller_a0d9ab52f0875129897d4ad1d85018b6d}\index{swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}!SUPABASE\_URL@{SUPABASE\_URL}}
+\index{SUPABASE\_URL@{SUPABASE\_URL}!swagger\_server.controllers.activity\_controller@{swagger\_server.controllers.activity\_controller}}
+\doxysubsubsection{\texorpdfstring{SUPABASE\_URL}{SUPABASE\_URL}}
+{\footnotesize\ttfamily \label{namespaceswagger__server_1_1controllers_1_1activity__controller_a0d9ab52f0875129897d4ad1d85018b6d} 
+str swagger\+\_\+server.\+controllers.\+activity\+\_\+controller.\+SUPABASE\+\_\+\+URL = "{}https\+://cyzdfdweghhrlquxwaxl.\+supabase.\+co"{}}
+
+
+
+Supabase-\/\+Projekt-\/\+URL. 
+

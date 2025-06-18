@@ -1,9 +1,10 @@
+// lib/Pages/LoginPage.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../Class/Logging.dart';
 import 'HomePage.dart';
 import 'RegistrationPage.dart';
 import '../Class/User.dart';
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,14 +14,17 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late TextEditingController _usernameController;
-  late TextEditingController _passwordController;
+  late final TextEditingController _usernameController;
+  late final TextEditingController _passwordController;
+  final _log = LoggingService();
 
   @override
   void initState() {
     super.initState();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
+    LoggingService();
+    _log.i('LoginPage initialized');
   }
 
   @override
@@ -31,37 +35,38 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login(BuildContext context) async {
+    final user = _usernameController.text;
+    final pass = _passwordController.text;
+    if (user.isEmpty || pass.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Bitte Benutzername und Passwort eingeben'))
+      );
+      _log.w('Leere Anmeldedaten');
+      return;
+    }
     try {
-      // Verwenden Sie .text von den Controllern, die im State gehalten werden
-      final result = await User.login_User(
-          _usernameController.text, _passwordController.text);
-
-      if (_usernameController.text == "" && _passwordController.text == "") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bitte Benutzername und Passwort eingeben')),
-        );
-        return;
-      }
-
-      if (!mounted) return; // Überprüfen, ob das Widget noch im Baum ist
-
-      if (result["success"] == true) { // Expliziter Check auf true
+      _log.i('Login attempt for user: $user');
+      final result = await User.login_User(user, pass);
+      if (!mounted) return;
+      if (result['success'] == true) {
+        _log.i('Login successful for user: $user');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (_) => const HomePage()),
         );
       } else {
+        final msg = result['message']?.toString() ?? 'Unbekannte Nachricht';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(result["message"]?.toString() ??
-                  'Login fehlgeschlagen: Unbekannte Nachricht')),
+            SnackBar(content: Text('Login fehlgeschlagen: $msg'))
         );
+        _log.w('Login failed for user: $user – $msg');
       }
-    } catch (e) {
+    } catch (e, st) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login fehlgeschlagen: ${e.toString()}')),
+          SnackBar(content: Text('Login fehlgeschlagen: ${e.toString()}'))
       );
+      _log.e('Exception during login for user: $user', e, st);
     }
   }
 
@@ -74,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: const Color(0xFF141212),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -91,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: formWidth),
                 child: TextField(
-                  controller: _usernameController, // Controller aus dem State verwenden
+                  controller: _usernameController,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color(0xFF505050),
@@ -114,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: formWidth),
                 child: TextField(
-                  controller: _passwordController, // Controller aus dem State verwenden
+                  controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
                     filled: true,
@@ -150,10 +155,10 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     TextButton(
                       onPressed: () {
+                        _log.i('Navigiere zu RegistrationPage');
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const RegistrationPage()),
+                          MaterialPageRoute(builder: (_) => const RegistrationPage()),
                         );
                       },
                       child: const Text(
@@ -170,20 +175,17 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 40),
               ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxWidth: formWidth, minHeight: 48),
+                constraints: BoxConstraints(maxWidth: formWidth, minHeight: 48),
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () =>
-                        _login(context), // _login Methode des States aufrufen
+                    onPressed: () => _login(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(40),
                       ),
-                      padding:
-                      const EdgeInsets.symmetric(vertical: 11),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
                     ),
                     child: const Text(
                       'Login',

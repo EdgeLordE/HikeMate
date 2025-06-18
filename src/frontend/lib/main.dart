@@ -6,12 +6,13 @@ import 'Pages/LoginPage.dart';
 import 'Pages/ProfilePage.dart';
 import 'Pages/emergency_page.dart';
 import 'Pages/checkin_service.dart';
-
+import 'Class/Logging.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LoggingService().init();
   tz.initializeTimeZones();
   await CheckInService().init();
 

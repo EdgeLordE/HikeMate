@@ -396,23 +396,26 @@ class _DonePageState extends State<DonePage>
         _searchAndFilterBar(), // Such- und Filterleiste nur für "Gemacht"-Tab
         Expanded(
           child: items.isEmpty
-              ? Center(
-              child: Text(
-                  _searchQuery.isEmpty && _filterState == 'Alle'
-                      ? 'Noch keine Berge abgehakt.'
-                      : 'Keine Berge entsprechen deiner Suche/Filter.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white54, fontSize: 16)))
+              ? const Center(
+            child: Text(
+              'Noch keine Berge als gemacht markiert.',
+              style: TextStyle(color: Colors.white54, fontSize: 16),
+            ),
+          )
               : ListView.builder(
-            padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
+            padding:
+            const EdgeInsets.only(bottom: 16, left: 8, right: 8),
             itemCount: items.length,
             itemBuilder: (_, i) {
               final e = items[i];
+              final mountain = e['Mountain'] as Map<String, dynamic>?;
+              final state = mountain?['FederalState'] as Map<String, dynamic>?;
+
               return _entryCard(
-                name: e['Mountain']?['Name'] ?? 'Unbekannter Berg',
-                subtitle: 'Höhe: ${e['Mountain']?['Height'] ?? 'N/A'} m • ${e['Mountain']?['FederalState']?['Name'] ?? 'N/A'}',
-                date: _formatDate(e['Date']),
-                onDelete: () => _deleteDone(e['DoneID']),
+                name: mountain?['Name'] as String? ?? 'Unbekannter Berg',
+                subtitle: state?['Name'] as String? ?? 'Bundesland',
+                date: _formatDate(e['Date'] as String? ?? ''),
+                onDelete: () => _deleteDone(e['DoneID'] as int),
               );
             },
           ),

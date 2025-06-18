@@ -4,7 +4,7 @@
 
 | Datum       | Was gemacht? |
 |-------------|--------------|
-| **18.06.2025** | • Merge des Remote-Branches `origin/main` und Konfliktlösung<br>• Bedienungsanleitung finalisiert (PDF & Markdown)<br>• Fix von `DonePage.dart`, Berge löschen nicht möglich <br>• Bugfix in `Watchlist.dart` <br>• Erweiterung der Unit-Tests um Logger-Klasse (`LoggerTest`) <br>• `pubspec.yaml`: Dependencies aktualisiert, Dev-Dependencies ergänzt und ungenutzte Pakete entfernt |
+| **18.06.2025** | • .exe build setup <br> • Merge des Remote-Branches `origin/main` und Konfliktlösung<br>• Bedienungsanleitung finalisiert (PDF & Markdown)<br>• Fix von `DonePage.dart`, Berge löschen nicht möglich <br>• Bugfix in `Watchlist.dart` <br>• Erweiterung der Unit-Tests um Logger-Klasse (`LoggerTest`) <br>• `pubspec.yaml`: Dependencies aktualisiert, Dev-Dependencies ergänzt und ungenutzte Pakete entfernt |
 | **16.06.2025** | • **Frontend**: UI-Glitches in `SearchMountainPage.dart` (Filter-Reset) und `Done.dart` (Listen-Refresh) korrigiert<br>• **Logging**: Log in `Logging.dart` angepasst und Fehlermeldungen angepasst<br>• **Unit-Tests** gexit, kleiner bug beim testen  |
 | **15.06.2025** | • **DonePage** gefixt und `DonePage.dart` überarbeitet (Performance-Optimierung beim Scrollen)<br>• `settings_page.dart`: Layout-Feinschliff und Button-Zustände ergänzt<br>• `AndroidManifest.xml`: SMS-Permission hinzugefügt und Berechtigungsdialog optimiert<br>• `checkin_service.dart` implementiert und Intervall-Tests angelegt<br>• `emergency_page.dart`: automatische Standortfreigabe & direkte SOS-Funktion integriert<br>• SOS-Button in `NavigationPage.dart` eingebaut<br>• **ProfilePage**: UI-Optimierung (Buttons & Menüs neu angeordnet) und Live-Refresh implementiert<br>• `pubspec.yaml`: Versionssperren aktualisiert<br>• Notfall-Nummer, Passwort-/Username-Änderung in `settings_page.dart` ergänzt<br>• `WeatherPage.dart`: Temperatur-Parsing-Fehler behoben |
 | **14.06.2025** | • Neue Service-Klasse `UserService.dart` für Username-/Passwort-Logik erstellt<br>• **ProfilePage.dart**: Menüpunkte für Abmelden, Passwort- und Username-Änderung hinzugefügt, alte Buttons entfernt und UI-Tests ergänzt<br>• `ChangePasswordPage.dart` & `ChangeUsernamePage.dart` angelegt und Formular-Validierung umgesetzt<br>• Supabase-Integration in `supabase_client.dart` angepasst |
@@ -13,7 +13,7 @@
 | **27.05.2025** | • `WeatherPage.dart`: Suchfunktion & Standort-Default integriert<br>• Tagesansicht mit Uhrzeit und Mehrtagesprognose implementiert<br>• UI-Feinschliff (fehlende Uhrzeit, Farbvorschläge) und Performance-Optimierungen durchgeführt<br>• Daten-Klasse `WeatherData.dart` verfeinert und Tests (`WeatherDataTest`) erstellt |
 | **26.05.2025** | • `WeatherPage` als Demo-Page mit API-Integration eingebunden<br>• **LocationTracker.dart** um Genauigkeits-Filter und Hintergrund-Tracking erweitert<br>• Tests für Wetter-API-Client (`WeatherApiTest`) implementiert |
 | **05.05.2025** | • Klassendiagramm erstellt<br>• Projektvorschlag/Konzept aktualisiert (`Abgabe_Projektvorschlag_Konzept` angepasst)<br>• `create_db.py` Script hinzugefügt und Datenbankschema-Tests (`DbSchemaTest`) geschrieben |
-| **28.04.2025** | • Flutter-Projekt initial aufgesetzt und erste Dateien ins Repo hochgeladen<br>• Grundstruktur in `lib/Class` und `lib/Pages` angelegt und CI/CD-Pipeline konfiguriert |
+| **28.04.2025** | • Flutter-Projekt initial aufgesetzt und erste Dateien ins Repo hochgeladen<br>• Grundstruktur in `lib/Class` und `lib/Pages` angelegt |
 
 
 

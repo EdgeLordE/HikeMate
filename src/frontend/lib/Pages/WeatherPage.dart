@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import '../Class/Logging.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -11,6 +12,7 @@ class WeatherPage extends StatefulWidget {
 }
 
 class _WeatherPageState extends State<WeatherPage> {
+  final _log = LoggingService();
   final TextEditingController _controller = TextEditingController();
   final String apiKey = 'b8fe09709a738c0e8f4412b7a7376bb9';
 
@@ -20,10 +22,19 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   void initState() {
     super.initState();
+    _log.i('WeatherPage initState');
     fetchWeatherByLocation();
   }
 
+  @override
+  void dispose() {
+    _log.i('WeatherPage disposed.');
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> fetchWeatherByLocation() async {
+    _log.i('Versuche, Wetterdaten für den aktuellen Standort abzurufen.');
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) throw Exception('Standortdienste sind deaktiviert');
@@ -39,7 +50,6 @@ class _WeatherPageState extends State<WeatherPage> {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.low);
 
-
       if (!mounted) return;
 
       final coordUrl = Uri.parse(
@@ -51,12 +61,16 @@ class _WeatherPageState extends State<WeatherPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final city = data['name'] as String;
+        _log.i('Standort erfolgreich ermittelt: $city. Rufe Wetterdaten ab.');
         _controller.text = city;
         await fetchWeather(city);
       } else {
+        _log.w(
+            'Fehler beim Ermitteln des Standorts via Koordinaten. Status: ${response.statusCode}');
         throw Exception('Fehler beim Ermitteln des Standorts');
       }
     } catch (e) {
+      _log.e('Standortfehler: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Standortfehler: ${e.toString()}')),
@@ -65,6 +79,7 @@ class _WeatherPageState extends State<WeatherPage> {
   }
 
   Future<void> fetchWeather(String city) async {
+    _log.i('Rufe Wetterdaten für "$city" ab.');
     try {
       final currentUrl = Uri.parse(
           'https://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=metric&lang=de');
@@ -98,10 +113,14 @@ class _WeatherPageState extends State<WeatherPage> {
           currentWeather = currentData;
           groupedForecast = forecastByDay;
         });
+        _log.i('Wetterdaten für "$city" erfolgreich geladen und verarbeitet.');
       } else {
+        _log.w(
+            'Fehler beim Laden der Wetterdaten für "$city". Status: Current=${currentResponse.statusCode}, Forecast=${forecastResponse.statusCode}');
         throw Exception('Fehler beim Laden der Wetterdaten');
       }
     } catch (e) {
+      _log.e('Fehler beim Abrufen der Wetterdaten für "$city": $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Fehler: ${e.toString()}')),
@@ -181,8 +200,8 @@ class _WeatherPageState extends State<WeatherPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('$weekday $day',
-                      style:
-                      const TextStyle(color: Colors.white70, fontSize: 16)),
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 16)),
                   const SizedBox(height: 8),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -200,8 +219,8 @@ class _WeatherPageState extends State<WeatherPage> {
                                 'https://openweathermap.org/img/wn/${e['icon']}@2x.png',
                                 width: 50),
                             Text("${e['temp']}°",
-                                style: const TextStyle(
-                                    color: Colors.white)),
+                                style:
+                                const TextStyle(color: Colors.white)),
                           ],
                         ),
                       ))
@@ -240,6 +259,11 @@ class _WeatherPageState extends State<WeatherPage> {
                     borderSide: BorderSide.none,
                   ),
                 ),
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    fetchWeather(value.trim());
+                  }
+                },
               ),
             ),
             IconButton(
@@ -256,8 +280,15 @@ class _WeatherPageState extends State<WeatherPage> {
       ),
       body: currentWeather == null
           ? const Center(
-          child: Text("Standort wird verwendet...",
-              style: TextStyle(color: Colors.white)))
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.lightBlueAccent),
+              SizedBox(height: 16),
+              Text("Standort wird verwendet...",
+                  style: TextStyle(color: Colors.white)),
+            ],
+          ))
           : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -270,30 +301,33 @@ class _WeatherPageState extends State<WeatherPage> {
                   width: 80,
                 ),
                 const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      currentWeather!["name"] as String,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      "${(currentWeather!["main"]["temp"] as num).round()}°",
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      currentWeather!["weather"][0]["description"]
-                      as String,
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 18),
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        currentWeather!["name"] as String,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        "${(currentWeather!["main"]["temp"] as num).round()}°",
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        currentWeather!["weather"][0]["description"]
+                        as String,
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 18),
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),

@@ -1,4 +1,3 @@
-// lib/Pages/LoginPage.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../Class/Logging.dart';
@@ -24,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
     LoggingService();
-    _log.i('LoginPage initialized');
+    _log.i('LoginPage initialisiert.');
   }
 
   @override
@@ -49,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
       final result = await User.login_User(user, pass);
       if (!mounted) return;
       if (result['success'] == true) {
-        _log.i('Login successful for user: $user');
+        _log.i('Login erfolgreich für user: $user');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const HomePage()),
@@ -59,14 +58,14 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Login fehlgeschlagen: $msg'))
         );
-        _log.w('Login failed for user: $user – $msg');
+        _log.w('Login fehlgeschlagen für user: $user – $msg');
       }
     } catch (e, st) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login fehlgeschlagen: ${e.toString()}'))
       );
-      _log.e('Exception during login for user: $user', e, st);
+      _log.e('Ausnahme beim Login for user: $user', e, st);
     }
   }
 

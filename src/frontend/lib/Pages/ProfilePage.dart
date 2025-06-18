@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Class/Logging.dart';
 import '../Class/User.dart';
 import 'settings_page.dart';
 import '../Class/Activity.dart';
@@ -11,6 +12,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final _log = LoggingService();
   bool _isLoading = true;
 
   double _totalDistance = 0.0;
@@ -26,19 +28,22 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    _log.i('ProfilePage initState');
     _fetchStatsAndActivities();
   }
 
   Future<void> _fetchStatsAndActivities() async {
+    _log.i('Lade Statistiken und Aktivitäten...');
     try {
       final int currentUserId = User.id;
       if (currentUserId <= 0) {
-        setState(() => _isLoading = false);
+        _log.w('Ungültige Benutzer-ID, Laden abgebrochen.');
+        if (mounted) setState(() => _isLoading = false);
         return;
       }
 
-      // Aktivitäten über die REST-API laden
       final rows = await Activity.fetchActivitiesByUserId(currentUserId);
+      _log.i('${rows.length} Aktivitäten für Benutzer $currentUserId gefunden.');
 
       double sumDist = 0.0;
       int sumAscent = 0;
@@ -56,23 +61,24 @@ class _ProfilePageState extends State<ProfilePage> {
       }
 
       final activityCount = rows.length;
-      final avgSpeed = sumDuration > 0 ? sumDist / sumDuration : 0.0;
+      final avgSpeed = sumDuration > 0 ? (sumDist / 1000) / (sumDuration / 3600) : 0.0;
 
       if (mounted) {
         setState(() {
-          _totalDistance = sumDist / 1000; // km
-          _totalAscent = sumAscent; // m
-          _totalDuration = sumDuration / 3600; // h
+          _totalDistance = sumDist / 1000;
+          _totalAscent = sumAscent;
+          _totalDuration = sumDuration / 3600;
           _totalActivities = activityCount;
           _totalCalories = sumCalories;
-          _averageSpeed = avgSpeed; // km/h
-          _maxElevation = maxAlt; // m
+          _averageSpeed = avgSpeed;
+          _maxElevation = maxAlt;
           _activities = rows;
           _isLoading = false;
         });
+        _log.i('Statistiken erfolgreich berechnet und UI aktualisiert.');
       }
-    } catch (e) {
-      debugPrint('Fehler beim Laden der Statistiken: $e');
+    } catch (e, st) {
+      _log.e('Fehler beim Laden der Statistiken', e, st);
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -107,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       date = DateTime.parse(activity['Date'] as String);
     } catch (_) {
-      date = DateTime.now(); // Fallback, falls das Datum ungültig ist
+      date = DateTime.now();
     }
     final formattedDate =
         '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
@@ -173,13 +179,13 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Row(
           children: [
             CircleAvatar(
-              radius: 20, // Vergrößerter Radius
+              radius: 20,
               backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
               child: Text(
                 initial,
                 style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 22, // Vergrößerte Schriftgröße
+                    fontSize: 22,
                     fontWeight: FontWeight.bold),
               ),
             ),
@@ -188,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
               userName,
               style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 22, // Vergrößerte Schriftgröße
+                  fontSize: 22,
                   fontWeight: FontWeight.w600),
             ),
           ],
@@ -196,16 +202,18 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert,
-                color: Colors.lightBlueAccent, size: 30), // Icon Größe
+                color: Colors.lightBlueAccent, size: 30),
             color: const Color(0xFF2C2C2C),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
             onSelected: (value) async {
               if (value == 'settings') {
+                _log.i("Navigiere zu den Einstellungen.");
                 Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const SettingsPage()));
               } else if (value == 'logout') {
+                _log.i("Benutzer wird abgemeldet.");
                 await User.logout(context);
               }
             },

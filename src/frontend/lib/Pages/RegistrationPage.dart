@@ -1,6 +1,8 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:HikeMate/Class/User.dart';
 import 'package:HikeMate/Pages/LoginPage.dart';
-import 'package:flutter/material.dart';
+import 'package:HikeMate/Class/Logging.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -15,6 +17,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  final _log = LoggingService();
+
+  @override
+  void initState() {
+    super.initState();
+    _log.init().then((_) {
+      _log.i('RegistrationPage initialisiert.');
+    });
+  }
+
   @override
   void dispose() {
     firstNameController.dispose();
@@ -25,40 +37,43 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   Future<void> register() async {
+    final user = usernameController.text;
     try {
+      _log.i('Registrierungsversuch für Benutzer: $user');
       final result = await User.register_User(
         firstNameController.text,
         lastNameController.text,
-        usernameController.text,
+        user,
         passwordController.text,
       );
 
-      if (!mounted) return; // Prüfung, ob das Widget noch im Baum ist
+      if (!mounted) return;
 
       if (result["success"] == true) {
+        _log.i('Registrierung erfolgreich für Benutzer: $user');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrierung erfolgreich!')),
         );
-        // Kehren Sie zur vorherigen Seite zurück (sollte die LoginPage sein).
-        // Dadurch wird die LoginPage nicht dupliziert oder unnötig im Stapel behalten.
         if (Navigator.canPop(context)) {
+          _log.i('Navigiere zurück zur LoginPage');
           Navigator.pop(context);
         } else {
-          // Fallback, falls die RegistrationPage die erste Seite im Stapel war
-          // (unwahrscheinlich im typischen App-Fluss, aber zur Sicherheit).
-          // In diesem Fall ersetzen wir sie durch die LoginPage.
+          _log.i('Ersetze mit LoginPage');
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LoginPage()),
           );
         }
       } else {
+        final msg = result["message"] ?? 'Registrierung fehlgeschlagen';
+        _log.w('Registrierung fehlgeschlagen für Benutzer: $user – $msg');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result["message"] ?? 'Registrierung fehlgeschlagen')),
+          SnackBar(content: Text(msg)),
         );
       }
-    } catch (e) {
-      if (!mounted) return; // Prüfung, ob das Widget noch im Baum ist
+    } catch (e, st) {
+      if (!mounted) return;
+      _log.e('Ausnahme bei Registrierung für Benutzer: $user', e, st);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registrierung fehlgeschlagen: ${e.toString()}')),
       );
@@ -109,6 +124,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.lightBlueAccent),
           onPressed: () {
+            _log.i('Navigiere zurück von RegistrationPage');
             Navigator.pop(context);
           },
         ),

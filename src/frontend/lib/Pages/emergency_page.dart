@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../Class/User.dart';
 import '../Class/supabase_client.dart';
+import '../Class/Logging.dart';
 
 class EmergencyPage extends StatefulWidget {
   const EmergencyPage({Key? key}) : super(key: key);
@@ -17,12 +18,13 @@ class _EmergencyPageState extends State<EmergencyPage> {
   Timer? _timer;
   bool _active = false;
   int _intervalSeconds = 7200;
-
   bool _sending = false;
+  final _log = LoggingService();
 
   @override
   void initState() {
     super.initState();
+    _log.init().then((_) => _log.i('EmergencyPage initialisiert.'));
     _initCheckIn();
   }
 
@@ -30,6 +32,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     final prefs = await SharedPreferences.getInstance();
     _active = prefs.getBool('checkInActive') ?? false;
     _intervalSeconds = prefs.getInt('checkInInterval') ?? 7200;
+    _log.i('CheckIn-Status geladen: active=$_active, interval=$_intervalSeconds sec');
     if (_active) _scheduleNext();
     setState(() {});
   }
@@ -37,25 +40,31 @@ class _EmergencyPageState extends State<EmergencyPage> {
   void _scheduleNext() {
     _timer?.cancel();
     _timer = Timer(Duration(seconds: _intervalSeconds), _showSOSScreen);
+    _log.i('Nächster Check-In in $_intervalSeconds Sekunden geplant.');
   }
 
   Future<void> _startCheckIn() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('checkInActive', true);
     await prefs.setInt('checkInInterval', _intervalSeconds);
-    setState(() => _active = true);
+    _active = true;
+    _log.i('Check-In gestartet mit Intervall $_intervalSeconds Sekunden.');
     _scheduleNext();
+    setState(() {});
   }
 
   Future<void> _stopCheckIn() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('checkInActive', false);
-    setState(() => _active = false);
+    _active = false;
     _timer?.cancel();
+    _log.i('Check-In gestoppt.');
+    setState(() {});
   }
 
   void _showSOSScreen() {
     _timer?.cancel();
+    _log.i('Zeige SOS-Screen nach Check-In-Timeout.');
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SOSScreen(onFinished: () {
@@ -67,11 +76,11 @@ class _EmergencyPageState extends State<EmergencyPage> {
 
   Future<void> _sendSOS() async {
     setState(() => _sending = true);
+    _log.i('SOS gesendet: Standort wird abgerufen.');
     try {
-      final pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       final lat = pos.latitude, lon = pos.longitude;
+      _log.i('Position ermittelt: lat=$lat, lon=$lon');
 
       final row = await supabase
           .from('User')
@@ -80,22 +89,22 @@ class _EmergencyPageState extends State<EmergencyPage> {
           .single();
       final phone = (row['ContactNumber']?.toString() ?? '').trim();
       if (phone.isEmpty) throw Exception('Keine Notfallnummer hinterlegt.');
+      _log.i('Notfallnummer: $phone');
 
-      final body = Uri.encodeComponent(
-        'SOS! Bitte helft mir. Meine Position: $lat, $lon',
-      );
+      final body = Uri.encodeComponent('SOS! Bitte helft mir. Meine Position: $lat, $lon');
       final uri = Uri.parse('sms:$phone?body=$body');
       if (await canLaunchUrl(uri)) {
+        _log.i('SMS-App wird geöffnet.');
         await launchUrl(uri);
       } else {
         throw Exception('SMS-App konnte nicht geöffnet werden.');
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fehler beim SOS: $e')),
-      );
+    } catch (e, st) {
+      _log.e('Fehler beim SOS', e, st);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fehler beim SOS: $e')));
     } finally {
       setState(() => _sending = false);
+      _log.i('SOS-Vorgang abgeschlossen.');
       _showSOSScreen();
     }
   }
@@ -103,6 +112,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
   @override
   void dispose() {
     _timer?.cancel();
+    _log.i('EmergencyPage disposed.');
     super.dispose();
   }
 
@@ -121,58 +131,32 @@ class _EmergencyPageState extends State<EmergencyPage> {
           children: [
             Row(
               children: [
-                const Text('Check-In Intervall:',
-                    style: TextStyle(color: Colors.white70)),
+                const Text('Check-In Intervall:', style: TextStyle(color: Colors.white70)),
                 const SizedBox(width: 12),
                 DropdownButton<int>(
                   dropdownColor: const Color(0xFF2C2C2C),
                   value: _intervalSeconds,
                   items: const [
-                    DropdownMenuItem(
-                        value: 10,
-                        child: Text('10 Sek.',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 60,
-                        child: Text('1 Min.',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 3600,
-                        child: Text('1 Std.',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 7200,
-                        child: Text('2 Std.',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 14400,
-                        child: Text('4 Std.',
-                            style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(
-                        value: 21600,
-                        child: Text('6 Std.',
-                            style: TextStyle(color: Colors.white))),
+                    DropdownMenuItem(value: 10, child: Text('10 Sek.', style: TextStyle(color: Colors.white))),
+                    DropdownMenuItem(value: 60, child: Text('1 Min.', style: TextStyle(color: Colors.white))),
+                    DropdownMenuItem(value: 3600, child: Text('1 Std.', style: TextStyle(color: Colors.white))),
+                    DropdownMenuItem(value: 7200, child: Text('2 Std.', style: TextStyle(color: Colors.white))),
+                    DropdownMenuItem(value: 14400, child: Text('4 Std.', style: TextStyle(color: Colors.white))),
+                    DropdownMenuItem(value: 21600, child: Text('6 Std.', style: TextStyle(color: Colors.white))),
                   ],
-                  onChanged: _active
-                      ? null
-                      : (v) => setState(() => _intervalSeconds = v!),
+                  onChanged: _active ? null : (v) => setState(() => _intervalSeconds = v!),
                 ),
                 const Spacer(),
                 ElevatedButton(
                   onPressed: _active ? _stopCheckIn : _startCheckIn,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    _active ? Colors.grey : Colors.lightBlueAccent,
-                  ),
-                  child:
-                  Text(_active ? 'Stop Check-In' : 'Start Check-In'),
+                  style: ElevatedButton.styleFrom(backgroundColor: _active ? Colors.grey : Colors.lightBlueAccent),
+                  child: Text(_active ? 'Stop Check-In' : 'Start Check-In'),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             _sending
-                ? const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Colors.redAccent))
+                ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Colors.redAccent))
                 : ElevatedButton.icon(
               onPressed: _sendSOS,
               icon: const Icon(Icons.sos),
@@ -192,7 +176,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
 class SOSScreen extends StatefulWidget {
   final VoidCallback onFinished;
   const SOSScreen({required this.onFinished, Key? key}) : super(key: key);
-
   @override
   State<SOSScreen> createState() => _SOSScreenState();
 }
@@ -205,14 +188,8 @@ class _SOSScreenState extends State<SOSScreen>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    )..repeat(reverse: true);
-    _colorAnim = ColorTween(
-      begin: Colors.red.shade900,
-      end: Colors.red.shade500,
-    ).animate(_controller);
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 500))..repeat(reverse: true);
+    _colorAnim = ColorTween(begin: Colors.red.shade900, end: Colors.red.shade500).animate(_controller);
   }
 
   @override
@@ -226,24 +203,12 @@ class _SOSScreenState extends State<SOSScreen>
     return Scaffold(
       body: AnimatedBuilder(
         animation: _colorAnim,
-        builder: (context, child) => Container(
-          color: _colorAnim.value,
-          child: child,
-        ),
+        builder: (context, child) => Container(color: _colorAnim.value, child: child),
         child: SafeArea(
           child: Column(
             children: [
               const Spacer(),
-              Center(
-                child: Text(
-                  'SOS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 120,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              Center(child: Text('SOS', style: TextStyle(color: Colors.white, fontSize: 120, fontWeight: FontWeight.bold))),
               const Spacer(),
               Padding(
                 padding: const EdgeInsets.only(bottom: 32),
@@ -252,18 +217,8 @@ class _SOSScreenState extends State<SOSScreen>
                     widget.onFinished();
                     Navigator.of(context).pop();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 16),
-                  ),
-                  child: const Text(
-                    'BEENDET',
-                    style: TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16)),
+                  child: const Text('BEENDET', style: TextStyle(color: Colors.redAccent, fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import '../Class/Logging.dart';
 import '../Class/LocationTracker.dart';
 import '../Class/TrackingStorage.dart';
 import '../Class/supabase_client.dart';
@@ -18,12 +19,14 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPageState extends State<NavigationPage> {
+  final _log = LoggingService();
   final MapController _mapController = MapController();
   late TrackingService _trackingService;
 
   @override
   void initState() {
     super.initState();
+    _log.i('NavigationPage initState');
     _trackingService = TrackingService();
 
     _trackingService.onUpdate.listen((_) {
@@ -31,9 +34,12 @@ class _NavigationPageState extends State<NavigationPage> {
     });
 
     TrackingStorage().loadTrackingState().then((isTracking) async {
+      _log.i('Geladener Tracking-Status: $isTracking');
       if (isTracking) {
+        _log.i('Tracking wird fortgesetzt.');
         await _trackingService.start();
       } else {
+        _log.i('Lade gespeicherte Tracking-Daten.');
         TrackingStorage().loadTrackingData().then((data) {
           _trackingService.totalDistance = data['totalDistance'];
           _trackingService.totalAscent = data['totalAscent'];
@@ -43,10 +49,11 @@ class _NavigationPageState extends State<NavigationPage> {
           return TrackingStorage().loadTrackingDuration();
         }).then((duration) {
           _trackingService.duration = duration;
-          setState(() {});
+          if (mounted) setState(() {});
+          _log.i('Gespeicherte Daten geladen.');
         });
       }
-      setState(() {});
+      if (mounted) setState(() {});
     });
 
     _moveToCurrentLocation();
@@ -54,19 +61,26 @@ class _NavigationPageState extends State<NavigationPage> {
 
   @override
   void dispose() {
+    _log.i('NavigationPage disposed.');
     super.dispose();
   }
 
   Future<void> _moveToCurrentLocation() async {
-    final pos = await Geolocator.getCurrentPosition();
-    _mapController.move(
-      LatLng(pos.latitude, pos.longitude),
-      14.0,
-    );
+    try {
+      final pos = await Geolocator.getCurrentPosition();
+      _log.i('Verschiebe zu aktueller Position: ${pos.latitude}, ${pos.longitude}');
+      _mapController.move(
+        LatLng(pos.latitude, pos.longitude),
+        14.0,
+      );
+    } catch (e, st) {
+      _log.e('Fehler beim Abrufen der aktuellen Position', e, st);
+    }
   }
 
   void _toggleTracking() {
     if (_trackingService.isTracking) {
+      _log.i('Tracking wird gestoppt.');
       TrackingStorage().saveTrackingData(
         _trackingService.totalDistance,
         _trackingService.totalAscent,
@@ -77,6 +91,7 @@ class _NavigationPageState extends State<NavigationPage> {
       _showSaveOrDiscardDialog();
       _trackingService.stop();
     } else {
+      _log.i('Tracking wird gestartet.');
       _trackingService.totalDistance = 0;
       _trackingService.totalAscent = 0;
       _trackingService.duration = Duration.zero;
@@ -100,6 +115,7 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   void _showSaveOrDiscardDialog() {
+    _log.i('Zeige Speichern/Verwerfen-Dialog.');
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -141,16 +157,17 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   void _discardActivity() {
+    _log.i('Aktivität wird verworfen.');
     _trackingService.isTracking = false;
     setState(() {});
   }
 
   void _saveActivity() async {
+    _log.i('Versuche, Aktivität zu speichern.');
     try {
-      // Beispielhafte Berechnung: 0.9 kcal pro kg pro km, 70kg angenommen
-      // Du kannst Gewicht und Formel nach Bedarf anpassen!
-      double gewicht = 70; // kg, ggf. dynamisch holen
-      double distanzKm = _trackingService.totalDistance / 1000.0; // Meter zu km
+
+      double gewicht = 70;
+      double distanzKm = _trackingService.totalDistance / 1000.0;
       double calories = gewicht * distanzKm * 0.9;
 
       await supabase.from('Activity').insert({
@@ -159,13 +176,15 @@ class _NavigationPageState extends State<NavigationPage> {
         'Increase': _trackingService.totalAscent,
         'Duration': _trackingService.duration.inSeconds,
         'Date': DateTime.now().toIso8601String(),
-        'Calories': calories.round(), // als ganze Zahl speichern
+        'Calories': calories.round(),
       });
+      _log.i('Aktivität erfolgreich in Supabase gespeichert.');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Aktivität erfolgreich gespeichert')),
       );
-    } catch (e) {
+    } catch (e, st) {
+      _log.e('Fehler beim Speichern der Aktivität', e, st);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Fehler beim Speichern der Aktivität: $e')),
@@ -184,8 +203,8 @@ class _NavigationPageState extends State<NavigationPage> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: LatLng(0, 0), // initialCenter statt center
-              initialZoom: 14.0, // initialZoom statt zoom
+              initialCenter: LatLng(0, 0),
+              initialZoom: 14.0,
             ),
             children: [
               TileLayer(
@@ -207,8 +226,6 @@ class _NavigationPageState extends State<NavigationPage> {
               ),
             ],
           ),
-
-          // SOS-Button wurde entfernt
 
           if (!_trackingService.isTracking)
             Positioned(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Class/User.dart';
+import '../Class/Logging.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({Key? key}) : super(key: key);
@@ -12,7 +13,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _oldPassCtrl = TextEditingController();
   final TextEditingController _newPassCtrl = TextEditingController();
   final TextEditingController _confirmNewPassCtrl = TextEditingController();
+  final _log = LoggingService();
+
   bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _log.init().then((_) {
+      _log.i('ChangePasswordPage initialisiert.');
+    });
+  }
 
   @override
   void dispose() {
@@ -29,6 +40,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         content: Text(message),
       ),
     );
+    if (isError) {
+      _log.w(message);
+    } else {
+      _log.i(message);
+    }
   }
 
   Future<void> _submit() async {
@@ -37,11 +53,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final confirmNewPass = _confirmNewPassCtrl.text.trim();
 
     if (oldPass.isEmpty || newPass.isEmpty || confirmNewPass.isEmpty) {
+      _log.w('ChangePassword: Nicht alle Felder ausgefüllt.');
       _showSnackBar('Bitte füllen Sie alle Felder aus.');
       return;
     }
 
     if (newPass != confirmNewPass) {
+      _log.w('ChangePassword: Neue Passwörter stimmen nicht überein.');
       _showSnackBar('Die neuen Passwörter stimmen nicht überein.');
       return;
     }
@@ -49,26 +67,39 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     setState(() {
       _loading = true;
     });
+    _log.i('ChangePassword: Passwortänderung gestartet.');
 
-    final success = await User.changePassword(oldPass, newPass);
+    try {
+      final success = await User.changePassword(oldPass, newPass);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      _loading = false;
-    });
+      setState(() {
+        _loading = false;
+      });
 
-    if (success) {
-      _showSnackBar('Passwort erfolgreich geändert.', isError: false);
-      _oldPassCtrl.clear();
-      _newPassCtrl.clear();
-      _confirmNewPassCtrl.clear();
-      await Future.delayed(const Duration(seconds: 2));
-      if (mounted && Navigator.canPop(context)) {
-        Navigator.of(context).pop();
+      if (success) {
+        _log.i('ChangePassword: Passwort erfolgreich geändert.');
+        _showSnackBar('Passwort erfolgreich geändert.', isError: false);
+        _oldPassCtrl.clear();
+        _newPassCtrl.clear();
+        _confirmNewPassCtrl.clear();
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted && Navigator.canPop(context)) {
+          _log.i('ChangePassword: Zurücknavigation nach Erfolg.');
+          Navigator.of(context).pop();
+        }
+      } else {
+        _log.w('ChangePassword: Fehler beim Ändern des Passworts.');
+        _showSnackBar('Fehler beim Ändern des Passworts. Überprüfen Sie Ihr altes Passwort.');
       }
-    } else {
-      _showSnackBar('Fehler beim Ändern des Passworts. Überprüfen Sie Ihr altes Passwort.');
+    } catch (e, st) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+      });
+      _log.e('ChangePassword: Ausnahme beim Passwortwechsel.', e, st);
+      _showSnackBar('Fehler beim Ändern des Passworts: ${e.toString()}');
     }
   }
 
@@ -121,6 +152,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.lightBlueAccent),
           onPressed: () {
+            _log.i('ChangePassword: Navigation zurück gedrückt.');
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             }
@@ -168,11 +200,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     child: ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
+                        backgroundColor:
+                        Colors.lightBlueAccent.withOpacity(0.9),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        padding:
+                        const EdgeInsets.symmetric(vertical: 11),
                       ),
                       child: const Text(
                         'Speichern',

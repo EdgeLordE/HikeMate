@@ -1,3 +1,4 @@
+import 'package:HikeMate/Class/Logging.dart';
 import 'package:flutter/material.dart';
 import 'ChangeUsernamePage.dart';
 import 'ChangePasswordPage.dart';
@@ -12,6 +13,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final _log = LoggingService();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneController = TextEditingController();
   bool _loading = true;
@@ -19,12 +21,13 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    _log.i('SettingsPage initState');
     _loadPhoneNumber();
   }
 
   Future<void> _loadPhoneNumber() async {
     if (User.id == null) {
-      // Handle case where User.id is null, maybe show an error or log out
+      _log.w('Benutzer nicht angemeldet, kann Telefonnummer nicht laden.');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Benutzer nicht angemeldet.')),
@@ -33,6 +36,7 @@ class _SettingsPageState extends State<SettingsPage> {
       }
       return;
     }
+    _log.i('Lade Telefonnummer für User ID: ${User.id}');
     try {
       final resp = await supabase
           .from('User')
@@ -41,10 +45,11 @@ class _SettingsPageState extends State<SettingsPage> {
           .single();
       if (mounted) {
         _phoneController.text = (resp['ContactNumber'] as String?) ?? '';
+        _log.i('Telefonnummer erfolgreich geladen.');
       }
     } catch (e) {
+      _log.e('Fehler beim Laden der Telefonnummer: $e');
       if (mounted) {
-        debugPrint('Fehler beim Laden der Telefonnummer: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Fehler beim Laden der Telefonnummer: $e')),
         );
@@ -59,18 +64,21 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _savePhoneNumber() async {
     if (!_formKey.currentState!.validate()) return;
     if (User.id == null) {
+      _log.w('Benutzer nicht angemeldet. Speichern nicht möglich.');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Benutzer nicht angemeldet. Speichern nicht möglich.')),
+        const SnackBar(
+            content: Text('Benutzer nicht angemeldet. Speichern nicht möglich.')),
       );
       return;
     }
     final phone = _phoneController.text.trim();
+    _log.i('Speichere Telefonnummer für User ID: ${User.id}');
     try {
       await supabase
           .from('User')
-          .update({'ContactNumber': phone})
-          .eq('UserID', User.id!);
+          .update({'ContactNumber': phone}).eq('UserID', User.id!);
       if (mounted) {
+        _log.i('Telefonnummer erfolgreich gespeichert.');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Telefonnummer gespeichert'),
@@ -79,6 +87,7 @@ class _SettingsPageState extends State<SettingsPage> {
         );
       }
     } catch (e) {
+      _log.e('Fehler beim Speichern der Telefonnummer: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -92,6 +101,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   void dispose() {
+    _log.i('SettingsPage disposed.');
     _phoneController.dispose();
     super.dispose();
   }
@@ -103,10 +113,13 @@ class _SettingsPageState extends State<SettingsPage> {
   }) {
     return ListTile(
       leading: Icon(icon, color: Colors.lightBlueAccent, size: 28),
-      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18)),
-      trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 18),
+      title:
+      Text(title, style: const TextStyle(color: Colors.white, fontSize: 18)),
+      trailing:
+      const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 18),
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0), // Angepasstes Padding
+      contentPadding:
+      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
     );
   }
 
@@ -116,13 +129,13 @@ class _SettingsPageState extends State<SettingsPage> {
     final formWidth = screenWidth * 0.85;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF141212), // Angepasster Hintergrund
+      backgroundColor: const Color(0xFF141212),
       appBar: AppBar(
         title: const Text(
           'Einstellungen',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
-        backgroundColor: const Color(0xFF141212), // Angepasster Hintergrund
+        backgroundColor: const Color(0xFF141212),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.lightBlueAccent),
@@ -134,9 +147,10 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.lightBlueAccent))
+          ? const Center(
+          child: CircularProgressIndicator(color: Colors.lightBlueAccent))
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0), // Einheitliches Padding
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -144,7 +158,10 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               const Text(
                 'Notfall-Nummer',
-                style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 12),
               ConstrainedBox(
@@ -155,9 +172,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     hintText: '+43 123 4567890',
                     hintStyle: const TextStyle(color: Colors.white54),
                     filled: true,
-                    fillColor: const Color(0xFF505050), // Passend zu anderen Textfeldern
+                    fillColor: const Color(0xFF505050),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10), // Abgerundete Ecken
+                      borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
                     ),
                     prefixIcon: const Icon(
@@ -166,35 +183,37 @@ class _SettingsPageState extends State<SettingsPage> {
                       size: 25,
                     ),
                   ),
-                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  style:
+                  const TextStyle(color: Colors.white, fontSize: 16),
                   keyboardType: TextInputType.phone,
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
                       return 'Bitte geben Sie eine Telefonnummer ein.';
                     }
-                    // Optional: Weitere Validierungen für Telefonnummern
                     return null;
                   },
                 ),
               ),
               const SizedBox(height: 20),
               ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: formWidth, minHeight: 48),
+                constraints:
+                BoxConstraints(maxWidth: formWidth, minHeight: 48),
                 child: SizedBox(
-                  width: double.infinity, // Nimmt die Breite von formWidth ein
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _savePhoneNumber,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlueAccent.withOpacity(0.9),
+                      backgroundColor:
+                      Colors.lightBlueAccent.withOpacity(0.9),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(40), // Stark abgerundet
+                        borderRadius: BorderRadius.circular(40),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 11),
                     ),
                     child: const Text(
                       'Notfall-Nummer speichern',
                       style: TextStyle(
-                        fontSize: 18, // Etwas kleiner als Login/Register Button
+                        fontSize: 18,
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
@@ -203,29 +222,31 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               const SizedBox(height: 25),
-              const Divider(color: Colors.white24, height: 30, thickness: 0.5),
+              const Divider(
+                  color: Colors.white24, height: 30, thickness: 0.5),
               const SizedBox(height: 15),
-
               _buildSettingsTile(
                 icon: Icons.person_outline,
                 title: 'Benutzername ändern',
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const ChangeUsernamePage()),
+                    MaterialPageRoute(
+                        builder: (_) => const ChangeUsernamePage()),
                   );
                 },
               ),
-              const Divider(color: Colors.white24, height: 1, thickness: 0.5), // Angepasster Divider
+              const Divider(
+                  color: Colors.white24, height: 1, thickness: 0.5),
               _buildSettingsTile(
                 icon: Icons.lock_outline,
                 title: 'Passwort ändern',
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
+                    MaterialPageRoute(
+                        builder: (_) => const ChangePasswordPage()),
                   );
                 },
               ),
-              // Weitere ListTiles können hier mit Dividers hinzugefügt werden
             ],
           ),
         ),

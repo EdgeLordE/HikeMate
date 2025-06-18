@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the sendSOS method from the CheckInService class, for the Dart programming language.">
+  <title>sendSOS method - CheckInService class - checkin_service library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">HikeMate</a></li>
+    <li><a href="../../package-HikeMate_Pages_checkin_service/">Pages\checkin_service.dart</a></li>
+    <li><a href="../../package-HikeMate_Pages_checkin_service/CheckInService-class.html">CheckInService</a></li>
+    <li class="self-crumb">sendSOS method</li>
+  </ol>
+  <div class="self-name">sendSOS</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="package-HikeMate_Pages_checkin_service&#47;CheckInService-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">sendSOS</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="name ">sendSOS</span>(<wbr>)
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Sendet eine SOS-Nachricht mit aktueller GPS-Position</p>
+<p>Ermittelt die aktuelle Position, lädt die Notfallnummer aus der
+Datenbank und öffnet die SMS-App mit einer vorformulierten
+SOS-Nachricht inkl. GPS-Koordinaten.</p>
+<p>Bei Fehlern wird eine entsprechende Snackbar angezeigt.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; sendSOS() async {
+  _log.i(&#39;sendSOS aufgerufen. Versuche Standort abzurufen.&#39;);
+  try {
+    final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    final lat = pos.latitude, lon = pos.longitude;
+    _log.i(&#39;Position ermittelt: lat=\$lat, lon=\$lon&#39;);
+
+    final row = await supabase
+        .from(&#39;User&#39;)
+        .select(&#39;ContactNumber&#39;)
+        .eq(&#39;UserID&#39;, User.id)
+        .single();
+    final phone = (row[&#39;ContactNumber&#39;]?.toString() ?? &#39;&#39;).trim();
+    if (phone.isEmpty) throw Exception(&#39;Keine Notfallnummer hinterlegt.&#39;);
+
+    _log.i(&#39;Notfallnummer: \$phone&#39;);
+    final body = Uri.encodeComponent(
+        &#39;SOS! Bitte helft mir. Meine Position: \$lat, \$lon&#39;);
+    final uri = Uri.parse(&#39;sms:\$phone?body=\$body&#39;);
+    if (await canLaunchUrl(uri)) {
+      _log.i(&#39;SMS-App wird geöffnet.&#39;);
+      await launchUrl(uri);
+    } else {
+      throw Exception(&#39;SMS-App konnte nicht geöffnet werden.&#39;);
+    }
+  } catch (e, st) {
+    _log.e(&#39;Fehler in sendSOS&#39;, e, st);
+    final ctx = navigatorKey.currentContext;
+    if (ctx != null) {
+      ScaffoldMessenger.of(ctx)
+          .showSnackBar(SnackBar(content: Text(&#39;Fehler beim SOS: \$e&#39;)));
+    }
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">HikeMate</a></li>
+    <li><a href="../../package-HikeMate_Pages_checkin_service/">checkin_service</a></li>
+    <li><a href="../../package-HikeMate_Pages_checkin_service/CheckInService-class.html">CheckInService</a></li>
+    <li class="self-crumb">sendSOS method</li>
+</ol>
+
+    <h5>CheckInService class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    HikeMate
+      1.0.0+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

@@ -1,3 +1,20 @@
+/// GPS-Tracking Service für die HikeMate App
+/// 
+/// Diese Klasse implementiert einen Singleton-Service für kontinuierliches
+/// GPS-Tracking während Wanderungen. Sie verwaltet Position, Entfernung,
+/// Höhengewinn und Zeitdauer der Aktivität.
+/// 
+/// Features:
+/// - Singleton Pattern für App-weite Verwendung
+/// - Kontinuierliches GPS-Tracking im Hintergrund
+/// - Berechnung von Distanz und Höhengewinn
+/// - Persistente Speicherung der Tracking-Daten
+/// - Stream-basierte Updates für UI-Komponenten
+/// - Timer für Zeitdauer-Tracking
+/// - Pfad-Aufzeichnung für Routenanzeige
+/// 
+/// Die Klasse unterstützt sowohl Vordergrund- als auch Hintergrund-Tracking
+/// und bietet umfassendes Logging aller Operationen.
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
@@ -6,36 +23,59 @@ import 'package:flutter_background/flutter_background.dart';
 import 'Logging.dart';
 import 'TrackingStorage.dart';
 
+/// Singleton-Service für GPS-Tracking und Aktivitätsdatenerfassung
 class TrackingService {
+  /// Singleton-Instanz des TrackingService
   static final TrackingService _instance = TrackingService._internal();
+  /// Factory Constructor für Singleton-Pattern
   factory TrackingService() => _instance;
 
+  /// Logger-Instanz für diese Klasse
   final _log = LoggingService();
 
+  /// Private Constructor für Singleton-Pattern
   TrackingService._internal() {
     _log.i('TrackingService initialisiert.');
   }
 
+  /// Zeigt an ob gerade getrackt wird
   bool isTracking = false;
+  /// Gesamtdistanz der aktuellen Aktivität in Metern
   double totalDistance = 0.0;
+  /// Gesamter Höhengewinn in Metern
   double totalAscent = 0.0;
+  /// Aktuelle Höhe in Metern
   double altitude = 0.0;
+  /// Dauer der aktuellen Aktivität
   Duration duration = Duration.zero;
 
+  /// Vorherige Position für Distanzberechnung
   LatLng? _previousPosition;
+  /// Vorherige Höhe für Höhengewinn-Berechnung
   double? _previousAltitude;
+  /// Timer für Dauer-Tracking
   Timer? _durationTimer;
+  /// Timer für Höhen-Updates
   Timer? _altitudeTimer;
+  /// Stream für kontinuierliche Positionsabfragen
   StreamSubscription<Position>? _positionStream;
+  /// Liste aller Positionspunkte für Pfadanzeige
   final List<LatLng> path = [];
 
+  /// Stream Controller für UI-Updates
   final _onUpdate = StreamController<void>.broadcast();
+  /// Stream für UI-Updates bei Tracking-Änderungen
   Stream<void> get onUpdate => _onUpdate.stream;
 
+  /// Stopwatch für präzise Zeitmessung
   final Stopwatch _stopwatch = Stopwatch();
 
+  /// Storage-Service für persistente Datenspeicherung
   var trackingStorage = TrackingStorage();
 
+  /// Setzt einen anderen TrackingStorage (für Tests)
+  /// 
+  /// [storage] - Alternative TrackingStorage-Implementierung
   @visibleForTesting
   void setTrackingStorage(TrackingStorage storage) {
     trackingStorage = storage;

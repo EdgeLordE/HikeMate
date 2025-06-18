@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_background/flutter_background.dart';
@@ -33,7 +34,12 @@ class TrackingService {
 
   final Stopwatch _stopwatch = Stopwatch();
 
-  final trackingStorage = TrackingStorage();
+  var trackingStorage = TrackingStorage();
+
+  @visibleForTesting
+  void setTrackingStorage(TrackingStorage storage) {
+    trackingStorage = storage;
+  }
 
   Future<void> start() async {
     if (isTracking) {
@@ -43,7 +49,8 @@ class TrackingService {
     _log.i('Starte Tracking-Service.');
     isTracking = true;
 
-    _log.i('Fordere Benachrichtigungsberechtigung an und aktiviere Hintergrund-Tracking.');
+    _log.i(
+        'Fordere Benachrichtigungsberechtigung an und aktiviere Hintergrund-Tracking.');
     await trackingStorage.requestNotificationPermission();
     await trackingStorage.enableBackgroundTracking();
 
@@ -61,24 +68,29 @@ class TrackingService {
         distanceFilter: 10,
       ),
     ).listen((position) {
-      _log.d('Neue Position empfangen: Lat=${position.latitude}, Lon=${position.longitude}, Alt=${position.altitude}, Acc=${position.accuracy}');
+      _log.d(
+          'Neue Position empfangen: Lat=${position.latitude}, Lon=${position.longitude}, Alt=${position.altitude}, Acc=${position.accuracy}');
       final currentPosition = LatLng(position.latitude, position.longitude);
       if (position.accuracy > 25) {
-        _log.w('Position ignoriert wegen geringer Genauigkeit: ${position.accuracy}');
+        _log.w(
+            'Position ignoriert wegen geringer Genauigkeit: ${position.accuracy}');
         return;
       }
       if (position.speed != null && position.speed! < 0.5) {
-        _log.d('Position ignoriert wegen geringer Geschwindigkeit: ${position.speed}');
+        _log.d(
+            'Position ignoriert wegen geringer Geschwindigkeit: ${position.speed}');
         return;
       }
 
       if (_previousPosition != null) {
-        final distance = Distance().as(LengthUnit.Meter, _previousPosition!, currentPosition);
+        final distance =
+        const Distance().as(LengthUnit.Meter, _previousPosition!, currentPosition);
         if (distance > 3) {
           totalDistance += distance;
           path.add(currentPosition);
           _previousPosition = currentPosition;
-          _log.d('Distanz hinzugefügt: $distance m. Gesamtdistanz: $totalDistance m.');
+          _log.d(
+              'Distanz hinzugefügt: $distance m. Gesamtdistanz: $totalDistance m.');
         }
       } else {
         _log.i('Erste Position gesetzt.');
@@ -87,10 +99,12 @@ class TrackingService {
       }
 
       if (_previousAltitude != null) {
-        final altitudeDifference = position.altitude.round() - _previousAltitude!.round();
+        final altitudeDifference =
+            position.altitude.round() - _previousAltitude!.round();
         if (altitudeDifference > 0) {
           totalAscent += altitudeDifference;
-          _log.d('Aufstieg hinzugefügt: $altitudeDifference m. Gesamtaufstieg: $totalAscent m.');
+          _log.d(
+              'Aufstieg hinzugefügt: $altitudeDifference m. Gesamtaufstieg: $totalAscent m.');
         }
       }
 
@@ -139,7 +153,8 @@ class TrackingService {
       _log.i('Neuer Berechtigungsstatus: $permission');
     }
 
-    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
       _log.e('Standortberechtigung verweigert.');
       return null;
     }

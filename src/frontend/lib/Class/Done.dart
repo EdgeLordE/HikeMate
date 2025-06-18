@@ -7,13 +7,15 @@ class Done {
   static final _log = LoggingService();
   static const String _baseUrl = User.baseUrl;
 
-  static Future<bool> isMountainDone(int userId, int mountainId) async {
+  static Future<bool> isMountainDone(int userId, int mountainId,
+      [http.Client? client]) async {
+    final httpClient = client ?? http.Client();
     _log.i('Prüfe, ob Berg $mountainId für User $userId erledigt ist.');
-    final url =
-    Uri.parse('$_baseUrl/DoneBerg/check?UserID=$userId&MountainID=$mountainId');
+    final url = Uri.parse(
+        '$_baseUrl/DoneBerg/check?UserID=$userId&MountainID=$mountainId');
     try {
       final response =
-      await http.get(url, headers: {'Accept': 'application/json'});
+      await httpClient.get(url, headers: {'Accept': 'application/json'});
       _log.i('Done.isMountainDone() status: ${response.statusCode}');
       _log.d('Done.isMountainDone() body: ${response.body}');
 
@@ -28,16 +30,22 @@ class Done {
     } catch (e) {
       _log.e('Fehler bei Done.isMountainDone(): $e');
       return false;
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
     }
   }
 
-  static Future<bool> isMountainDoneSimple(int userId, int mountainId) async {
+  static Future<bool> isMountainDoneSimple(int userId, int mountainId,
+      [http.Client? client]) async {
+    final httpClient = client ?? http.Client();
     _log.i('Prüfe (einfach), ob Berg $mountainId für User $userId erledigt ist.');
-    final url =
-    Uri.parse('$_baseUrl/DoneBerg/is_done?UserID=$userId&MountainID=$mountainId');
+    final url = Uri.parse(
+        '$_baseUrl/DoneBerg/is_done?UserID=$userId&MountainID=$mountainId');
     try {
       final response =
-      await http.get(url, headers: {'Accept': 'application/json'});
+      await httpClient.get(url, headers: {'Accept': 'application/json'});
       _log.i('Done.isMountainDoneSimple() status: ${response.statusCode}');
       _log.d('Done.isMountainDoneSimple() body: ${response.body}');
 
@@ -53,15 +61,21 @@ class Done {
     } catch (e) {
       _log.e('Fehler bei Done.isMountainDoneSimple(): $e');
       return false;
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
     }
   }
 
   static Future<Map<String, dynamic>> addMountainToDone(
-      int userId, int mountainId) async {
+      int userId, int mountainId,
+      [http.Client? client]) async {
+    final httpClient = client ?? http.Client();
     _log.i('Füge Berg $mountainId für User $userId zu Erledigt hinzu.');
     final url = Uri.parse('$_baseUrl/DoneBerghinzufuegen');
     try {
-      final response = await http.post(
+      final response = await httpClient.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -87,16 +101,21 @@ class Done {
     } catch (e) {
       _log.e('Fehler bei Done.addMountainToDone(): $e');
       return {"success": false, "message": "Client-Fehler: $e"};
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
     }
   }
 
-  static Future<Map<String, dynamic>> deleteDone(
-      int doneId, int userId) async {
+  static Future<Map<String, dynamic>> deleteDone(int doneId, int userId,
+      [http.Client? client]) async {
+    final httpClient = client ?? http.Client();
     _log.i('Lösche Erledigt-Eintrag $doneId für User $userId.');
     final url = Uri.parse('$_baseUrl/Done?DoneID=$doneId&UserID=$userId');
     try {
       final response =
-      await http.delete(url, headers: {'Accept': 'application/json'});
+      await httpClient.delete(url, headers: {'Accept': 'application/json'});
       _log.i('Done.deleteDone() status: ${response.statusCode}');
       _log.d('Done.deleteDone() body: ${response.body}');
       if (response.statusCode == 200) {
@@ -114,15 +133,21 @@ class Done {
     } catch (e) {
       _log.e('Fehler bei Done.deleteDone(): $e');
       return {"success": false, "message": "Client-Fehler: $e"};
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
     }
   }
 
-  static Future<Map<String, dynamic>> fetchDoneList(int userId) async {
+  static Future<Map<String, dynamic>> fetchDoneList(int userId,
+      [http.Client? client]) async {
+    final httpClient = client ?? http.Client();
     _log.i('Rufe Erledigt-Liste für User $userId ab.');
     final url = Uri.parse('$_baseUrl/Done?UserID=$userId');
     try {
       final response =
-      await http.get(url, headers: {'Accept': 'application/json'});
+      await httpClient.get(url, headers: {'Accept': 'application/json'});
       _log.i('Done.fetchDoneList() status: ${response.statusCode}');
       _log.d('Done.fetchDoneList() body: ${response.body}');
       if (response.statusCode == 200) {
@@ -141,6 +166,10 @@ class Done {
     } catch (e) {
       _log.e('Fehler bei Done.fetchDoneList(): $e');
       return {"success": false, "message": "Client-Fehler: $e"};
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
     }
   }
 }

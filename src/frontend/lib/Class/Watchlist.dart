@@ -8,12 +8,13 @@ class Watchlist {
   static const String _baseUrl = User.baseUrl;
 
   static Future<Map<String, dynamic>> addMountainToWatchlist(
-      int userId, int mountainId) async {
+      int userId, int mountainId, [http.Client? client]) async {
     _log.i('Füge Berg $mountainId zur Watchlist für User $userId hinzu.');
     final String apiUrl = "$_baseUrl/PostWatchlist";
     _log.d('Watchlist.addMountainToWatchlist() URL: $apiUrl');
+    final httpClient = client ?? http.Client();
     try {
-      final response = await http.post(
+      final response = await httpClient.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
@@ -47,17 +48,20 @@ class Watchlist {
     } catch (e) {
       _log.e('Fehler beim Hinzufügen zur Watchlist: $e');
       return {"success": false, "message": "Fehler: $e"};
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
   static Future<Map<String, dynamic>> removeMountainFromWatchlist(
-      int userId, int mountainId) async {
+      int userId, int mountainId, [http.Client? client]) async {
     _log.i('Entferne Berg $mountainId von der Watchlist für User $userId.');
     final String apiUrl =
         "$_baseUrl/Watchlist/entry?UserID=$userId&MountainID=$mountainId";
     _log.d('Watchlist.removeMountainFromWatchlist() URL: $apiUrl');
+    final httpClient = client ?? http.Client();
     try {
-      final response = await http.delete(
+      final response = await httpClient.delete(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
       );
@@ -86,18 +90,20 @@ class Watchlist {
     } catch (e) {
       _log.e('Fehler beim Entfernen von der Watchlist: $e');
       return {"success": false, "message": "Fehler: $e"};
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
   static Future<Map<String, dynamic>> checkIfMountainIsOnWatchlist(
-      int userId, int mountainId) async {
+      int userId, int mountainId, [http.Client? client]) async {
     _log.i('Prüfe, ob Berg $mountainId auf der Watchlist von User $userId ist.');
     final String apiUrl =
         "$_baseUrl/Watchlist/check?UserID=$userId&MountainID=$mountainId";
     _log.d('Watchlist.checkIfMountainIsOnWatchlist() URL: $apiUrl');
-
+    final httpClient = client ?? http.Client();
     try {
-      final response = await http.get(
+      final response = await httpClient.get(
         Uri.parse(apiUrl),
         headers: {'Accept': 'application/json'},
       );
@@ -141,15 +147,19 @@ class Watchlist {
     } catch (e) {
       _log.e('Client-seitiger Fehler beim Überprüfen des Watchlist-Status: $e');
       return {"success": false, "message": "Client-seitiger Fehler: $e"};
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
-  static Future<Map<String, dynamic>> fetchWatchlist(int userId) async {
+  static Future<Map<String, dynamic>> fetchWatchlist(
+      int userId, [http.Client? client]) async {
     _log.i('Rufe Watchlist für User $userId ab.');
     final String apiUrl = "$_baseUrl/Watchlist?UserID=$userId";
     _log.d('Watchlist.fetchWatchlist() URL: $apiUrl');
+    final httpClient = client ?? http.Client();
     try {
-      final response = await http.get(
+      final response = await httpClient.get(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
       );
@@ -173,17 +183,20 @@ class Watchlist {
     } catch (e) {
       _log.e('Fehler beim Abrufen der Watchlist: $e');
       return {"success": false, "message": "Fehler: $e"};
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
   static Future<Map<String, dynamic>> deleteWatchlistEntry(
-      int watchlistId, int userId) async {
+      int watchlistId, int userId, [http.Client? client]) async {
     _log.i('Lösche Watchlist-Eintrag $watchlistId für User $userId.');
     final String apiUrl =
         "$_baseUrl/DeleteWatchlist?WatchlistID=$watchlistId&UserID=$userId";
     _log.d('Watchlist.deleteWatchlistEntry() URL: $apiUrl');
+    final httpClient = client ?? http.Client();
     try {
-      final response = await http.delete(
+      final response = await httpClient.delete(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
       );
@@ -217,6 +230,8 @@ class Watchlist {
     } catch (e) {
       _log.e('Fehler beim Löschen des Watchlist-Eintrags: $e');
       return {"success": false, "message": "Fehler: $e"};
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 }

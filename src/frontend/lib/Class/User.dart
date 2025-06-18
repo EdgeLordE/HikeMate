@@ -43,12 +43,13 @@ class User {
   }
 
   static Future<Map<String, dynamic>> login_User(
-      String username, String password) async {
+      String username, String password, [http.Client? client]) async {
     _log.i('Login-Versuch für Benutzer "$username".');
     const String apiUrl = "$baseUrl/Login";
+    final httpClient = client ?? http.Client();
 
     try {
-      final response = await http.post(
+      final response = await httpClient.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"Username": username, "Password": password}),
@@ -71,16 +72,19 @@ class User {
     } catch (e) {
       _log.e('Fehler bei User.login_User(): $e');
       return {"success": false, "message": "Fehler: $e"};
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
   static Future<Map<String, dynamic>> register_User(String firstName,
-      String lastName, String username, String password) async {
+      String lastName, String username, String password, [http.Client? client]) async {
     _log.i('Registrierungsversuch für Benutzer "$username".');
     const String apiUrl = "$baseUrl/Registrieren";
+    final httpClient = client ?? http.Client();
 
     try {
-      final response = await http.post(
+      final response = await httpClient.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
@@ -106,6 +110,8 @@ class User {
     } catch (e) {
       _log.e('Fehler bei User.register_User(): $e');
       return {"success": false, "message": "Fehler: $e"};
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
@@ -119,12 +125,13 @@ class User {
   }
 
   static Future<bool> changeUsername(
-      String oldUsername, String newUsername) async {
+      String oldUsername, String newUsername, [http.Client? client]) async {
     _log.i(
         'Ändere Benutzernamen von "$oldUsername" zu "$newUsername".');
     final url = Uri.parse("$baseUrl/ChangeUsername");
+    final httpClient = client ?? http.Client();
     try {
-      final response = await http.post(
+      final response = await httpClient.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
@@ -145,15 +152,18 @@ class User {
     } catch (e) {
       _log.e('Fehler beim Benutzernamen ändern: $e');
       return false;
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
   static Future<bool> changePassword(
-      String oldPassword, String newPassword) async {
+      String oldPassword, String newPassword, [http.Client? client]) async {
     _log.i('Ändere Passwort für Benutzer "${User.username}".');
     final url = Uri.parse("$baseUrl/ChangePassword");
+    final httpClient = client ?? http.Client();
     try {
-      final response = await http.post(
+      final response = await httpClient.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
@@ -173,15 +183,18 @@ class User {
     } catch (e) {
       _log.e('Fehler beim Passwort ändern: $e');
       return false;
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
-  static Future<String?> loadPhoneNumber() async {
+  static Future<String?> loadPhoneNumber([http.Client? client]) async {
     _log.i('Lade Telefonnummer für User ID ${User.id}.');
     final url = Uri.parse('$baseUrl/User/phone?UserID=${User.id}');
+    final httpClient = client ?? http.Client();
     try {
       final response =
-      await http.get(url, headers: {'Accept': 'application/json'});
+      await httpClient.get(url, headers: {'Accept': 'application/json'});
       _log.i('User.loadPhoneNumber() status: ${response.statusCode}');
       _log.d('User.loadPhoneNumber() body: ${response.body}');
       if (response.statusCode == 200) {
@@ -195,14 +208,17 @@ class User {
     } catch (e) {
       _log.e('Fehler beim Laden der Telefonnummer: $e');
       return null;
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 
-  static Future<bool> savePhoneNumber(String phone) async {
+  static Future<bool> savePhoneNumber(String phone, [http.Client? client]) async {
     _log.i('Speichere Telefonnummer für User ID ${User.id}.');
     final url = Uri.parse('$baseUrl/User/phone');
+    final httpClient = client ?? http.Client();
     try {
-      final response = await http.put(
+      final response = await httpClient.put(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -222,6 +238,8 @@ class User {
     } catch (e) {
       _log.e('Fehler beim Speichern der Telefonnummer: $e');
       return false;
+    } finally {
+      if (client == null) httpClient.close();
     }
   }
 }

@@ -7,12 +7,13 @@ class Activity {
   static final _log = LoggingService();
 
   static Future<List<Map<String, dynamic>>> fetchActivitiesByUserId(
-      int userId) async {
+      int userId, [http.Client? client]) async {
+    final httpClient = client ?? http.Client();
     _log.i('Rufe Aktivitäten für User ID $userId ab.');
     final url = Uri.parse('${User.baseUrl}/Aktivitaet?user_id=$userId');
     try {
       final response =
-      await http.get(url, headers: {'Accept': 'application/json'});
+      await httpClient.get(url, headers: {'Accept': 'application/json'});
       _log.i('Activity.fetchActivitiesByUserId() status: ${response.statusCode}');
       _log.d('Activity.fetchActivitiesByUserId() body: ${response.body}');
 
@@ -27,6 +28,10 @@ class Activity {
     } catch (e) {
       _log.e('Fehler beim Laden der Aktivitäten: $e');
       return [];
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
     }
   }
 }

@@ -4,15 +4,18 @@ import 'Logging.dart';
 
 class Mountain {
   static final _log = LoggingService();
+  static const String baseUrl = "http://193.141.60.63:8080";
 
-  static Future<Map<String, dynamic>> SearchMountainByName(String name) async {
+  static Future<Map<String, dynamic>> SearchMountainByName(String name,
+      [http.Client? client]) async {
     _log.i('Suche nach Berg mit Namen: "$name"');
+    final httpClient = client ?? http.Client();
     final String apiUrl =
-        "http://193.141.60.63:8080/Berg?mountain_name=${Uri.encodeComponent(name)}";
+        "$baseUrl/Berg?mountain_name=${Uri.encodeComponent(name)}";
     _log.d('API URL: $apiUrl');
 
     try {
-      final response = await http.get(
+      final response = await httpClient.get(
         Uri.parse(apiUrl),
         headers: {"Accept": "application/json"},
       );
@@ -42,6 +45,10 @@ class Mountain {
     } catch (e) {
       _log.e('Fehler bei Mountain.SearchMountainByName(): $e');
       return {"success": false, "message": "Netzwerkfehler oder Client-Fehler: $e"};
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
     }
   }
 }

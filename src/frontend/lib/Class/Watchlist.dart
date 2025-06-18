@@ -1,12 +1,37 @@
+/// Watchlist-Verwaltung für die HikeMate App
+/// 
+/// Diese Klasse verwaltet die Merkliste (Watchlist) der Benutzer und bietet
+/// alle notwendigen Funktionen zum Hinzufügen, Entfernen und Abfragen von
+/// Bergen auf der persönlichen Watchlist.
+/// 
+/// Features:
+/// - Berg zur Watchlist hinzufügen
+/// - Berg von Watchlist entfernen  
+/// - Prüfung ob Berg bereits auf Watchlist
+/// - Vollständige Watchlist abrufen
+/// - Einzelne Watchlist-Einträge löschen
+/// 
+/// Alle Methoden verwenden HTTP-Requests an das Backend und
+/// unterstützen Dependency Injection für Tests.
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'User.dart';
 import 'Logging.dart';
 
+/// Statische Klasse für alle Watchlist-bezogenen API-Operationen
 class Watchlist {
+  /// Logger-Instanz für diese Klasse
   static final _log = LoggingService();
+  /// Basis-URL für API-Aufrufe (von User-Klasse)
   static const String _baseUrl = User.baseUrl;
 
+  /// Fügt einen Berg zur Watchlist eines Benutzers hinzu
+  /// 
+  /// [userId] - ID des Benutzers
+  /// [mountainId] - ID des Berges der hinzugefügt werden soll
+  /// [client] - Optional: HTTP-Client für Tests (Dependency Injection)
+  /// 
+  /// Returns: Map mit success-Flag, message und ggf. data
   static Future<Map<String, dynamic>> addMountainToWatchlist(
       int userId, int mountainId, [http.Client? client]) async {
     _log.i('Füge Berg $mountainId zur Watchlist für User $userId hinzu.');
@@ -52,7 +77,13 @@ class Watchlist {
       if (client == null) httpClient.close();
     }
   }
-
+  /// Entfernt einen Berg von der Watchlist eines Benutzers
+  /// 
+  /// [userId] - ID des Benutzers
+  /// [mountainId] - ID des Berges der entfernt werden soll
+  /// [client] - Optional: HTTP-Client für Tests
+  /// 
+  /// Returns: Map mit success-Flag und message
   static Future<Map<String, dynamic>> removeMountainFromWatchlist(
       int userId, int mountainId, [http.Client? client]) async {
     _log.i('Entferne Berg $mountainId von der Watchlist für User $userId.');
@@ -94,7 +125,13 @@ class Watchlist {
       if (client == null) httpClient.close();
     }
   }
-
+  /// Prüft ob sich ein Berg auf der Watchlist eines Benutzers befindet
+  /// 
+  /// [userId] - ID des Benutzers
+  /// [mountainId] - ID des zu prüfenden Berges
+  /// [client] - Optional: HTTP-Client für Tests
+  /// 
+  /// Returns: Map mit success-Flag und isOnWatchlist boolean
   static Future<Map<String, dynamic>> checkIfMountainIsOnWatchlist(
       int userId, int mountainId, [http.Client? client]) async {
     _log.i('Prüfe, ob Berg $mountainId auf der Watchlist von User $userId ist.');
@@ -151,7 +188,12 @@ class Watchlist {
       if (client == null) httpClient.close();
     }
   }
-
+  /// Ruft die komplette Watchlist eines Benutzers ab
+  /// 
+  /// [userId] - ID des Benutzers dessen Watchlist abgerufen werden soll
+  /// [client] - Optional: HTTP-Client für Tests
+  /// 
+  /// Returns: Map mit success-Flag und data (Liste der Berge)
   static Future<Map<String, dynamic>> fetchWatchlist(
       int userId, [http.Client? client]) async {
     _log.i('Rufe Watchlist für User $userId ab.');
@@ -187,7 +229,13 @@ class Watchlist {
       if (client == null) httpClient.close();
     }
   }
-
+  /// Löscht einen spezifischen Watchlist-Eintrag anhand der Watchlist-ID
+  /// 
+  /// [watchlistId] - ID des zu löschenden Watchlist-Eintrags
+  /// [userId] - ID des Benutzers (für Berechtigungsprüfung)
+  /// [client] - Optional: HTTP-Client für Tests
+  /// 
+  /// Returns: Map mit success-Flag und message
   static Future<Map<String, dynamic>> deleteWatchlistEntry(
       int watchlistId, int userId, [http.Client? client]) async {
     _log.i('Lösche Watchlist-Eintrag $watchlistId für User $userId.');

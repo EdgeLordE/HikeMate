@@ -1,11 +1,36 @@
+/// Berg-Suchfunktionalität für die HikeMate App
+/// 
+/// Diese Klasse stellt Funktionen zur Verfügung um Berge aus der
+/// Datenbank zu suchen und deren Informationen abzurufen.
+/// 
+/// Features:
+/// - Berg-Suche nach Namen (Teilstring-Matching)
+/// - Rückgabe von Berg-Details (ID, Name, Höhe, Bundesland, Bild-URL)
+/// - HTTP-Client Unterstützung für Tests
+/// - Umfassendes Logging aller API-Aufrufe
+/// 
+/// Die Klasse arbeitet mit dem Backend über REST-API
+/// und unterstützt Dependency Injection für Tests.
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'Logging.dart';
 
+/// Statische Klasse für Berg-Suchoperationen
 class Mountain {
+  /// Logger-Instanz für diese Klasse
   static final _log = LoggingService();
+  /// Basis-URL für API-Aufrufe
   static const String baseUrl = "http://193.141.60.63:8080";
 
+  /// Sucht nach Bergen anhand des Namens (Teilstring-Suche)
+  /// 
+  /// [name] - Suchbegriff für den Bergnamen (auch Teilstrings möglich)
+  /// [client] - Optional: HTTP-Client für Tests (Dependency Injection)
+  /// 
+  /// Returns: Map mit success-Flag und data (Liste gefundener Berge)
+  /// oder Fehlermeldung bei Problemen
+
+  // prompt: mache alle Fehlermeldungen in der Funktion
   static Future<Map<String, dynamic>> SearchMountainByName(String name,
       [http.Client? client]) async {
     _log.i('Suche nach Berg mit Namen: "$name"');

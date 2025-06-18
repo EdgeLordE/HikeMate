@@ -1,29 +1,61 @@
+/// Benutzerverwaltung für die HikeMate App
+/// 
+/// Diese Klasse verwaltet alle benutzerbezogenen Daten und Operationen
+/// inklusive Authentifizierung, Profilverwaltung und Session-Management.
+/// 
+/// Features:
+/// - Benutzer-Login und Registrierung
+/// - Session-Management (statische Variablen)
+/// - Passwort und Benutzername ändern
+/// - Logout-Funktionalität
+/// - HTTP-Client Integration für Backend-Kommunikation
+/// 
+/// Die Klasse arbeitet als Singleton und speichert Benutzerdaten
+/// statisch für die Dauer der App-Session.
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../Pages/LoginPage.dart';
 import 'Logging.dart';
 
+/// Statische Klasse für Benutzerverwaltung und Authentifizierung
 class User {
+  /// Logger-Instanz für diese Klasse
   static final _log = LoggingService();
 
+  /// Private statische Variablen für Session-Management
   static int _id = 0;
   static String _firstName = "";
   static String _lastName = "";
   static String _username = "";
 
+  /// Basis-URL für alle API-Aufrufe
   static const String baseUrl = "http://193.141.60.63:8080";
 
+  /// Getter für Benutzer-ID
   static int get id => _id;
+  /// Getter für Vorname
   static String get firstName => _firstName;
+  /// Getter für Nachname
   static String get lastName => _lastName;
+  /// Getter für Benutzername
   static String get username => _username;
 
+  /// Setter für Benutzer-ID
   static set id(int value) => _id = value;
+  /// Setter für Vorname
   static set firstName(String value) => _firstName = value;
+  /// Setter für Nachname
   static set lastName(String value) => _lastName = value;
+  /// Setter für Benutzername
   static set username(String value) => _username = value;
 
+  /// Setzt alle Benutzerdaten auf einmal (für Session-Initialisierung)
+  /// 
+  /// [id] - Eindeutige Benutzer-ID
+  /// [firstName] - Vorname des Benutzers
+  /// [lastName] - Nachname des Benutzers
+  /// [username] - Benutzername für Login
   static void setUser(
       int id, String firstName, String lastName, String username) {
     _log.i(

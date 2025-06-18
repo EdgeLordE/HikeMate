@@ -1,3 +1,5 @@
+# Bei den Tests wurde viel KI verwendet, Herr Diem hat gesagt Ki ist perfekt für tests
+
 import unittest
 from unittest.mock import patch, MagicMock
 import sys

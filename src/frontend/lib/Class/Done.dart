@@ -93,7 +93,7 @@ class Done {
   static Future<Map<String, dynamic>> deleteDone(
       int doneId, int userId) async {
     _log.i('Lösche Erledigt-Eintrag $doneId für User $userId.');
-    final url = Uri.parse('$_baseUrl/Done?DoneID=$doneId&UserID=$userId');
+    final url = Uri.parse('${User.baseUrl}/DeleteDone?DoneID=$doneId&UserID=$userId');
     try {
       final response =
       await http.delete(url, headers: {'Accept': 'application/json'});
@@ -101,7 +101,8 @@ class Done {
       _log.d('Done.deleteDone() body: ${response.body}');
       if (response.statusCode == 200) {
         _log.i('Erledigt-Eintrag erfolgreich gelöscht.');
-        return {"success": true};
+        final data = jsonDecode(response.body);
+        return {"success": true, "message": data["message"] ?? "Done-Eintrag gelöscht."};
       } else {
         _log.w(
             'Fehler beim Löschen des Erledigt-Eintrags, Statuscode: ${response.statusCode}');

@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../Class/Logging.dart';
 import '../Class/supabase_client.dart';
 import '../Class/User.dart';
 import '../Class/Watchlist.dart';
-import '../Class/Done.dart';
+import '../Class/Done.dart'; // Importiert die Klasse Done für Datenoperationen
+// import 'package:flutter_map/flutter_map.dart'; // Nicht verwendet in diesem Snippet
+// import 'package:latlong2/latlong.dart'; // Nicht verwendet in diesem Snippet
 
 class DonePage extends StatefulWidget {
   const DonePage({Key? key}) : super(key: key);
@@ -15,7 +16,6 @@ class DonePage extends StatefulWidget {
 
 class _DonePageState extends State<DonePage>
     with SingleTickerProviderStateMixin {
-  final _log = LoggingService();
   late TabController _tabController;
   List<Map<String, dynamic>> _doneList = [];
   List<Map<String, dynamic>> _watchlist = [];
@@ -24,7 +24,8 @@ class _DonePageState extends State<DonePage>
   String _searchQuery = '';
   String _filterState = 'Alle';
   List<String> get _availableStates {
-    final states = <String>{'Alle'};
+    // Erstellt eine eindeutige, sortierte Liste von Bundesländern aus _doneList und _watchlist
+    final states = <String>{'Alle'}; // 'Alle' immer als erste Option
     for (var item in _doneList) {
       if (item['Mountain'] != null && item['Mountain']['FederalState'] != null && item['Mountain']['FederalState']['Name'] != null) {
         states.add(item['Mountain']['FederalState']['Name']);
@@ -76,26 +77,33 @@ class _DonePageState extends State<DonePage>
   }
 
   List<Map<String, dynamic>> get _filteredWatchlist {
+    // Ähnliche Filterung und Sortierung für Watchlist, falls benötigt.
+    // Fürs Erste nur einfache Liste ohne Filter/Sortierung für Watchlist,
+    // da die UI-Elemente dafür nicht im Watchlist-Tab sind.
     var list = _watchlist.where((e) {
       final name = (e['Mountain']?['Name'] as String?)?.toLowerCase() ?? '';
+      // Watchlist hat keinen direkten Filter für Bundesland in der UI,
+      // aber wir könnten es hier berücksichtigen, wenn _searchQuery auch Bundesländer durchsuchen soll.
       return name.contains(_searchQuery.toLowerCase());
     }).toList();
 
+    // Sortierung für Watchlist (optional, hier A-Z als Beispiel)
     list.sort((a, b) =>
         (a['Mountain']?['Name'] as String? ?? '').compareTo(b['Mountain']?['Name'] as String? ?? ''));
     return list;
   }
 
+
   @override
   void initState() {
     super.initState();
-    _log.i('DonePage initState');
     _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
+    _tabController.addListener(() { // Listener, um Filter zurückzusetzen oder anzupassen
       if (mounted) {
-        _log.i('Tab gewechselt, Suchanfrage wird zurückgesetzt.');
         setState(() {
-          _searchQuery = '';
+          _searchQuery = ''; // Suchfeld leeren beim Tab-Wechsel
+          // _filterState = 'Alle'; // Optional: Filter zurücksetzen
+          // _sortMode = 'Neu → Alt'; // Optional: Sortierung zurücksetzen
         });
       }
     });
@@ -103,47 +111,37 @@ class _DonePageState extends State<DonePage>
   }
 
   Future<void> _loadData() async {
-    _log.i('Lade Done- und Watchlist-Daten...');
     if (mounted) setState(() => _isLoading = true);
     await Future.wait([_fetchDone(), _fetchWatchlist()]);
     if (mounted) setState(() => _isLoading = false);
-    _log.i('Daten erfolgreich geladen.');
   }
 
   Future<void> _fetchDone() async {
-    _log.i('Rufe Done-Liste ab...');
     try {
       final result = await Done.fetchDoneList(User.id);
       if (mounted) {
         if (result["success"] == true && result["data"] is List) {
           _doneList = List<Map<String, dynamic>>.from(result["data"]);
-          _log.i('Done-Liste erfolgreich abgerufen: ${_doneList.length} Einträge.');
         } else {
-          _log.w('Fehler beim Abrufen der Done-Liste: ${result["message"]}');
           _doneList = [];
         }
       }
-    } catch (e, st) {
-      _log.e('Ausnahme beim Abrufen der Done-Liste', e, st);
+    } catch (_) {
       if (mounted) _doneList = [];
     }
   }
 
   Future<void> _fetchWatchlist() async {
-    _log.i('Rufe Watchlist ab...');
     try {
       final result = await Watchlist.fetchWatchlist(User.id);
       if (mounted) {
         if (result["success"] == true && result["data"] is List) {
           _watchlist = List<Map<String, dynamic>>.from(result["data"]);
-          _log.i('Watchlist erfolgreich abgerufen: ${_watchlist.length} Einträge.');
         } else {
-          _log.w('Fehler beim Abrufen der Watchlist: ${result["message"]}');
           _watchlist = [];
         }
       }
-    } catch (e, st) {
-      _log.e('Ausnahme beim Abrufen der Watchlist', e, st);
+    } catch (_) {
       if (mounted) _watchlist = [];
     }
   }
@@ -158,25 +156,21 @@ class _DonePageState extends State<DonePage>
   }
 
   Future<void> _deleteDone(int id) async {
-    _log.i('Lösche Done-Eintrag mit ID: $id');
     try {
       final result = await Done.deleteDone(id, User.id);
       if (mounted) {
         if (result["success"] == true) {
-          _log.i('Done-Eintrag erfolgreich gelöscht.');
           setState(() => _doneList.removeWhere((e) => e['DoneID'] == id));
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Eintrag gelöscht'), backgroundColor: Colors.redAccent),
           );
         } else {
-          _log.e('Fehler beim Löschen des Done-Eintrags: ${result["message"]}');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Fehler beim Löschen: ${result["message"] ?? ""}'), backgroundColor: Colors.red),
           );
         }
       }
-    } catch (e, st) {
-      _log.e('Ausnahme beim Löschen des Done-Eintrags', e, st);
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Fehler beim Löschen: $e'), backgroundColor: Colors.red),
@@ -186,7 +180,6 @@ class _DonePageState extends State<DonePage>
   }
 
   Future<void> _deleteWatch(int id) async {
-    _log.i('Lösche Watchlist-Eintrag mit ID: $id');
     try {
       await supabase
           .from('Watchlist')
@@ -194,14 +187,12 @@ class _DonePageState extends State<DonePage>
           .eq('WatchlistID', id)
           .eq('UserID', User.id);
       if (mounted) {
-        _log.i('Watchlist-Eintrag erfolgreich gelöscht.');
         setState(() => _watchlist.removeWhere((e) => e['WatchlistID'] == id));
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Von Watchlist entfernt'), backgroundColor: Colors.orangeAccent),
         );
       }
-    } catch (e, st) {
-      _log.e('Ausnahme beim Löschen des Watchlist-Eintrags', e, st);
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red),
@@ -211,9 +202,9 @@ class _DonePageState extends State<DonePage>
   }
 
   Future<void> _markDone(int mid, int wid) async {
-    _log.i('Markiere Berg $mid als erledigt, entferne von Watchlist $wid.');
     final now = DateTime.now().toIso8601String();
     try {
+      // Prüfen, ob der Berg bereits in "Done" ist
       final existingDone = await supabase
           .from('Done')
           .select('DoneID')
@@ -222,12 +213,12 @@ class _DonePageState extends State<DonePage>
           .maybeSingle();
 
       if (existingDone != null) {
-        _log.w('Berg $mid wurde bereits als erledigt markiert.');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Dieser Berg wurde bereits abgehakt.'), backgroundColor: Colors.orangeAccent));
+          // Optional: Watchlist-Eintrag trotzdem löschen, wenn er noch existiert
           await _deleteWatch(wid);
-          await _fetchWatchlist();
+          await _fetchWatchlist(); // Watchlist neu laden, da ein Element entfernt wurde
           if (mounted) setState(() {});
         }
         return;
@@ -235,16 +226,14 @@ class _DonePageState extends State<DonePage>
 
       await supabase.from('Done').insert(
           {'UserID': User.id, 'MountainID': mid, 'Date': now});
-      _log.i('Berg $mid erfolgreich als erledigt markiert.');
-      await _deleteWatch(wid);
-      await _loadData();
+      await _deleteWatch(wid); // Watchlist-Eintrag nach erfolgreichem Abhaken löschen
+      await _loadData(); // Beide Listen neu laden, um Konsistenz sicherzustellen
       if (mounted) {
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Als gemacht markiert'), backgroundColor: Colors.green));
       }
-    } catch (e, st) {
-      _log.e('Fehler beim Markieren als erledigt', e, st);
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red));
@@ -254,7 +243,6 @@ class _DonePageState extends State<DonePage>
 
   @override
   void dispose() {
-    _log.i('DonePage disposed.');
     _tabController.dispose();
     super.dispose();
   }
@@ -266,28 +254,29 @@ class _DonePageState extends State<DonePage>
       appBar: AppBar(
         backgroundColor: const Color(0xFF141212),
         elevation: 0,
+        // title: const Text('Meine Berge', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)), // Entfernt
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.lightBlueAccent,
           labelColor: Colors.lightBlueAccent,
           unselectedLabelColor: Colors.white70,
-          indicatorWeight: 3.0,
+          indicatorWeight: 3.0, // Dicke des Indikators erhöht
           tabs: const [
             Tab(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.0),
+                padding: EdgeInsets.symmetric(vertical: 12.0), // Vertikaler Innenabstand für größere Tabs
                 child: Text(
                   "GEMACHT",
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15), // Schriftgröße angepasst
                 ),
               ),
             ),
             Tab(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.0),
+                padding: EdgeInsets.symmetric(vertical: 12.0), // Vertikaler Innenabstand für größere Tabs
                 child: Text(
                   "WATCHLIST",
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15), // Schriftgröße angepasst
                 ),
               ),
             ),
@@ -346,7 +335,7 @@ class _DonePageState extends State<DonePage>
               Expanded(
                 child: _buildDropdown(
                   _filterState,
-                  _availableStates,
+                  _availableStates, // Dynamische Liste der Bundesländer
                       (v) {
                     if (mounted && v != null) setState(() => _filterState = v);
                   },
@@ -375,7 +364,7 @@ class _DonePageState extends State<DonePage>
     final items = _filteredDone;
     return Column(
       children: [
-        _searchAndFilterBar(),
+        _searchAndFilterBar(), // Such- und Filterleiste nur für "Gemacht"-Tab
         Expanded(
           child: items.isEmpty
               ? Center(
@@ -404,10 +393,10 @@ class _DonePageState extends State<DonePage>
   }
 
   Widget _watchView() {
-    final items = _filteredWatchlist;
+    final items = _filteredWatchlist; // Verwende die gefilterte Watchlist
     return Column(
       children: [
-        Padding(
+        Padding( // Eigene, einfachere Suchleiste für Watchlist
           padding: const EdgeInsets.all(16.0),
           child: TextField(
             onChanged: (value) {
@@ -482,7 +471,7 @@ class _DonePageState extends State<DonePage>
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-      color: const Color(0xFF2C2C2C),
+      color: const Color(0xFF2C2C2C), // Dunklere Kartenfarbe
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
@@ -503,18 +492,30 @@ class _DonePageState extends State<DonePage>
     );
   }
 
+  // _slideBg ist nicht mehr notwendig, da Dismissible entfernt wurde.
+  // Widget _slideBg(Color c, IconData i, AlignmentGeometry alignment) => Container(
+  //   decoration: BoxDecoration(
+  //     color: c,
+  //     borderRadius: BorderRadius.circular(10),
+  //   ),
+  //   margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+  //   alignment: alignment,
+  //   padding: const EdgeInsets.symmetric(horizontal: 20),
+  //   child: Icon(i, color: Colors.white, size: 28),
+  // );
+
   Widget _buildDropdown(String currentValue, List<String> items,
       ValueChanged<String?> onChanged, {String? hint}) =>
       Container(
-        height: 50,
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        height: 50, // Feste Höhe für Dropdowns
+        padding: const EdgeInsets.symmetric(horizontal: 12.0), // Vertikales Padding entfernt
         decoration: BoxDecoration(
           color: const Color(0xFF505050),
           borderRadius: BorderRadius.circular(10),
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
-            value: items.contains(currentValue) ? currentValue : null,
+            value: items.contains(currentValue) ? currentValue : null, // Sicherstellen, dass der Wert gültig ist
             hint: hint != null ? Text(hint, style: const TextStyle(color: Colors.white54, fontSize: 15)) : null,
             isExpanded: true,
             dropdownColor: const Color(0xFF3c3c3c),

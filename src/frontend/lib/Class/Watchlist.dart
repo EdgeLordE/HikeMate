@@ -3,10 +3,32 @@ import 'package:http/http.dart' as http;
 import 'User.dart';
 import 'Logging.dart';
 
+/// Klasse für die Verwaltung der Berge-Watchlist in der HikeMate App
+/// 
+/// Diese Klasse stellt Methoden zur Verfügung, um Berge zur persönlichen
+/// Watchlist hinzuzufügen, zu entfernen und zu verwalten. Die Watchlist
+/// dient als "Merkliste" für Berge, die der Benutzer wandern möchte.
+/// 
+/// Hauptfunktionen:
+/// - Berge zur Watchlist hinzufügen/entfernen
+/// - Prüfen ob ein Berg auf der Watchlist steht
+/// - Komplette Watchlist laden
+/// - Einzelne Einträge löschen
 class Watchlist {
+  /// Logger für diese Klasse
   static final _log = LoggingService();
+  
+  /// Basis-URL für alle API-Aufrufe
   static const String _baseUrl = User.baseUrl;
 
+  /// Fügt einen Berg zur Watchlist hinzu
+  /// 
+  /// [userId] - Die ID des Benutzers
+  /// [mountainId] - Die ID des Berges, der hinzugefügt werden soll
+  /// 
+  /// Rückgabe: Map mit "success" (bool), "message" (String) und optional "data"
+  /// Bei Erfolg: {"success": true, "message": "Erfolg", "data": Watchlist-Eintrag}
+  /// Bei Fehler: {"success": false, "message": "Fehlerbeschreibung"}
   static Future<Map<String, dynamic>> addMountainToWatchlist(
       int userId, int mountainId) async {
     _log.i('Füge Berg $mountainId zur Watchlist für User $userId hinzu.');
@@ -46,10 +68,17 @@ class Watchlist {
       }
     } catch (e) {
       _log.e('Fehler beim Hinzufügen zur Watchlist: $e');
-      return {"success": false, "message": "Fehler: $e"};
-    }
+      return {"success": false, "message": "Fehler: $e"};    }
   }
 
+  /// Entfernt einen Berg aus der Watchlist
+  /// 
+  /// [userId] - Die ID des Benutzers
+  /// [mountainId] - Die ID des Berges, der entfernt werden soll
+  /// 
+  /// Rückgabe: Map mit "success" (bool) und "message" (String)
+  /// Bei Erfolg: {"success": true, "message": "Berg entfernt"}
+  /// Bei Fehler: {"success": false, "message": "Fehlerbeschreibung"}
   static Future<Map<String, dynamic>> removeMountainFromWatchlist(
       int userId, int mountainId) async {
     _log.i('Entferne Berg $mountainId von der Watchlist für User $userId.');
@@ -85,10 +114,17 @@ class Watchlist {
       }
     } catch (e) {
       _log.e('Fehler beim Entfernen von der Watchlist: $e');
-      return {"success": false, "message": "Fehler: $e"};
-    }
+      return {"success": false, "message": "Fehler: $e"};    }
   }
 
+  /// Prüft ob ein bestimmter Berg auf der Watchlist steht
+  /// 
+  /// [userId] - Die ID des Benutzers
+  /// [mountainId] - Die ID des Berges, der geprüft werden soll
+  /// 
+  /// Rückgabe: Map mit "success" (bool), "isOnWatchlist" (bool) und "message"
+  /// Bei Erfolg: {"success": true, "isOnWatchlist": true/false}
+  /// Bei Fehler: {"success": false, "message": "Fehlerbeschreibung"}
   static Future<Map<String, dynamic>> checkIfMountainIsOnWatchlist(
       int userId, int mountainId) async {
     _log.i('Prüfe, ob Berg $mountainId auf der Watchlist von User $userId ist.');
@@ -140,10 +176,18 @@ class Watchlist {
       }
     } catch (e) {
       _log.e('Client-seitiger Fehler beim Überprüfen des Watchlist-Status: $e');
-      return {"success": false, "message": "Client-seitiger Fehler: $e"};
-    }
+      return {"success": false, "message": "Client-seitiger Fehler: $e"};    }
   }
 
+  /// Lädt die komplette Watchlist für einen Benutzer
+  /// 
+  /// [userId] - Die ID des Benutzers, dessen Watchlist geladen werden soll
+  /// 
+  /// Rückgabe: Map mit "success" (bool) und entweder "data" oder "message"
+  /// Bei Erfolg: {"success": true, "data": [Liste der Watchlist-Einträge]}
+  /// Bei Fehler: {"success": false, "message": "Fehlerbeschreibung"}
+  /// 
+  /// Die "data" enthält eine Liste von Watchlist-Einträgen mit Berg-Details
   static Future<Map<String, dynamic>> fetchWatchlist(int userId) async {
     _log.i('Rufe Watchlist für User $userId ab.');
     final String apiUrl = "$_baseUrl/Watchlist?UserID=$userId";
@@ -172,10 +216,17 @@ class Watchlist {
       }
     } catch (e) {
       _log.e('Fehler beim Abrufen der Watchlist: $e');
-      return {"success": false, "message": "Fehler: $e"};
-    }
+      return {"success": false, "message": "Fehler: $e"};    }
   }
 
+  /// Löscht einen spezifischen Watchlist-Eintrag
+  /// 
+  /// [watchlistId] - Die eindeutige ID des Watchlist-Eintrags
+  /// [userId] - Die ID des Benutzers (für Berechtigung)
+  /// 
+  /// Rückgabe: Map mit "success" (bool) und "message" (String)
+  /// Bei Erfolg: {"success": true, "message": "Eintrag gelöscht"}
+  /// Bei Fehler: {"success": false, "message": "Fehlerbeschreibung"}
   static Future<Map<String, dynamic>> deleteWatchlistEntry(
       int watchlistId, int userId) async {
     _log.i('Lösche Watchlist-Eintrag $watchlistId für User $userId.');

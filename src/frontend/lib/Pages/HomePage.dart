@@ -5,6 +5,18 @@ import 'ProfilePage.dart';
 import 'SearchMountainPage.dart';
 import 'DonePage.dart';
 
+/// Hauptseite der HikeMate App mit Tab-Navigation
+/// 
+/// Diese Seite dient als zentraler Hub der Anwendung nach dem Login.
+/// Sie stellt eine Bottom-Navigation-Bar bereit, über die Benutzer
+/// zwischen den verschiedenen Hauptfunktionen der App wechseln können.
+/// 
+/// Verfügbare Tabs:
+/// - Suche: Berg-Suchfunktion
+/// - Wetter: Wetter-Informationen
+/// - Navigation: GPS-Tracking und Wandernavigation
+/// - Profil: Benutzer-Profilverwaltung
+/// - Erledigt: Liste der absolvierten Berge
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -12,17 +24,23 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+/// State-Klasse für die HomePage mit Tab-Management
 class _HomePageState extends State<HomePage> {
+  /// Index des aktuell ausgewählten Tabs
   int _selectedIndex = 0;
 
+  /// Liste aller verfügbaren Seiten/Tabs
   static const List<Widget> _pages = [
-    SearchMountainPage(),
-    WeatherPage(),
-    NavigationPage(),
-    ProfilePage(),
-    DonePage(),
+    SearchMountainPage(),  // Tab 0: Berg-Suche
+    WeatherPage(),         // Tab 1: Wetter
+    NavigationPage(),      // Tab 2: GPS-Navigation
+    ProfilePage(),         // Tab 3: Benutzerprofil
+    DonePage(),           // Tab 4: Erledigte Berge
   ];
 
+  /// Behandelt Tab-Wechsel in der Bottom-Navigation
+  /// 
+  /// [index] - Index des ausgewählten Tabs (0-4)
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;

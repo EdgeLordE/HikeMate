@@ -4,6 +4,17 @@ import '../Class/Mountain.dart';
 import '../Class/Watchlist.dart';
 import '../Class/Done.dart'; // <-- REST-API für Done
 
+/// Berg-Suchseite der HikeMate App
+/// 
+/// Diese Seite ermöglicht es Benutzern nach Bergen zu suchen und
+/// detaillierte Informationen über gefundene Berge anzuzeigen.
+/// 
+/// Features:
+/// - Berg-Suche nach Namen
+/// - Detailansicht mit Berg-Informationen (Höhe, Koordinaten, etc.)
+/// - Integration mit Watchlist (Berg als "Zu wandern" markieren)
+/// - Integration mit Done-Liste (Berg als "Erledigt" markieren)
+/// - Status-Anzeige (ob Berg bereits auf Watchlist oder erledigt)
 class SearchMountainPage extends StatefulWidget {
   const SearchMountainPage({super.key});
 
@@ -11,11 +22,21 @@ class SearchMountainPage extends StatefulWidget {
   State<SearchMountainPage> createState() => _SearchMountainPageState();
 }
 
+/// State-Klasse für die SearchMountainPage mit Such- und Status-Management
 class _SearchMountainPageState extends State<SearchMountainPage> {
+  /// Controller für das Such-Eingabefeld
   final TextEditingController _controller = TextEditingController();
+  
+  /// Daten des aktuell angezeigten Berges
   Map<String, dynamic>? mountainData;
+  
+  /// Zeigt an ob gerade eine Suchanfrage läuft
   bool _isLoading = false;
+  
+  /// Status ob der Berg auf der Watchlist steht
   bool _isOnWatchlist = false;
+  
+  /// Status ob der Berg bereits erledigt ist
   bool _isDone = false;
 
   @override
@@ -23,6 +44,9 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
     super.initState();
   }
 
+  /// Prüft ob der aktuell angezeigte Berg auf der Watchlist steht
+  /// 
+  /// Aktualisiert den _isOnWatchlist Status für die UI-Anzeige
   Future<void> _checkIfOnWatchlist() async {
     if (mountainData == null || User.id == null) {
       if (mounted) setState(() => _isOnWatchlist = false);
@@ -41,10 +65,12 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _isOnWatchlist = false);
-    }
+      if (mounted) setState(() => _isOnWatchlist = false);    }
   }
 
+  /// Prüft ob der aktuell angezeigte Berg bereits erledigt ist
+  /// 
+  /// Aktualisiert den _isDone Status für die UI-Anzeige
   Future<void> _checkIfDone() async {
     if (mountainData == null || User.id == null) {
       if (mounted) setState(() => _isDone = false);
@@ -59,10 +85,18 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
       final result = await Done.isMountainDoneSimple(User.id!, mountainIdValue);
       if (mounted) setState(() => _isDone = result);
     } catch (_) {
-      if (mounted) setState(() => _isDone = false);
-    }
+      if (mounted) setState(() => _isDone = false);    }
   }
 
+  /// Führt die Berg-Suche durch
+  /// 
+  /// [name] - Der Name des zu suchenden Berges
+  /// 
+  /// Diese Methode:
+  /// - Validiert die Eingabe (nicht leer)
+  /// - Setzt Loading-Status und resettet vorherige Daten
+  /// - Führt API-Suche durch und zeigt ersten Treffer an
+  /// - Prüft automatisch Watchlist- und Done-Status
   Future<void> fetchMountainData(String name) async {
     if (name.isEmpty) {
       if (mounted) {
@@ -132,9 +166,16 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
           _isLoading = false;
         });
       }
-    }
-  }
+    }  }
 
+  /// Fügt den aktuell angezeigten Berg zu den erledigten Bergen hinzu
+  /// 
+  /// Diese Methode:
+  /// - Validiert dass Berg-Daten vorhanden sind
+  /// - Extrahiert die Berg-ID aus den Daten
+  /// - Sendet eine Anfrage an das Backend
+  /// - Aktualisiert den UI-Status entsprechend
+  /// - Zeigt Erfolgs- oder Fehlermeldungen an
   Future<void> addMountainToDone() async {
     if (mountainData == null) {
       if (mounted) {
@@ -209,10 +250,17 @@ class _SearchMountainPageState extends State<SearchMountainPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Fehler beim Abhaken des Berges: $e')),
         );
-      }
-    }
+      }    }
   }
 
+  /// Wechselt den Watchlist-Status des aktuellen Berges
+  /// 
+  /// Diese Methode:
+  /// - Fügt Berg zur Watchlist hinzu wenn er nicht drauf ist
+  /// - Entfernt Berg von Watchlist wenn er drauf ist
+  /// - Validiert Berg-Daten und Benutzer-Anmeldung
+  /// - Aktualisiert den UI-Status entsprechend
+  /// - Zeigt Feedback-Nachrichten an
   Future<void> _toggleWatchlistStatus() async {
     if (mountainData == null) {
       if (mounted) {

@@ -7,6 +7,18 @@ import '../Class/User.dart';
 import '../Class/supabase_client.dart';
 import '../Class/Logging.dart';
 
+/// Notfall- und Check-In-Seite der HikeMate App
+/// 
+/// Diese Seite bietet Sicherheitsfunktionen für Wanderer:
+/// - Automatische Check-In-Nachrichten in regelmäßigen Abständen
+/// - Notfall-Kontakte und schnelle Hilfe-Rufnummern
+/// - GPS-Position für Notfall-Services
+/// 
+/// Features:
+/// - Konfigurierbarer Check-In-Timer (automatische Sicherheitsmeldungen)
+/// - Schnellzugriff auf Notfall-Rufnummern (112, Bergrettung, etc.)
+/// - GPS-Koordinaten für Rettungsdienste
+/// - Persistente Speicherung der Check-In-Einstellungen
 class EmergencyPage extends StatefulWidget {
   const EmergencyPage({Key? key}) : super(key: key);
 
@@ -14,11 +26,21 @@ class EmergencyPage extends StatefulWidget {
   State<EmergencyPage> createState() => _EmergencyPageState();
 }
 
+/// State-Klasse für die EmergencyPage mit Timer- und GPS-Management
 class _EmergencyPageState extends State<EmergencyPage> {
+  /// Timer für automatische Check-In-Nachrichten
   Timer? _timer;
+  
+  /// Zeigt an ob der Check-In-Service aktiv ist
   bool _active = false;
+  
+  /// Intervall für Check-In-Nachrichten in Sekunden (Standard: 2 Stunden)
   int _intervalSeconds = 7200;
+  
+  /// Zeigt an ob gerade eine Nachricht gesendet wird
   bool _sending = false;
+  
+  /// Logger für diese Seite
   final _log = LoggingService();
 
   @override
@@ -28,6 +50,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
     _initCheckIn();
   }
 
+  /// Initialisiert die Check-In-Einstellungen beim App-Start
+  /// 
+  /// Lädt gespeicherte Einstellungen aus SharedPreferences und
+  /// startet den Timer falls Check-In aktiv war
   Future<void> _initCheckIn() async {
     final prefs = await SharedPreferences.getInstance();
     _active = prefs.getBool('checkInActive') ?? false;
@@ -37,12 +63,20 @@ class _EmergencyPageState extends State<EmergencyPage> {
     setState(() {});
   }
 
+  /// Plant den nächsten Check-In-Timer
+  /// 
+  /// Cancelt den vorherigen Timer und startet einen neuen mit
+  /// dem konfigurierten Intervall
   void _scheduleNext() {
     _timer?.cancel();
     _timer = Timer(Duration(seconds: _intervalSeconds), _showSOSScreen);
     _log.i('Nächster Check-In in $_intervalSeconds Sekunden geplant.');
   }
 
+  /// Startet den automatischen Check-In-Service
+  /// 
+  /// Speichert die Einstellungen persistent und startet den Timer
+  /// für wiederkehrende Sicherheits-Check-Ins
   Future<void> _startCheckIn() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('checkInActive', true);
@@ -53,6 +87,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
     setState(() {});
   }
 
+  /// Stoppt den automatischen Check-In-Service
+  /// 
+  /// Deaktiviert den Service, cancelt den Timer und speichert
+  /// die Einstellungen persistent
   Future<void> _stopCheckIn() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('checkInActive', false);
@@ -62,6 +100,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
     setState(() {});
   }
 
+  /// Zeigt den SOS-Bildschirm nach Check-In-Timeout
+  /// 
+  /// Wird automatisch aufgerufen wenn der Check-In-Timer abläuft
+  /// und navigiert zum blinkenden SOS-Screen
   void _showSOSScreen() {
     _timer?.cancel();
     _log.i('Zeige SOS-Screen nach Check-In-Timeout.');
@@ -74,6 +116,12 @@ class _EmergencyPageState extends State<EmergencyPage> {
     );
   }
 
+  /// Sendet eine SOS-Nachricht mit GPS-Position
+  /// 
+  /// Ermittelt die aktuelle Position, lädt die Notfallnummer aus der
+  /// Datenbank und öffnet die SMS-App mit einer vorformulierten
+  /// SOS-Nachricht inkl. GPS-Koordinaten. Bei Fehlern wird eine
+  /// Fehlermeldung angezeigt.
   Future<void> _sendSOS() async {
     setState(() => _sending = true);
     _log.i('SOS gesendet: Standort wird abgerufen.');
@@ -173,16 +221,30 @@ class _EmergencyPageState extends State<EmergencyPage> {
   }
 }
 
+/// Vollbild-SOS-Bildschirm mit blinkender Animation
+/// 
+/// Dieser Screen wird angezeigt wenn ein Check-In-Timeout auftritt
+/// oder manuell ein SOS gesendet wird. Der Bildschirm blinkt rot
+/// um Aufmerksamkeit zu erregen.
+/// 
+/// [onFinished] - Callback der aufgerufen wird wenn der SOS beendet wird
 class SOSScreen extends StatefulWidget {
+  /// Callback-Funktion die aufgerufen wird wenn SOS beendet wird
   final VoidCallback onFinished;
   const SOSScreen({required this.onFinished, Key? key}) : super(key: key);
   @override
   State<SOSScreen> createState() => _SOSScreenState();
 }
 
+/// State-Klasse für SOSScreen mit Blink-Animation
+/// 
+/// Verwaltet die rote Blink-Animation für den SOS-Bildschirm
+/// mit Hilfe eines AnimationControllers
 class _SOSScreenState extends State<SOSScreen>
     with SingleTickerProviderStateMixin {
+  /// Controller für die Blink-Animation
   late AnimationController _controller;
+  /// Animation für Farbwechsel zwischen verschiedenen Rottönen
   late Animation<Color?> _colorAnim;
 
   @override

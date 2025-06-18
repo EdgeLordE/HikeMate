@@ -8,16 +8,43 @@ import '../Class/supabase_client.dart';
 import '../Class/Logging.dart';
 import '../main.dart';
 
+/// Service für automatische Check-In-Funktionalität
+/// 
+/// Dieser Service implementiert ein Singleton-Pattern und verwaltet
+/// automatische Sicherheits-Check-Ins für Wanderer. Er sendet in
+/// regelmäßigen Abständen Lebenszeichen mit GPS-Position.
+/// 
+/// Features:
+/// - Automatische Check-In-Nachrichten in konfigurierbaren Intervallen
+/// - GPS-Position-Übertragung für Sicherheit
+/// - Persistente Speicherung der Einstellungen
+/// - Hintergrund-Timer für kontinuierliche Überwachung
+/// - Integration mit Notfall-Services
 class CheckInService {
+  /// Singleton-Instanz des CheckInService
   static final CheckInService _instance = CheckInService._internal();
+  
+  /// Factory Constructor für Singleton-Pattern
   factory CheckInService() => _instance;
+  
+  /// Privater Constructor für Singleton-Pattern
   CheckInService._internal();
 
+  /// Logger für diesen Service
   final _log = LoggingService();
+  
+  /// Timer für periodische Check-Ins
   Timer? _timer;
+  
+  /// Check-In-Intervall in Stunden (Standard: 2 Stunden)
   int intervalHours = 2;
+  
+  /// Zeigt an ob der Check-In-Service aktiv ist
   bool active = false;
 
+  /// Initialisiert den CheckInService
+  /// 
+  /// Lädt gespeicherte Einstellungen und startet ggf. den Timer
   Future<void> init() async {
     await _log.init();
     _log.i('CheckInService init gestartet.');
@@ -32,6 +59,11 @@ class CheckInService {
     }
   }
 
+  /// Startet den Check-In-Service mit dem angegebenen Intervall
+  /// 
+  /// [hours] - Intervall zwischen Check-Ins in Stunden
+  /// 
+  /// Speichert die Einstellungen persistent und startet den Timer
   Future<void> start(int hours) async {
     intervalHours = hours;
     final prefs = await SharedPreferences.getInstance();
@@ -42,6 +74,10 @@ class CheckInService {
     _scheduleNext();
   }
 
+  /// Stoppt den Check-In-Service
+  /// 
+  /// Deaktiviert den Service, cancelt den Timer und speichert
+  /// die Einstellungen persistent
   Future<void> stop() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('checkInActive', false);
@@ -50,12 +86,21 @@ class CheckInService {
     _log.i('CheckInService gestoppt. Keine weiteren Check-Ins.');
   }
 
+  /// Plant den nächsten Check-In Timer
+  /// 
+  /// Cancelt den vorherigen Timer und startet einen neuen mit
+  /// dem konfigurierten Intervall
   void _scheduleNext() {
     _timer?.cancel();
     _timer = Timer(Duration(hours: intervalHours), _askCheckIn);
     _log.i('Nächstes Check-In in \$intervalHours Stunden geplant.');
   }
 
+  /// Zeigt den Check-In-Dialog an und wartet auf Benutzerreaktion
+  /// 
+  /// Startet einen 5-Minuten-Timer. Bei fehlender Reaktion wird
+  /// automatisch ein SOS gesendet. Der Dialog ist nicht abweisbar
+  /// und erfordert eine explizite Antwort.
   void _askCheckIn() {
     _log.i('CheckInService fragt nach Check-In.');
 
@@ -104,6 +149,13 @@ class CheckInService {
     });
   }
 
+  /// Sendet eine SOS-Nachricht mit aktueller GPS-Position
+  /// 
+  /// Ermittelt die aktuelle Position, lädt die Notfallnummer aus der
+  /// Datenbank und öffnet die SMS-App mit einer vorformulierten
+  /// SOS-Nachricht inkl. GPS-Koordinaten.
+  /// 
+  /// Bei Fehlern wird eine entsprechende Snackbar angezeigt.
   Future<void> sendSOS() async {
     _log.i('sendSOS aufgerufen. Versuche Standort abzurufen.');
     try {

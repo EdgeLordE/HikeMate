@@ -10,7 +10,19 @@ import '../Class/TrackingStorage.dart';
 import '../Class/supabase_client.dart';
 import '../Class/Activity.dart';
 
-
+/// GPS-Navigations- und Tracking-Seite der HikeMate App
+/// 
+/// Diese Seite ist das Herzstück der Wanderfunktionalität. Sie bietet
+/// GPS-Tracking, Kartenansicht und Aufzeichnung von Wanderungen.
+/// 
+/// Features:
+/// - Interaktive Karte mit aktueller Position
+/// - GPS-Tracking mit Start/Stop-Funktionalität
+/// - Aufzeichnung von Distanz, Höhenmetern und Zeit
+/// - Anzeige des zurückgelegten Pfades auf der Karte
+/// - Speicherung von Tracking-Daten zwischen App-Sessions
+/// - Hintergrund-Tracking (App läuft auch bei geschlossenem Bildschirm)
+/// - Speichern abgeschlossener Wanderungen als Aktivitäten
 class NavigationPage extends StatefulWidget {
   const NavigationPage({super.key});
 
@@ -18,9 +30,15 @@ class NavigationPage extends StatefulWidget {
   State<NavigationPage> createState() => _NavigationPageState();
 }
 
+/// State-Klasse für die NavigationPage mit GPS- und Karten-Management
 class _NavigationPageState extends State<NavigationPage> {
+  /// Logger für diese Seite
   final _log = LoggingService();
+  
+  /// Controller für die Kartenansicht
   final MapController _mapController = MapController();
+  
+  /// Service für GPS-Tracking und Datenaufzeichnung
   late TrackingService _trackingService;
 
   @override
@@ -29,10 +47,12 @@ class _NavigationPageState extends State<NavigationPage> {
     _log.i('NavigationPage initState');
     _trackingService = TrackingService();
 
+    // Lauscht auf Updates vom TrackingService für UI-Aktualisierungen
     _trackingService.onUpdate.listen((_) {
       if (mounted) setState(() {});
     });
 
+    // Lädt gespeicherten Tracking-Status und setzt ggf. Tracking fort
     TrackingStorage().loadTrackingState().then((isTracking) async {
       _log.i('Geladener Tracking-Status: $isTracking');
       if (isTracking) {

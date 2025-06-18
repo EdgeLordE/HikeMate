@@ -4,6 +4,18 @@ import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import '../Class/Logging.dart';
 
+/// Wetter-Seite der HikeMate App
+/// 
+/// Diese Seite zeigt aktuelle Wetterdaten und Wettervorhersagen an.
+/// Sie kann Wetter sowohl für den aktuellen GPS-Standort als auch
+/// für manuell eingegebene Orte anzeigen.
+/// 
+/// Features:
+/// - Automatisches Laden des Wetters für aktuellen Standort
+/// - Manuelle Ortssuche mit Eingabefeld
+/// - Aktuelle Wetterdaten (Temperatur, Beschreibung, etc.)
+/// - 5-Tage Wettervorhersage gruppiert nach Tagen
+/// - Integration mit OpenWeatherMap API
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
 
@@ -11,12 +23,21 @@ class WeatherPage extends StatefulWidget {
   State<WeatherPage> createState() => _WeatherPageState();
 }
 
+/// State-Klasse für die WeatherPage mit Wetter-API Management
 class _WeatherPageState extends State<WeatherPage> {
+  /// Logger für diese Seite
   final _log = LoggingService();
+  
+  /// Controller für das Orts-Eingabefeld
   final TextEditingController _controller = TextEditingController();
+  
+  /// API-Schlüssel für OpenWeatherMap
   final String apiKey = 'b8fe09709a738c0e8f4412b7a7376bb9';
 
+  /// Aktuelle Wetterdaten
   Map<String, dynamic>? currentWeather;
+  
+  /// Wettervorhersage gruppiert nach Tagen
   Map<String, List<Map<String, dynamic>>> groupedForecast = {};
 
   @override
@@ -33,6 +54,10 @@ class _WeatherPageState extends State<WeatherPage> {
     super.dispose();
   }
 
+  /// Lädt Wetterdaten für den aktuellen GPS-Standort
+  /// 
+  /// Diese Methode wird automatisch beim Seitenaufruf ausgeführt
+  /// und fordert GPS-Berechtigungen an falls nötig.
   Future<void> fetchWeatherByLocation() async {
     _log.i('Versuche, Wetterdaten für den aktuellen Standort abzurufen.');
     try {
@@ -75,9 +100,18 @@ class _WeatherPageState extends State<WeatherPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Standortfehler: ${e.toString()}')),
       );
-    }
-  }
+    }  }
 
+  /// Lädt Wetterdaten für eine bestimmte Stadt
+  /// 
+  /// [city] - Name der Stadt für die das Wetter abgerufen werden soll
+  /// 
+  /// Diese Methode:
+  /// - Ruft aktuelle Wetterdaten von OpenWeatherMap API ab
+  /// - Ruft 5-Tage-Wettervorhersage ab
+  /// - Gruppiert Vorhersagedaten nach Tagen
+  /// - Aktualisiert die UI mit den neuen Daten
+  /// - Behandelt Fehler mit Benutzer-Feedback
   Future<void> fetchWeather(String city) async {
     _log.i('Rufe Wetterdaten für "$city" ab.');
     try {

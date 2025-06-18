@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import '../Class/User.dart';
 import '../Class/Logging.dart';
 
+/// Seite zum Ändern des Benutzer-Passworts
+/// 
+/// Diese Seite ermöglicht es Benutzern ihr aktuelles Passwort zu ändern.
+/// Zur Sicherheit muss das alte Passwort zur Verifikation eingegeben werden.
+/// 
+/// Features:
+/// - Eingabe des alten Passworts zur Verifikation
+/// - Eingabe und Bestätigung des neuen Passworts
+/// - Passwort-Validation (Übereinstimmung der neuen Passwörter)
+/// - Sichere Übertragung an das Backend
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({Key? key}) : super(key: key);
 
@@ -9,12 +19,21 @@ class ChangePasswordPage extends StatefulWidget {
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
+/// State-Klasse für die ChangePasswordPage mit Formular-Management
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
+  /// Controller für das alte Passwort
   final TextEditingController _oldPassCtrl = TextEditingController();
+  
+  /// Controller für das neue Passwort
   final TextEditingController _newPassCtrl = TextEditingController();
+  
+  /// Controller für die Bestätigung des neuen Passworts
   final TextEditingController _confirmNewPassCtrl = TextEditingController();
+  
+  /// Logger für diese Seite
   final _log = LoggingService();
 
+  /// Zeigt an ob gerade eine Anfrage läuft
   bool _loading = false;
 
   @override
@@ -29,10 +48,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   void dispose() {
     _oldPassCtrl.dispose();
     _newPassCtrl.dispose();
-    _confirmNewPassCtrl.dispose();
-    super.dispose();
+    _confirmNewPassCtrl.dispose();    super.dispose();
   }
 
+  /// Zeigt eine Snackbar mit Nachricht an
+  /// 
+  /// [message] - Die anzuzeigende Nachricht
+  /// [isError] - true für Fehlermeldung, false für Erfolgsmeldung
+  /// 
+  /// Zusätzlich wird die Nachricht im Log protokolliert
   void _showSnackBar(String message, {bool isError = true}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -43,10 +67,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     if (isError) {
       _log.w(message);
     } else {
-      _log.i(message);
-    }
+      _log.i(message);    }
   }
 
+  /// Führt die Passwort-Änderung durch
+  /// 
+  /// Validiert alle Eingaben und sendet die Änderungsanfrage an das Backend.
+  /// Bei Erfolg wird der Benutzer informiert und die Seite geschlossen.
+  /// 
+  /// Validations:
+  /// - Alle Felder müssen ausgefüllt sein
+  /// - Neues Passwort und Bestätigung müssen übereinstimmen
+  /// - Altes Passwort wird vom Backend verifiziert
   Future<void> _submit() async {
     final oldPass = _oldPassCtrl.text.trim();
     final newPass = _newPassCtrl.text.trim();

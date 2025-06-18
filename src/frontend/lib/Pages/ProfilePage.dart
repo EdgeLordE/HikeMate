@@ -4,6 +4,17 @@ import '../Class/User.dart';
 import 'settings_page.dart';
 import '../Class/Activity.dart';
 
+/// Profil-Seite der HikeMate App
+/// 
+/// Diese Seite zeigt das Benutzerprofil mit persönlichen Statistiken
+/// und eine Übersicht aller absolvierten Wanderungen an.
+/// 
+/// Features:
+/// - Anzeige von Benutzerinformationen (Name, etc.)
+/// - Wanderstatistiken (Gesamtdistanz, Höhenmeter, Zeit, etc.)
+/// - Liste aller aufgezeichneten Aktivitäten/Wanderungen
+/// - Navigation zu Einstellungsseite
+/// - Automatische Berechnung von Durchschnittswerten
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
 
@@ -11,18 +22,37 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
+/// State-Klasse für die ProfilePage mit Statistik-Management
 class _ProfilePageState extends State<ProfilePage> {
+  /// Logger für diese Seite
   final _log = LoggingService();
+  
+  /// Zeigt an ob gerade Daten geladen werden
   bool _isLoading = true;
 
+  // Berechnete Statistik-Werte
+  /// Gesamte zurückgelegte Distanz in Kilometern
   double _totalDistance = 0.0;
+  
+  /// Gesamte Höhenmeter
   int _totalAscent = 0;
+  
+  /// Gesamte Wanderzeit in Stunden
   double _totalDuration = 0.0;
+  
+  /// Anzahl der Aktivitäten
   int _totalActivities = 0;
+  
+  /// Verbrannte Kalorien (geschätzt)
   int _totalCalories = 0;
+  
+  /// Durchschnittsgeschwindigkeit in km/h
   double _averageSpeed = 0.0;
+  
+  /// Höchste erreichte Elevation
   int _maxElevation = 0;
 
+  /// Liste aller Benutzer-Aktivitäten
   List<Map<String, dynamic>> _activities = [];
 
   @override
@@ -32,6 +62,10 @@ class _ProfilePageState extends State<ProfilePage> {
     _fetchStatsAndActivities();
   }
 
+  /// Lädt alle Aktivitäten und berechnet Statistiken
+  /// 
+  /// Diese Methode holt alle Aktivitäten des Benutzers vom Backend
+  /// und berechnet daraus verschiedene Statistik-Werte.
   Future<void> _fetchStatsAndActivities() async {
     _log.i('Lade Statistiken und Aktivitäten...');
     try {

@@ -2,9 +2,27 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'Logging.dart';
 
+/// Klasse für die Verwaltung von Berg-Daten in der HikeMate App
+/// 
+/// Diese Klasse stellt Methoden zur Verfügung, um Informationen
+/// über Berge vom Backend-Server zu laden und zu durchsuchen.
 class Mountain {
+  /// Logger für diese Klasse
   static final _log = LoggingService();
 
+  /// Sucht nach Bergen anhand des Namens
+  /// 
+  /// Diese Methode sendet eine GET-Anfrage an das Backend um Berge
+  /// zu finden, die dem angegebenen Namen entsprechen oder ihn enthalten.
+  /// 
+  /// [name] - Der Name oder Teil des Namens des gesuchten Berges
+  /// 
+  /// Rückgabe: Map mit "success" (bool) und entweder "data" oder "message"
+  /// Bei Erfolg: {"success": true, "data": [Liste der gefundenen Berge]}
+  /// Bei Fehler: {"success": false, "message": "Fehlerbeschreibung"}
+  /// 
+  /// Die "data" enthält eine Liste von Berg-Objekten mit Informationen
+  /// wie ID, Name, Höhe, Koordinaten, Bundesland, etc.
   static Future<Map<String, dynamic>> SearchMountainByName(String name) async {
     _log.i('Suche nach Berg mit Namen: "$name"');
     final String apiUrl =

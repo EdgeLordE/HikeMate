@@ -7,6 +7,18 @@ import '../Class/Done.dart'; // Importiert die Klasse Done für Datenoperationen
 // import 'package:flutter_map/flutter_map.dart'; // Nicht verwendet in diesem Snippet
 // import 'package:latlong2/latlong.dart'; // Nicht verwendet in diesem Snippet
 
+/// Seite für erledigte Berge und Watchlist in der HikeMate App
+/// 
+/// Diese Seite zeigt zwei Tabs: "Erledigt" und "Watchlist".
+/// Benutzer können hier ihre abgeschlossenen Wanderungen einsehen
+/// und ihre Merkliste für zukünftige Wanderungen verwalten.
+/// 
+/// Features:
+/// - Tab-basierte Ansicht (Erledigt/Watchlist)
+/// - Such- und Filterfunktionen nach Name und Bundesland
+/// - Sortierung nach Datum oder alphabetisch
+/// - Entfernen von Einträgen aus beiden Listen
+/// - Detailansicht für jeden Berg
 class DonePage extends StatefulWidget {
   const DonePage({Key? key}) : super(key: key);
 
@@ -14,15 +26,28 @@ class DonePage extends StatefulWidget {
   _DonePageState createState() => _DonePageState();
 }
 
+/// State-Klasse für die DonePage mit Tab- und Listen-Management
 class _DonePageState extends State<DonePage>
     with SingleTickerProviderStateMixin {
+  /// Controller für Tab-Navigation zwischen "Erledigt" und "Watchlist"
   late TabController _tabController;
+  
+  /// Liste aller erledigten Berge
   List<Map<String, dynamic>> _doneList = [];
+  
+  /// Liste aller Berge auf der Watchlist
   List<Map<String, dynamic>> _watchlist = [];
+  
+  /// Zeigt an ob gerade Daten geladen werden
   bool _isLoading = false;
 
+  /// Aktueller Suchbegriff für Filterung
   String _searchQuery = '';
+  
+  /// Aktuell ausgewähltes Bundesland für Filterung
   String _filterState = 'Alle';
+  
+  /// Dynamisch erstellte Liste verfügbarer Bundesländer aus den Daten
   List<String> get _availableStates {
     // Erstellt eine eindeutige, sortierte Liste von Bundesländern aus _doneList und _watchlist
     final states = <String>{'Alle'}; // 'Alle' immer als erste Option
@@ -40,11 +65,15 @@ class _DonePageState extends State<DonePage>
     if (sortedStates.length > 1 && sortedStates[0] == 'Alle') {
       final otherStates = sortedStates.sublist(1)..sort();
       return ['Alle'] + otherStates;
-    }
-    return sortedStates..sort();
+    }    return sortedStates..sort();
   }
+  
+  /// Aktueller Sortier-Modus für die Listen
   String _sortMode = 'Neu → Alt';
 
+  /// Gefilterte und sortierte Liste der erledigten Berge
+  /// 
+  /// Wendet Suchbegriff, Bundesland-Filter und Sortierung an
   List<Map<String, dynamic>> get _filteredDone {
     var list = _doneList.where((e) {
       final name = (e['Mountain']?['Name'] as String?)?.toLowerCase() ?? '';
